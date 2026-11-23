@@ -1,0 +1,21 @@
+{
+  "pdf_pages": 6,
+  "body_font_sizes_pt": [
+    10.2,
+    10.2,
+    10.2,
+    10.2,
+    10.2,
+    10.049999999999999
+  ],
+  "source_commit": "6a0d253",
+  "words": 1881,
+  "section_titles": [
+    "System objectives and implemented architecture",
+    "Transactional correctness and data model",
+    "Realtime scaling, API contracts and user workflows",
+    "Security, independent audit and observability",
+    "High availability, backup and disaster recovery",
+    "Experimental results, limitations and reproducibility"
+  ]
+}
