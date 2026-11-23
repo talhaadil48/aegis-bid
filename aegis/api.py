@@ -278,3 +278,9 @@ def health():
     with connection() as c:
         c.execute("SELECT 1")
     return {"database": "ok"}
+
+
+# Register operation routes after the application and dependencies exist.
+import importlib
+
+importlib.import_module("aegis.operations")

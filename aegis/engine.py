@@ -3,6 +3,7 @@ from datetime import timedelta
 from psycopg.types.json import Jsonb
 
 from aegis.db import connection
+from aegis.evidence import pseudonym
 from aegis.rules import ZERO_HASH, evaluate, event_hash
 
 
@@ -111,7 +112,7 @@ def process(auction_id, holder, expected_epoch=None):
             {
                 "type": "bid.decision",
                 "request_id": str(r["request_id"]),
-                "bidder": str(r["bidder_id"]),
+                "bidder": pseudonym(r["bidder_id"]),
                 "amount_cents": r["amount_cents"],
                 "admitted_at": r["admitted_at"].isoformat(),
                 "status": status,
@@ -152,7 +153,9 @@ def close(auction_id, holder):
             {
                 "type": "auction.closed",
                 "decision_seq": a["version"],
-                "winners": [{"bidder": str(o["bidder_id"]), "amount_cents": o["current_amount_cents"]} for o in offers],
+                "winners": [
+                    {"bidder": pseudonym(o["bidder_id"]), "amount_cents": o["current_amount_cents"]} for o in offers
+                ],
             },
         )
         return True
