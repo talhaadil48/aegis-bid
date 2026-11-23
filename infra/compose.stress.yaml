@@ -67,6 +67,9 @@ services:
       MAX_AUCTION_CONNECTIONS: '60000'
       MAX_USER_CONNECTIONS: '10'
       PUBLIC_ORIGIN: http://localhost:18080
+      GOMAXPROCS: '2'
+      GOGC: '150'
+      GOMEMLIMIT: 1500MiB
     ports: ["127.0.0.1:18082:8081"]
     mem_limit: 2000m
     ulimits:

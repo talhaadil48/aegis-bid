@@ -285,6 +285,8 @@ def run(args):
                     project + "_default",
                     "--user",
                     "0:0",
+                    "-e",
+                    "GOMAXPROCS=1",
                     "--read-only",
                     "--ulimit",
                     "nofile=100000:100000",
@@ -507,7 +509,7 @@ if __name__ == "__main__":
     parser.add_argument("--bidders", type=int, default=500)
     parser.add_argument("--shards", type=int, default=5)
     parser.add_argument("--workers", type=int, default=6)
-    parser.add_argument("--ramp", type=int, default=150)
+    parser.add_argument("--ramp", type=int, default=50)
     parser.add_argument("--ramp-timeout", type=float, default=240)
     parser.add_argument("--drain-timeout", type=float, default=120)
     parser.add_argument("--spread", type=float, default=9)
