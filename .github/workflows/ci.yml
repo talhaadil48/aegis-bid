@@ -1,0 +1,25 @@
+name: Verify
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: aegis
+          POSTGRES_PASSWORD: aegis-local
+          POSTGRES_DB: aegisbid
+        ports: ["55432:5432"]
+        options: --health-cmd "pg_isready -U aegis -d aegisbid" --health-interval 3s --health-retries 20
+    env:
+      RUN_INTEGRATION: '1'
+      SESSION_SECRET: ci-test-secret-at-least-32-characters-long
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -e '.[dev]'
+      - run: ruff check aegis tests scripts
+      - run: pytest -q

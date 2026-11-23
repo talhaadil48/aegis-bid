@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: aegisbid
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["postgres-data:/var/lib/postgresql"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegisbid"]
+      interval: 3s
+      retries: 20
+  nats1:
+    image: nats:2.11
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    ports: ["127.0.0.1:54222:4222"]
+    volumes: ["nats-data:/data"]
+volumes:
+  postgres-data:
+  nats-data:
