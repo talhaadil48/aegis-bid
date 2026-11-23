@@ -1,0 +1,18 @@
+{
+  "run_id": "3e7070dabcc24a7198327682d862c8b8",
+  "project": "aegis-pitr-3e7070da",
+  "status": "PASS",
+  "base_name": "base-3e7070dabcc24a7198327682d862c8b8",
+  "target_name": "aegis_3e7070dabcc24a7198327682d862c8b8",
+  "target_lsn": "0/4006668",
+  "protected_checkpoint": "2026-11-23T13:05:37.997604+00:00",
+  "incident_at": "2026-11-23T13:05:37.999550+00:00",
+  "rpo_s": 0.001946,
+  "rto_s": 3.118553799984511,
+  "base_decisions": 1,
+  "restored_decisions": 2,
+  "restored_events": 3,
+  "ledger_anchor_matches": true,
+  "verifier_errors": [],
+  "scope": "Isolated physical PITR through archived WAL; selected named target; source corruption occurred only in new rehearsal project; excludes offsite retrieval and full-site rebuild"
+}

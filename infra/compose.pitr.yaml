@@ -1,0 +1,48 @@
+# Isolated rehearsal; never points at the existing application data volume.
+services:
+  primary:
+    build: {context: .., dockerfile: infra/pitr/Dockerfile}
+    image: aegis-pitr:local
+    environment: &pg-env
+      POSTGRES_USER: aegis
+      POSTGRES_DB: aegisbid
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    ports: ["127.0.0.1:${PITR_SOURCE_PORT:-55433}:5432"]
+    volumes:
+      - source-data:/var/lib/postgresql
+      - wal-archive:/wal
+      - ./pitr/replication.sh:/docker-entrypoint-initdb.d/replication.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegisbid"]
+      interval: 2s
+      retries: 30
+  basebackup:
+    image: aegis-pitr:local
+    entrypoint: ["bash", "/opt/aegis-pitr/basebackup.sh"]
+    environment:
+      <<: *pg-env
+      BASE_NAME: ${BASE_NAME:-}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes: ["base-backups:/backups"]
+    depends_on:
+      primary: {condition: service_healthy}
+    profiles: [tools]
+  recovered:
+    image: aegis-pitr:local
+    entrypoint: ["bash", "/opt/aegis-pitr/restore.sh"]
+    environment:
+      <<: *pg-env
+      BASE_NAME: ${BASE_NAME:-}
+      RECOVERY_TARGET_NAME: ${RECOVERY_TARGET_NAME:-}
+      RECOVERY_TARGET_TIME: ${RECOVERY_TARGET_TIME:-}
+    ports: ["127.0.0.1:${PITR_RESTORE_PORT:-55434}:5432"]
+    volumes:
+      - restore-data:/var/lib/postgresql
+      - base-backups:/backups:ro
+      - wal-archive:/wal:ro
+    profiles: [recovery]
+volumes:
+  source-data:
+  restore-data:
+  wal-archive:
+  base-backups:
