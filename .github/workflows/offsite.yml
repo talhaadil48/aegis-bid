@@ -21,6 +21,7 @@ jobs:
       - run: pip install -r requirements.lock -r requirements-backup.lock && pip install --no-deps -e .
       - run: sudo apt-get update && sudo apt-get install -y postgresql-client-18
       - run: python -c "import pathlib; pathlib.Path('.env').write_text('POSTGRES_PASSWORD=aegis-local\n')"
+      - run: python -m aegis.db
       - run: python -m scripts.rehearse_recovery
       - run: python -c "from pathlib import Path; from scripts.rehearse_offsite import main; main(next(Path('backup-staging').glob('*/manifest.json')).parent)"
       - uses: actions/upload-artifact@v4
