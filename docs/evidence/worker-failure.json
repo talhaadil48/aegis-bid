@@ -1,0 +1,12 @@
+{
+  "timestamp": "2026-11-23T12:36:38.601324+00:00",
+  "scenario": "SIGKILL worker, 20 identical retries, explicit Compose worker restart",
+  "request_id": "8d573870-7c4a-4883-b430-64c83a2c08b9",
+  "auction_id": "b5d92451-3751-40c9-a748-f6bf4a65ee4d",
+  "final_state": "ACCEPTED",
+  "matching_requests": 1,
+  "decision_seq": 1,
+  "recovery_s": 2.093350500043016,
+  "status": "PASS",
+  "scope": "Local process failure and restart; database unique constraint prevents duplicate decisions; not database primary failover"
+}

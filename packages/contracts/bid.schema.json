@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"Bid admission request","type":"object","additionalProperties":false,"required":["request_id","amount_cents"],"properties":{"request_id":{"type":"string","format":"uuid"},"amount_cents":{"type":"integer","minimum":1,"maximum":1000000000000}}}
