@@ -29,18 +29,46 @@ def admit(auction_id, bidder_id, request_id, amount):
             ):
                 raise Conflict("Request ID already used for another payload")
             return old
+        now = c.execute("SELECT clock_timestamp() t").fetchone()["t"]
+        expired = a["status"] == "CLOSED" or now >= a["closes_at"]
         pending = c.execute(
             "SELECT count(*) n FROM bid_requests WHERE auction_id=%s AND state='QUEUED'", (auction_id,)
         ).fetchone()["n"]
-        if pending >= 10000:
+        if not expired and pending >= 10000:
             raise OverflowError("Auction queue capacity reached")
         seq = c.execute(
             "UPDATE auctions SET intake_seq=intake_seq+1 WHERE id=%s RETURNING intake_seq", (auction_id,)
         ).fetchone()["intake_seq"]
-        return c.execute(
-            "INSERT INTO bid_requests(request_id,auction_id,bidder_id,amount_cents,intake_seq) VALUES(%s,%s,%s,%s,%s) RETURNING *",
-            (request_id, auction_id, bidder_id, amount, seq),
+        request = c.execute(
+            "INSERT INTO bid_requests(request_id,auction_id,bidder_id,amount_cents,intake_seq,admitted_at,state) VALUES(%s,%s,%s,%s,%s,%s,%s) RETURNING *",
+            (request_id, auction_id, bidder_id, amount, seq, now, "CLOSED" if expired else "QUEUED"),
         ).fetchone()
+        if expired:
+            c.execute(
+                "INSERT INTO admission_outcomes(request_id,status,reason) VALUES(%s,'CLOSED','Auction deadline passed')",
+                (request_id,),
+            )
+        return request
+
+
+def finalize_stranded():
+    """Repair legacy late intake without changing a closed auction's audit anchor."""
+    with connection() as c:
+        rows = c.execute(
+            "SELECT r.request_id FROM bid_requests r JOIN auctions a ON a.id=r.auction_id "
+            "WHERE a.status='CLOSED' AND r.state='QUEUED' "
+            "ORDER BY r.auction_id,r.intake_seq LIMIT 1000 FOR UPDATE OF r SKIP LOCKED"
+        ).fetchall()
+        ids = [r["request_id"] for r in rows]
+        if ids:
+            c.execute(
+                "INSERT INTO admission_outcomes(request_id,status,reason) "
+                "SELECT request_id,'CLOSED','Auction already finalized' FROM bid_requests "
+                "WHERE request_id=ANY(%s) ON CONFLICT DO NOTHING",
+                (ids,),
+            )
+            c.execute("UPDATE bid_requests SET state='CLOSED' WHERE request_id=ANY(%s)", (ids,))
+        return len(ids)
 
 
 def acquire(c, auction_id, holder):
