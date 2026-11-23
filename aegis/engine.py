@@ -4,7 +4,7 @@ from psycopg.types.json import Jsonb
 
 from aegis.db import connection
 from aegis.evidence import pseudonym
-from aegis.rules import ZERO_HASH, evaluate, event_hash
+from aegis.rules import ZERO_HASH, event_hash
 
 
 class Conflict(ValueError):
@@ -16,39 +16,12 @@ class Fenced(RuntimeError):
 
 
 def admit(auction_id, bidder_id, request_id, amount):
-    with connection() as c:
-        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (auction_id,)).fetchone()
-        if not a:
-            raise LookupError("Auction not found")
-        old = c.execute("SELECT * FROM bid_requests WHERE request_id=%s", (request_id,)).fetchone()
-        if old:
-            if (str(old["auction_id"]), str(old["bidder_id"]), old["amount_cents"]) != (
-                str(auction_id),
-                str(bidder_id),
-                amount,
-            ):
-                raise Conflict("Request ID already used for another payload")
-            return old
-        now = c.execute("SELECT clock_timestamp() t").fetchone()["t"]
-        expired = a["status"] == "CLOSED" or now >= a["closes_at"]
-        pending = c.execute(
-            "SELECT count(*) n FROM bid_requests WHERE auction_id=%s AND state='QUEUED'", (auction_id,)
-        ).fetchone()["n"]
-        if not expired and pending >= 10000:
-            raise OverflowError("Auction queue capacity reached")
-        seq = c.execute(
-            "UPDATE auctions SET intake_seq=intake_seq+1 WHERE id=%s RETURNING intake_seq", (auction_id,)
-        ).fetchone()["intake_seq"]
-        request = c.execute(
-            "INSERT INTO bid_requests(request_id,auction_id,bidder_id,amount_cents,intake_seq,admitted_at,state) VALUES(%s,%s,%s,%s,%s,%s,%s) RETURNING *",
-            (request_id, auction_id, bidder_id, amount, seq, now, "CLOSED" if expired else "QUEUED"),
-        ).fetchone()
-        if expired:
-            c.execute(
-                "INSERT INTO admission_outcomes(request_id,status,reason) VALUES(%s,'CLOSED','Auction deadline passed')",
-                (request_id,),
-            )
-        return request
+    from aegis.engine_batch import admit_many
+
+    result = admit_many(auction_id, [(bidder_id, request_id, amount)])[0]
+    if isinstance(result, Exception):
+        raise result
+    return result
 
 
 def finalize_stranded():
@@ -105,51 +78,10 @@ def append_event(c, a, payload):
 
 
 def process(auction_id, holder, expected_epoch=None):
-    with connection() as c:
-        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (auction_id,)).fetchone()
-        if not a:
-            return None
-        epoch = acquire(c, auction_id, holder)
-        if expected_epoch is not None and epoch != expected_epoch:
-            raise Fenced("Stale fencing epoch")
-        r = c.execute(
-            "SELECT * FROM bid_requests WHERE auction_id=%s AND state='QUEUED' ORDER BY intake_seq LIMIT 1 FOR UPDATE",
-            (auction_id,),
-        ).fetchone()
-        if not r:
-            return None
-        high = c.execute(
-            "SELECT coalesce(max(current_amount_cents),0) high FROM bidder_offers WHERE auction_id=%s", (auction_id,)
-        ).fetchone()["high"]
-        status, reason = evaluate(a, r, high)
-        a["version"] += 1
-        c.execute("UPDATE auctions SET version=%s WHERE id=%s", (a["version"], auction_id))
-        decision = c.execute(
-            "INSERT INTO bid_decisions(request_id,auction_id,bidder_id,status,reason,effective_amount_cents,decision_seq,epoch) VALUES(%s,%s,%s,%s,%s,%s,%s,%s) RETURNING *",
-            (r["request_id"], auction_id, r["bidder_id"], status, reason, r["amount_cents"], a["version"], epoch),
-        ).fetchone()
-        if status == "ACCEPTED":
-            c.execute(
-                "INSERT INTO bidder_offers VALUES(%s,%s,%s,%s) ON CONFLICT(auction_id,bidder_id) DO UPDATE SET current_amount_cents=excluded.current_amount_cents,decision_seq=excluded.decision_seq",
-                (auction_id, r["bidder_id"], r["amount_cents"], a["version"]),
-            )
-        c.execute("UPDATE bid_requests SET state=%s WHERE request_id=%s", (status, r["request_id"]))
-        append_event(
-            c,
-            a,
-            {
-                "type": "bid.decision",
-                "request_id": str(r["request_id"]),
-                "bidder": pseudonym(r["bidder_id"]),
-                "amount_cents": r["amount_cents"],
-                "admitted_at": r["admitted_at"].isoformat(),
-                "status": status,
-                "reason": reason,
-                "decision_seq": a["version"],
-                "intake_seq": r["intake_seq"],
-            },
-        )
-        return decision
+    from aegis.engine_batch import process_many
+
+    rows = process_many(auction_id, holder, limit=1, expected_epoch=expected_epoch)
+    return rows[0] if rows else None
 
 
 def close(auction_id, holder):

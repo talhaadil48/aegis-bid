@@ -11,15 +11,19 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from aegis import config
 from aegis.auth import check_password, current_user, identity, roles, token
+from aegis.coalescing import grouped
 from aegis.db import connection
-from aegis.engine import Conflict, admit
+from aegis.engine import Conflict
+from aegis.engine_batch import admit_many
 
 app = FastAPI(title="AegisBid Omega", version="1.0.0")
 attempts = defaultdict(deque)
 connections = defaultdict(int)
+next_prune = 0.0
 
 
 def limit(key, maximum, seconds=60):
+    global next_prune
     now = time.monotonic()
     bucket = attempts[key]
     while bucket and bucket[0] < now - seconds:
@@ -27,7 +31,8 @@ def limit(key, maximum, seconds=60):
     if len(bucket) >= maximum:
         raise HTTPException(429, "Rate limit reached", headers={"Retry-After": str(seconds)})
     bucket.append(now)
-    if len(attempts) > 10000:
+    if len(attempts) > 10000 and now >= next_prune:
+        next_prune = now + 1
         for old in list(attempts):
             if not attempts[old] or attempts[old][-1] < now - seconds:
                 del attempts[old]
@@ -113,10 +118,10 @@ class Bid(BaseModel):
 
 
 @app.post("/v1/auctions/{aid}/bids", status_code=202)
-def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidder"))):
+async def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidder"))):
     limit(("bid", str(user["id"])), 120)
     try:
-        r = admit(aid, user["id"], body.request_id, body.amount_cents)
+        r = await grouped("admission", aid, (user["id"], body.request_id, body.amount_cents), admit_many)
     except LookupError as e:
         raise HTTPException(404, str(e)) from None
     except Conflict as e:
