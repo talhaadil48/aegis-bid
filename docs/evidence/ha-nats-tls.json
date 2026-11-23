@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "tls_certificate_verified": true,
+  "credentials_authenticated": true,
+  "stream_replicas": 3,
+  "committed_stream_sequence": 1,
+  "scope": "Actual private Kubernetes NATS TLS and replicated persistence; three lab nodes on one host"
+}

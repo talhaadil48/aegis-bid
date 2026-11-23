@@ -19,3 +19,14 @@ No 50,000-socket test, multi-host load test, full-site disaster, offsite media l
 ## Production extension measurements
 
 The Go gateway retained **50,000 authenticated WebSockets concurrently for a shared 58.01-second interval**, with zero handshake errors. Five generators each requested/retained 10,000 sockets and held for 90 seconds after their individual ramps. Evidence: `evidence/sockets-8be4e979f1bb4723bfcb86fe7a90f37a/`. Sampled gateway memory was about 1.36 GiB; generators about 175 MiB each (`evidence/resources-50k.json`). All containers shared the local 12-CPU, 7.46-GiB Docker host and a demo identity with its socket quota explicitly raised. This supersedes the earlier absence of a local 50k-socket test; it does not establish 50k unique bidders, multi-host capacity, 50k simultaneous bids, or multi-zone resilience.
+
+| Production extension | Actual result | Evidence |
+| --- | --- | --- |
+| Continuous physical PITR | Base contained 1 decision; archived WAL recovered 2 decisions and 3 events; matching anchor, recovery/verification 3.12 s | `evidence/pitr-local.json` |
+| Synchronous PostgreSQL HA | Actual primary worker-container loss; standby promotion and verification 67.21 s; 3 committed decisions retained, stale worker fenced | `evidence/ha-local.json` |
+| Authenticated NATS TLS | Certificate verification and credentials succeeded; three-replica stream acknowledged a real publish | `evidence/ha-nats-tls.json` |
+| Locked object-store protocol | Retained version deletion denied; corrupted newer index ignored; isolated database PASS | `evidence/offsite-local.json` |
+| Real AWS offsite recovery | Private Singapore S3 repository, AES-256-GCM plus server-side encryption, 30-day COMPLIANCE lock, downloaded database PASS; retrieval + verification 1.97 s | `evidence/s3-offsite.json` |
+| Infrastructure validation | EKS and S3 CloudFormation templates pass cfn-lint; Kubernetes workload and Barman resources pass actual API-server dry runs | Reproduce with `docs/ha-deployment.md` |
+
+PITR RPO in the controlled drill is the interval between the chosen restore point and injected corruption; it is not a measured full-site/offsite RPO. The remote S3 measurement used a small 20-decision dataset. No EKS compute stack was launched: the available AWS principal denied EKS management calls. All source and report scopes distinguish these limits.

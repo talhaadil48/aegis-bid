@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "timestamp": "2026-11-23T13:43:51.639907+00:00",
+  "old_primary": "aegis-pg-1",
+  "new_primary": "aegis-pg-2",
+  "stopped_node": "aegis-ha-lab-worker3",
+  "old_node_running": false,
+  "synchronous_standby_names": "ANY 1 (\"aegis-pg-2\",\"aegis-pg-3\",\"aegis-pg-1\")",
+  "failover_quorum": true,
+  "leader_epoch_fencing_passed": true,
+  "committed_decisions_preserved": 3,
+  "ledger_anchor_matches": true,
+  "recovery_s": 67.21187970001483,
+  "verifier_errors": [],
+  "scope": "Real kind worker-container loss and synchronous PostgreSQL promotion on one host; lab zone labels are simulated failure domains, not physical availability zones"
+}

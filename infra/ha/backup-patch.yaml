@@ -1,0 +1,7 @@
+# kubectl patch cluster aegis-pg --type merge --patch-file this-file -n aegis
+spec:
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: independent-vault

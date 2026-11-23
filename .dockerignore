@@ -6,3 +6,5 @@
 .env
 backup-staging
 restore-output
+.tools
+.cache

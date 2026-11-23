@@ -1,0 +1,110 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata: {name: aegis-bootstrap-ca, namespace: aegis}
+spec: {selfSigned: {}}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: aegis-root, namespace: aegis}
+spec:
+  isCA: true
+  commonName: aegis-internal-ca
+  secretName: aegis-root
+  issuerRef: {name: aegis-bootstrap-ca, kind: Issuer}
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata: {name: aegis-ca, namespace: aegis}
+spec: {ca: {secretName: aegis-root}}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata: {name: aegis-nats, namespace: aegis}
+spec:
+  secretName: aegis-nats-tls
+  issuerRef: {name: aegis-ca, kind: Issuer}
+  dnsNames: ['nats', 'nats.aegis.svc', 'nats.aegis.svc.cluster.local', '*.nats.aegis.svc', '*.nats.aegis.svc.cluster.local']
+  usages: [server auth, client auth]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata: {name: aegis-nats, namespace: aegis}
+data:
+  nats.conf: |
+    server_name: $POD_NAME
+    port: 4222
+    http_port: 8222
+    jetstream { store_dir: /data/jetstream, max_file_store: 10GB }
+    authorization { users: [{user: $NATS_USERNAME, password: $NATS_PASSWORD}] }
+    tls {
+      cert_file: /tls/tls.crt
+      key_file: /tls/tls.key
+      ca_file: /tls/ca.crt
+    }
+    cluster {
+      name: aegis
+      listen: 0.0.0.0:6222
+      authorization { user: $ROUTE_USER, password: $ROUTE_PASSWORD }
+      routes: [$ROUTE_0, $ROUTE_1, $ROUTE_2]
+      tls {
+        cert_file: /tls/tls.crt
+        key_file: /tls/tls.key
+        ca_file: /tls/ca.crt
+        verify: true
+      }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata: {name: nats, namespace: aegis}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector: {app: nats}
+  ports:
+    - {name: client, port: 4222}
+    - {name: routes, port: 6222}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: {name: nats, namespace: aegis}
+spec:
+  serviceName: nats
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector: {matchLabels: {app: nats}}
+  template:
+    metadata: {labels: {app: nats}}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {fsGroup: 1000, runAsNonRoot: true, runAsUser: 1000, seccompProfile: {type: RuntimeDefault}}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector: {matchLabels: {app: nats}}
+              topologyKey: topology.kubernetes.io/zone
+      containers:
+        - name: nats
+          image: nats:2.11
+          args: ['-c', '/config/nats.conf']
+          securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+          envFrom: [{secretRef: {name: aegis-nats-auth}}]
+          env: [{name: POD_NAME, valueFrom: {fieldRef: {fieldPath: metadata.name}}}]
+          ports: [{containerPort: 4222, name: client}, {containerPort: 6222, name: routes}]
+          readinessProbe: {httpGet: {path: '/healthz?js-enabled-only=true', port: 8222}, periodSeconds: 5}
+          resources: {requests: {cpu: 250m, memory: 256Mi}, limits: {memory: 1Gi}}
+          volumeMounts:
+            - {name: config, mountPath: /config, readOnly: true}
+            - {name: tls, mountPath: /tls, readOnly: true}
+            - {name: data, mountPath: /data}
+      volumes:
+        - {name: config, configMap: {name: aegis-nats}}
+        - {name: tls, secret: {secretName: aegis-nats-tls}}
+  volumeClaimTemplates:
+    - metadata: {name: data}
+      spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 20Gi}}}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: nats, namespace: aegis}
+spec: {minAvailable: 2, selector: {matchLabels: {app: nats}}}

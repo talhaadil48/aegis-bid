@@ -11,3 +11,5 @@ restore-output/
 *.pem
 *.key
 *.egg-info/
+.tools/
+.cache/

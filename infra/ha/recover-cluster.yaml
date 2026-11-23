@@ -1,0 +1,31 @@
+# New authority candidate only. Never change the existing application Service automatically.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: aegis-pg-recovered
+  namespace: aegis
+spec:
+  instances: 3
+  bootstrap:
+    recovery:
+      source: original
+      recoveryTarget:
+        targetTime: REPLACE_RFC3339_RECOVERY_TIME
+  externalClusters:
+    - name: original
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: independent-vault
+          serverName: aegis-pg
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+    topologyKey: topology.kubernetes.io/zone
+  postgresql:
+    synchronous:
+      method: any
+      number: 1
+      dataDurability: required
+      failoverQuorum: true
+  storage: {size: 10Gi}
