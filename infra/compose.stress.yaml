@@ -1,0 +1,79 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${STRESS_DATABASE:?Set isolated database}
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: ${STRESS_DB_PASSWORD:?Set isolated password}
+    command: [postgres, -c, shared_buffers=256MB, -c, max_connections=100, -c, wal_compression=on, -c, checkpoint_timeout=15min]
+    ports: ["127.0.0.1:55440:5432"]
+    volumes: [stress-postgres:/var/lib/postgresql]
+    mem_limit: 1400m
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U aegis -d $$POSTGRES_DB"]
+      interval: 2s
+      retries: 30
+  nats:
+    image: nats:2.11
+    command: [-js, -sd, /data]
+    volumes: [stress-nats:/data]
+    mem_limit: 256m
+  migrate:
+    image: aegis-stress-app:local
+    environment: &app-env
+      DATABASE_URL: postgresql://aegis:${STRESS_DB_PASSWORD}@postgres:5432/${STRESS_DATABASE}
+      SESSION_SECRET: ${STRESS_SESSION_SECRET:?Set isolated session key}
+      NATS_URL: nats://nats:4222
+      ENVIRONMENT: test
+      MAX_PENDING_BIDS: '60000'
+    command: [python, -m, aegis.db]
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    image: aegis-stress-app:local
+    environment: *app-env
+    command: [uvicorn, aegis.api:app, --host, 0.0.0.0, --port, '8000', --workers, '${STRESS_API_WORKERS:-6}', --no-access-log, --backlog, '65535']
+    ports: ["127.0.0.1:15810:8000"]
+    mem_limit: 2000m
+    ulimits:
+      nofile: {soft: 100000, hard: 100000}
+    sysctls:
+      net.core.somaxconn: '65535'
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  worker:
+    image: aegis-stress-app:local
+    environment:
+      <<: *app-env
+      PGAPPNAME: aegis-stress-worker
+    command: [python, -m, aegis.pipeline, worker]
+    mem_limit: 512m
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      nats: {condition: service_started}
+  relay:
+    image: aegis-stress-app:local
+    environment: *app-env
+    command: [python, -m, aegis.pipeline, relay]
+    mem_limit: 384m
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      nats: {condition: service_started}
+  gateway:
+    image: aegis-stress-tools:local
+    environment:
+      API_URL: http://api:8000
+      MAX_CONNECTIONS: '60000'
+      MAX_AUCTION_CONNECTIONS: '60000'
+      MAX_USER_CONNECTIONS: '10'
+      PUBLIC_ORIGIN: http://localhost:18080
+    ports: ["127.0.0.1:18082:8081"]
+    mem_limit: 2000m
+    ulimits:
+      nofile: {soft: 200000, hard: 200000}
+    sysctls:
+      net.core.somaxconn: '65535'
+    depends_on: [api]
+volumes:
+  stress-postgres:
+  stress-nats:

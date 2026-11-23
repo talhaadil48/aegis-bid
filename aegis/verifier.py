@@ -40,6 +40,7 @@ def verify(document, trusted_key=None):
     requests = set()
     closed = False
     last_intake = 0
+    high = 0
     for seq, event in enumerate(document["events"], 1):
         payload = event["payload"]
         check(event["event_seq"] == seq and payload["decision_seq"] == seq, "Non-contiguous sequence")
@@ -55,7 +56,6 @@ def verify(document, trusted_key=None):
             check(payload["intake_seq"] > last_intake, "Intake ordering mismatch")
             last_intake = payload["intake_seq"]
             admitted = datetime.fromisoformat(payload["admitted_at"])
-            high = max((o[0] for o in offers.values()), default=0)
             required = max(a["min_price_cents"], high + a["increment_cents"] if high else 0)
             expected = "ACCEPTED"
             if admitted >= datetime.fromisoformat(a["closes_at"]):
@@ -65,6 +65,7 @@ def verify(document, trusted_key=None):
             check(payload["status"] == expected, "Decision violates auction rules")
             if payload["status"] == "ACCEPTED":
                 offers[payload["bidder"]] = (payload["amount_cents"], seq)
+                high = max(high, payload["amount_cents"])
         elif payload["type"] == "auction.closed":
             check(not closed, "Duplicate close")
             closed = True
