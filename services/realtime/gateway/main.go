@@ -29,6 +29,11 @@ type authEntry struct {
 	subject string
 	until   time.Time
 }
+type authFlight struct {
+	done    chan struct{}
+	subject string
+	err     error
+}
 type client struct {
 	socket  *websocket.Conn
 	updates chan *websocket.PreparedMessage
@@ -46,6 +51,8 @@ type server struct {
 	hubs                                 map[string]*hub
 	counts                               map[string]int
 	auth                                 map[string]authEntry
+	flights                              map[string]*authFlight
+	authSlots                            chan struct{}
 	http                                 *http.Client
 	upstream, origin                     string
 	total, maxTotal, maxAuction, maxUser int
@@ -63,7 +70,8 @@ func newServer() *server {
 	if upstream == "" {
 		upstream = "http://api:8000"
 	}
-	return &server{hubs: map[string]*hub{}, counts: map[string]int{}, auth: map[string]authEntry{}, http: &http.Client{Timeout: 5 * time.Second}, upstream: strings.TrimRight(upstream, "/"), origin: os.Getenv("PUBLIC_ORIGIN"), maxTotal: integer("MAX_CONNECTIONS", 60000), maxAuction: integer("MAX_AUCTION_CONNECTIONS", 60000), maxUser: integer("MAX_USER_CONNECTIONS", 10)}
+	transport := &http.Transport{MaxIdleConns: 512, MaxIdleConnsPerHost: 256, MaxConnsPerHost: 256, IdleConnTimeout: 60 * time.Second}
+	return &server{hubs: map[string]*hub{}, counts: map[string]int{}, auth: map[string]authEntry{}, flights: map[string]*authFlight{}, authSlots: make(chan struct{}, 256), http: &http.Client{Timeout: 5 * time.Second, Transport: transport}, upstream: strings.TrimRight(upstream, "/"), origin: os.Getenv("PUBLIC_ORIGIN"), maxTotal: integer("MAX_CONNECTIONS", 60000), maxAuction: integer("MAX_AUCTION_CONNECTIONS", 60000), maxUser: integer("MAX_USER_CONNECTIONS", 10)}
 }
 func (s *server) get(path, cookie string) ([]byte, int, error) {
 	req, err := http.NewRequest("GET", s.upstream+path, nil)
@@ -85,22 +93,32 @@ func (s *server) authenticate(cookie string) (string, error) {
 	}
 	digest := sha256.Sum256([]byte(cookie))
 	key := hex.EncodeToString(digest[:])
-	// Serialize cache misses: a connection burst sharing a token must not stampede SQL.
+	// Coalesce only identical sessions; distinct users must not wait on a global network lock.
 	s.authMu.Lock()
-	defer s.authMu.Unlock()
 	if entry, ok := s.auth[key]; ok && time.Now().Before(entry.until) {
+		s.authMu.Unlock()
 		return entry.subject, nil
 	}
-	data, status, err := s.get("/v1/auth/me", cookie)
-	if err != nil || status != 200 {
-		return "", fmt.Errorf("session verification failed")
+	if pending, ok := s.flights[key]; ok {
+		s.authMu.Unlock()
+		<-pending.done
+		return pending.subject, pending.err
 	}
+	flight := &authFlight{done: make(chan struct{})}
+	s.flights[key] = flight
+	s.authMu.Unlock()
+	s.authSlots <- struct{}{}
+	data, status, err := s.get("/v1/auth/me", cookie)
+	<-s.authSlots
 	var identity struct {
 		ID string `json:"id"`
 	}
-	if json.Unmarshal(data, &identity) != nil || identity.ID == "" {
-		return "", fmt.Errorf("invalid identity")
+	if err != nil || status != 200 {
+		err = fmt.Errorf("session verification failed")
+	} else if json.Unmarshal(data, &identity) != nil || identity.ID == "" {
+		err = fmt.Errorf("invalid identity")
 	}
+	s.authMu.Lock()
 	if len(s.auth) > 100000 {
 		for key, value := range s.auth {
 			if time.Now().After(value.until) {
@@ -108,8 +126,14 @@ func (s *server) authenticate(cookie string) (string, error) {
 			}
 		}
 	}
-	s.auth[key] = authEntry{identity.ID, time.Now().Add(30 * time.Second)}
-	return identity.ID, nil
+	if err == nil {
+		s.auth[key] = authEntry{identity.ID, time.Now().Add(30 * time.Second)}
+	}
+	flight.subject, flight.err = identity.ID, err
+	delete(s.flights, key)
+	close(flight.done)
+	s.authMu.Unlock()
+	return flight.subject, flight.err
 }
 func (s *server) snapshot(h *hub) (*websocket.PreparedMessage, error) {
 	data, status, err := s.get("/v1/auctions/"+h.id, h.cookie)

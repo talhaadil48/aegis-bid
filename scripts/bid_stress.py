@@ -461,12 +461,8 @@ def run(args):
             "winning_amount_total_cents": sum(w["amount_cents"] for w in audit["winners"]),
             "sql": truth,
             "machine": command(["docker", "info", "--format", "{{.NCPU}} CPUs {{.MemTotal}} bytes"]).strip(),
-            "app_image_id": command(
-                ["docker", "image", "inspect", "aegis-stress-app:local", "--format", "{{.Id}}"]
-            ).strip(),
-            "tools_image_id": command(
-                ["docker", "image", "inspect", "aegis-stress-tools:local", "--format", "{{.Id}}"]
-            ).strip(),
+            "app_image_id": command(["docker", "inspect", project + "-api-1", "--format", "{{.Image}}"]).strip(),
+            "tools_image_id": command(["docker", "inspect", project + "-gateway-1", "--format", "{{.Image}}"]).strip(),
             "scope": "One local Docker host; distinct seeded users and pre-issued real HS256 sessions; 50k claim only if requested population is 50,000 and every gate passes. No password-login throughput, independent load hosts or real cloud zones claimed.",
         }
         write_json(output / "summary.json", report)

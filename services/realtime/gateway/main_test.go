@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -22,6 +24,59 @@ func TestOriginAndIDs(t *testing.T) {
 	}
 	if uuidPattern.MatchString("../../admin") {
 		t.Fatal("unsafe path")
+	}
+}
+
+func TestDistinctSessionsVerifyConcurrentlyAndSharedSessionsCoalesce(t *testing.T) {
+	arrived := make(chan struct{}, 2)
+	release := make(chan struct{})
+	var calls atomic.Int64
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		arrived <- struct{}{}
+		<-release
+		_, _ = w.Write([]byte(`{"id":"user"}`))
+	}))
+	defer upstream.Close()
+	s := newServer()
+	s.upstream = upstream.URL
+	var group sync.WaitGroup
+	group.Add(2)
+	for _, cookie := range []string{"first", "second"} {
+		go func(cookie string) {
+			defer group.Done()
+			if _, err := s.authenticate(cookie); err != nil {
+				t.Error(err)
+			}
+		}(cookie)
+	}
+	concurrent := true
+	for i := 0; i < 2; i++ {
+		select {
+		case <-arrived:
+		case <-time.After(2 * time.Second):
+			concurrent = false
+		}
+	}
+	close(release)
+	group.Wait()
+	if !concurrent {
+		t.Fatal("distinct sessions serialized across upstream HTTP calls")
+	}
+	before := calls.Load()
+	group.Add(20)
+	for i := 0; i < 20; i++ {
+		go func() {
+			defer group.Done()
+			_, err := s.authenticate("first")
+			if err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	group.Wait()
+	if calls.Load() != before {
+		t.Fatal("shared cached session caused extra verification calls")
 	}
 }
 func TestLiveSharedSnapshotAndQuota(t *testing.T) {
