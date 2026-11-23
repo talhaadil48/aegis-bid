@@ -22,8 +22,8 @@
       "title": "Complete system flow and recovery paths",
       "blocks": [
         {"type":"system_design"},
-        {"type":"p","text":"<b>Read top to bottom:</b> authenticated role views enter FastAPI; SQL admission precedes the JetStream relay; the worker reconciles SQL and commits one fenced decision transaction. Committed state feeds realtime projections, independent audit and retryable notifications. The side branch protects authoritative data through logical/Bacula backup, physical WAL recovery and encrypted remote storage. Arrows show logical dependencies, not separate databases. Dashed control/telemetry links are outside bid decision authority."},
-        {"type":"p","text":"<b>Scope:</b> solid paths reflect the implementation. The bottom band distinguishes local HA/quorum evidence from production deployment templates. SQL admission can succeed before broker publication; the Go realtime gateway polls the API rather than consuming the notification outbox. Restores use isolated targets and do not automatically cut over production traffic."}
+        {"type":"p","text":"<b>Flow:</b> follow the blue arrows from role views through SQL intake, JetStream and the worker to the atomic database commit. The dashed shortcut shows broker-independent SQL reconciliation; the gold branch protects committed data. SQL intake commits before QUEUED is returned."},
+        {"type":"p","text":"<b>Boundaries:</b> the Go gateway polls the API. Trusted audit verification requires a public key; unsigned exports are INCOMPLETE. Restores use isolated targets. Local failover is tested; physical multi-zone deployment remains a production target."}
       ]
     },
     {
