@@ -16,6 +16,43 @@ services:
     command: ["-js", "-sd", "/data", "-m", "8222"]
     ports: ["127.0.0.1:54222:4222"]
     volumes: ["nats-data:/data"]
+  migrate:
+    build: {context: .., dockerfile: infra/Dockerfile}
+    command: ["python", "-m", "aegis.db"]
+    environment: &app-env
+      DATABASE_URL: postgresql://aegis:${POSTGRES_PASSWORD}@postgres:5432/aegisbid
+      NATS_URL: nats://nats1:4222
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET}
+      ENVIRONMENT: development
+      ENABLE_CHAOS: ${ENABLE_CHAOS:-false}
+    depends_on:
+      postgres: {condition: service_healthy}
+  api:
+    build: {context: .., dockerfile: infra/Dockerfile}
+    environment: *app-env
+    ports: ["127.0.0.1:58000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+  worker:
+    build: {context: .., dockerfile: infra/Dockerfile}
+    environment: *app-env
+    command: ["python", "-m", "aegis.pipeline", "worker"]
+    restart: unless-stopped
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      nats1: {condition: service_started}
+  relay:
+    build: {context: .., dockerfile: infra/Dockerfile}
+    environment: *app-env
+    command: ["python", "-m", "aegis.pipeline", "relay"]
+    restart: unless-stopped
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      nats1: {condition: service_started}
+  web:
+    build: {context: .., dockerfile: infra/Web.Dockerfile}
+    ports: ["127.0.0.1:58080:80"]
+    depends_on: [api]
 volumes:
   postgres-data:
   nats-data:
