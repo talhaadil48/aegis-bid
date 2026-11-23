@@ -31,8 +31,8 @@ async def main(args):
                     json={"request_id": rid, "amount_cents": args.amount + index * args.increment},
                 )
                 ingress = time.perf_counter() - start
-                if response.status_code == 202:
-                    state = "QUEUED"
+                if response.status_code in (200, 202):
+                    state = response.json()["state"]
                     while time.perf_counter() - start < args.timeout:
                         result = await client.get("/v1/bid-requests/" + rid)
                         result.raise_for_status()

@@ -3,11 +3,13 @@ import hashlib
 import hmac
 import os
 from datetime import UTC, datetime, timedelta
+from uuid import UUID
 
 import jwt
 from fastapi import Depends, HTTPException, Request
 
 from aegis import config
+from aegis.coalescing import grouped
 from aegis.db import connection
 
 
@@ -32,7 +34,7 @@ def token(user):
     )
 
 
-def identity(raw):
+def subject(raw):
     config.require_secret()
     try:
         payload = jwt.decode(
@@ -42,21 +44,35 @@ def identity(raw):
             issuer="aegisbid",
             options={"require": ["exp", "sub", "iss"]},
         )
-        with connection() as c:
-            user = c.execute("SELECT id,username,role FROM users WHERE id=%s", (payload["sub"],)).fetchone()
-        if not user:
-            raise ValueError("Unknown identity")
-        return user
-    except (jwt.InvalidTokenError, ValueError):
+        return UUID(payload["sub"])
+    except (jwt.InvalidTokenError, ValueError, TypeError, AttributeError):
         raise HTTPException(401, "Sign in required") from None
 
 
-def current_user(request: Request):
-    return identity(request.cookies.get("aegis_session"))
+def users_many(_key, ids):
+    with connection() as c:
+        rows = c.execute("SELECT id,username,role FROM users WHERE id=ANY(%s)", (ids,)).fetchall()
+    users = {r["id"]: r for r in rows}
+    return [users.get(uid) or HTTPException(401, "Sign in required") for uid in ids]
+
+
+def identity(raw):
+    result = users_many(None, [subject(raw)])[0]
+    if isinstance(result, Exception):
+        raise result
+    return result
+
+
+async def current_user(request: Request):
+    uid = subject(request.cookies.get("aegis_session"))
+    try:
+        return await grouped("identity", "all", uid, users_many)
+    except OverflowError as exc:
+        raise HTTPException(429, str(exc), headers={"Retry-After": "1"}) from None
 
 
 def roles(*allowed):
-    def dependency(user=Depends(current_user)):
+    async def dependency(user=Depends(current_user)):
         if user["role"] not in allowed:
             raise HTTPException(403, "Role does not permit this action")
         return user

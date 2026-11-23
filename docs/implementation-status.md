@@ -13,6 +13,7 @@ The two root documents are the requirements baseline. Proposed capacity and reco
 | 07 | Encrypted offsite transport, S3 version pinning, COMPLIANCE retention | Real object-store round trip and database restore; local + CI |
 | 08 | Three-zone infrastructure, PostgreSQL/NATS TLS quorum, HA workloads | Real node-loss recovery, cloud schema validation, Kubernetes admission checks, CI |
 | 11 | Terminal late-bid admission and legacy queue repair | 29 PostgreSQL/NATS tests; stable CLOSED retry/history; unchanged sealed winners and audit anchor |
+| 12 | Bounded batched admission, identity lookup and decision commits | Ordered replay, capacity/UUID conflicts, transaction rollback and disconnected-client tests; no capacity claim before stress measurement |
 
 The implementation phases and their recorded proofs are in Git history. See `measurements.md` for measured results and `ha-deployment.md` for cloud commissioning. Phase 08 also records an actual remote AWS S3 backup/restore, with keys kept outside the repository and application containers.
 
@@ -27,3 +28,5 @@ Still outside these four production extensions: payment settlement, a full legac
 Git flow: phase branch from main; implement; run required checks; commit and push phase; merge with `--no-ff` only after checks pass; push main. GitHub pull requests are optional review wrappers; merges retain phase history.
 
 Late-request fix: an authenticated valid request admitted after the deadline or final close is stored with state CLOSED and an admission outcome containing a reason and timestamp. These are admission receipts outside the sealed bidding ledger; no post-close bid event changes the winners or anchor. Same-payload UUID retries return the existing result, including earlier accepted bids. Reconciliation repairs legacy queued requests on already closed auctions. Terminal POST responses use HTTP 200; pending durable admissions use HTTP 202.
+
+Throughput changes retain one serialized authority per auction while amortizing database overhead: HTTP identity lookups and admissions coalesce into groups of at most 512 (two-millisecond collection delay); decision batches commit at most 512 separate ordered results with their events and outbox rows. Buffers are bounded, queue capacity defaults to 60,000 and disconnected HTTP waiters do not cancel other group members. Global request-UUID advisory locks protect cross-auction conflicts. A new worker boot has a distinct holder ID, so recovery respects the five-second lease and epoch. These mechanisms are implementation changes, not evidence of a particular measured bid rate.
