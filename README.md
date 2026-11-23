@@ -42,6 +42,8 @@ Admin metrics come from real database records. WebSockets send coalesced authori
 
 ## Recovery and evidence
 
+Production extensions are described in [the deployment and proof runbook](docs/production.md). The optional Go realtime gateway shares authoritative snapshots across large subscriber sets; the sharded generator measures overlapping held sockets separately from bid throughput.
+
 See [recovery procedures](docs/recovery.md), [operations](docs/runbook.md), and [measured results](docs/measurements.md). `python -m scripts.rehearse_recovery` builds an isolated source and restore database for a non-destructive drill. PostgreSQL 18 client tools (`pg_dump`, `pg_restore`) must be on PATH. `python -m scripts.backup_export backup-staging/<new-run>` exports the configured database. Backup artifacts contain private records and stay untracked.
 
 The Bacula profile has its own PostgreSQL Catalog, file daemon, storage daemon, persistent media and alternate restore directory. It is a local classroom deployment, not offsite protection. Set `BACULA_PASSWORD` to 24+ URL-safe random characters, then start with `docker compose --env-file .env -f infra/compose.bacula.yaml up -d --build`. Do not use `--remove-orphans` when running separate Compose files in the same project.

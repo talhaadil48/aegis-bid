@@ -1,0 +1,144 @@
+{
+  "status": "PASS",
+  "run_id": "8be4e979f1bb4723bfcb86fe7a90f37a",
+  "requested": 50000,
+  "simultaneously_held": 50000,
+  "overlap_seconds": 58.009616,
+  "required": 50000,
+  "shards": 5,
+  "handshake_errors": 0,
+  "scope": "Local Docker socket capacity; shared demo identity; not independent hosts, unique bidders or bid throughput",
+  "commit": "4c33f41de2236e62df8f184c5f7de7fe91ed2443",
+  "sampled_at": "2026-11-23T13:01:12.003800+00:00",
+  "gateway_samples": [
+    {
+      "at": "2026-11-23T12:59:02.625777+00:00",
+      "metrics": "gateway_connected_clients 18126\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 299298\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:06.902462+00:00",
+      "metrics": "gateway_connected_clients 24992\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 395978\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:10.901970+00:00",
+      "metrics": "gateway_connected_clients 30794\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 514775\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:14.929487+00:00",
+      "metrics": "gateway_connected_clients 35172\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 637711\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:19.109293+00:00",
+      "metrics": "gateway_connected_clients 38426\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 799801\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:23.164031+00:00",
+      "metrics": "gateway_connected_clients 41642\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 963771\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:27.157678+00:00",
+      "metrics": "gateway_connected_clients 44571\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1139069\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:31.563060+00:00",
+      "metrics": "gateway_connected_clients 46773\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1324722\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:35.628967+00:00",
+      "metrics": "gateway_connected_clients 48363\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1510803\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:40.205857+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1710609\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:44.605563+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1910320\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:48.572823+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 2060916\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:52.931895+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 2263666\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:59:56.937767+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 2464094\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:00.796898+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 2663976\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:04.650443+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 2860530\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:09.002108+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 3063743\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:13.625680+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 3263544\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:17.639643+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 3463778\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:21.746468+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 3663770\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:25.565797+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 3863802\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:30.034249+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4101231\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:34.091246+00:00",
+      "metrics": "gateway_connected_clients 50000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4308472\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:38.092302+00:00",
+      "metrics": "gateway_connected_clients 40000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4496081\ngateway_slow_disconnects_total 70\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:41.942314+00:00",
+      "metrics": "gateway_connected_clients 40000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4658416\ngateway_slow_disconnects_total 70\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:45.774120+00:00",
+      "metrics": "gateway_connected_clients 40000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4818315\ngateway_slow_disconnects_total 70\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:49.998714+00:00",
+      "metrics": "gateway_connected_clients 40000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 4977891\ngateway_slow_disconnects_total 70\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:53.715125+00:00",
+      "metrics": "gateway_connected_clients 30000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5108376\ngateway_slow_disconnects_total 110\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:00:57.526468+00:00",
+      "metrics": "gateway_connected_clients 30000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5227138\ngateway_slow_disconnects_total 110\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:01:01.606102+00:00",
+      "metrics": "gateway_connected_clients 21676\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5343335\ngateway_slow_disconnects_total 206\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:01:05.019089+00:00",
+      "metrics": "gateway_connected_clients 20000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5403335\ngateway_slow_disconnects_total 206\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T13:01:08.533198+00:00",
+      "metrics": "gateway_connected_clients 20000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5483335\ngateway_slow_disconnects_total 206\ngateway_auth_failures_total 0\n"
+    }
+  ],
+  "machine": "12 CPUs 8009699328 bytes"
+}

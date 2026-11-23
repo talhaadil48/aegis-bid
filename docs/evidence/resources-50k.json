@@ -1,0 +1,192 @@
+﻿{
+    "captured_at":  "2026-11-23T13:00:43.0914521Z",
+    "containers":  [
+                       {
+                           "BlockIO":  "0B / 0B",
+                           "CPUPerc":  "70.21%",
+                           "Container":  "18dbff0dcf15a8ffd85eab46a0fd197c692fabc3a7946cfecbc7d85a15f25b70",
+                           "ID":  "18dbff0dcf15",
+                           "MemPerc":  "2.29%",
+                           "MemUsage":  "175.2MiB / 7.46GiB",
+                           "Name":  "aegis-load-8be4e979-4",
+                           "NetIO":  "430MB / 66.6MB",
+                           "PIDs":  "18"
+                       },
+                       {
+                           "BlockIO":  "0B / 0B",
+                           "CPUPerc":  "69.24%",
+                           "Container":  "4deb52a1f364a45ae604102392cb230465278ece6162a2cbb67907b68ff82283",
+                           "ID":  "4deb52a1f364",
+                           "MemPerc":  "2.28%",
+                           "MemUsage":  "174.5MiB / 7.46GiB",
+                           "Name":  "aegis-load-8be4e979-3",
+                           "NetIO":  "444MB / 68.5MB",
+                           "PIDs":  "16"
+                       },
+                       {
+                           "BlockIO":  "0B / 0B",
+                           "CPUPerc":  "68.21%",
+                           "Container":  "7f502bab6663ed848f38d993ac996fad3719eb7c24fc10b3e131c8956dce20df",
+                           "ID":  "7f502bab6663",
+                           "MemPerc":  "2.30%",
+                           "MemUsage":  "175.8MiB / 7.46GiB",
+                           "Name":  "aegis-load-8be4e979-2",
+                           "NetIO":  "469MB / 72.1MB",
+                           "PIDs":  "17"
+                       },
+                       {
+                           "BlockIO":  "0B / 0B",
+                           "CPUPerc":  "64.51%",
+                           "Container":  "182fa69a38bf3c9929597bb0e38899b3aabfd81ad6125559a2bb1796d0e20255",
+                           "ID":  "182fa69a38bf",
+                           "MemPerc":  "2.31%",
+                           "MemUsage":  "176.3MiB / 7.46GiB",
+                           "Name":  "aegis-load-8be4e979-1",
+                           "NetIO":  "501MB / 76.7MB",
+                           "PIDs":  "17"
+                       },
+                       {
+                           "BlockIO":  "0B / 0B",
+                           "CPUPerc":  "329.91%",
+                           "Container":  "e026dcb67771519a924e8017699e9db5c8d5e3cb71cce1552ea42134d88eceef",
+                           "ID":  "e026dcb67771",
+                           "MemPerc":  "17.94%",
+                           "MemUsage":  "1.339GiB / 7.46GiB",
+                           "Name":  "infra-gateway-1",
+                           "NetIO":  "385MB / 2.46GB",
+                           "PIDs":  "39"
+                       },
+                       {
+                           "BlockIO":  "0B / 12.3kB",
+                           "CPUPerc":  "0.00%",
+                           "Container":  "1fedf572cf7478f5b4c213e76f4653dec8e9fd1bf197c2809a5835557f3329cd",
+                           "ID":  "1fedf572cf74",
+                           "MemPerc":  "0.03%",
+                           "MemUsage":  "2.191MiB / 7.46GiB",
+                           "Name":  "infra-web-1",
+                           "NetIO":  "17.4kB / 506kB",
+                           "PIDs":  "2"
+                       },
+                       {
+                           "BlockIO":  "0B / 991kB",
+                           "CPUPerc":  "2.91%",
+                           "Container":  "6e1b889b508f225a6e1ac241fbde58290d92798ccdde987d40fe34e70756a1b8",
+                           "ID":  "6e1b889b508f",
+                           "MemPerc":  "0.84%",
+                           "MemUsage":  "64.26MiB / 7.46GiB",
+                           "Name":  "infra-api-1",
+                           "NetIO":  "709kB / 624kB",
+                           "PIDs":  "2"
+                       },
+                       {
+                           "BlockIO":  "0B / 737kB",
+                           "CPUPerc":  "14.03%",
+                           "Container":  "18c44fd01d36ee1fbba3d56c97270d073f397d2ac0ecb76264860d9e9a9acd02",
+                           "ID":  "18c44fd01d36",
+                           "MemPerc":  "0.52%",
+                           "MemUsage":  "39.48MiB / 7.46GiB",
+                           "Name":  "infra-relay-1",
+                           "NetIO":  "24MB / 18.4MB",
+                           "PIDs":  "2"
+                       },
+                       {
+                           "BlockIO":  "0B / 737kB",
+                           "CPUPerc":  "5.20%",
+                           "Container":  "532e6eeaf15f2cba8a40dd8c8c438aacd38a9474397dc86397649c143156651d",
+                           "ID":  "532e6eeaf15f",
+                           "MemPerc":  "0.53%",
+                           "MemUsage":  "40.57MiB / 7.46GiB",
+                           "Name":  "infra-worker-1",
+                           "NetIO":  "13.6MB / 10.8MB",
+                           "PIDs":  "2"
+                       },
+                       {
+                           "BlockIO":  "0B / 41kB",
+                           "CPUPerc":  "1.24%",
+                           "Container":  "2e060e21e453ecfe56b7723238ccc7e384fd218f2dfb863d90b35b15467657c8",
+                           "ID":  "2e060e21e453",
+                           "MemPerc":  "0.10%",
+                           "MemUsage":  "7.363MiB / 7.46GiB",
+                           "Name":  "aegis-cluster-nats2-1",
+                           "NetIO":  "1.55MB / 1.33MB",
+                           "PIDs":  "12"
+                       },
+                       {
+                           "BlockIO":  "0B / 45.1kB",
+                           "CPUPerc":  "1.23%",
+                           "Container":  "ec6da334aac3cc1ce04bad15b3c3d9b9a2eb3a2177ba6f45da7f38e0303f633a",
+                           "ID":  "ec6da334aac3",
+                           "MemPerc":  "0.10%",
+                           "MemUsage":  "7.715MiB / 7.46GiB",
+                           "Name":  "aegis-cluster-nats3-1",
+                           "NetIO":  "1.56MB / 1.29MB",
+                           "PIDs":  "14"
+                       },
+                       {
+                           "BlockIO":  "1.62MB / 135kB",
+                           "CPUPerc":  "1.64%",
+                           "Container":  "b8b204fd91902b30f352c32862daca30ac3058808970ae67d7fa7b69d84b9633",
+                           "ID":  "b8b204fd9190",
+                           "MemPerc":  "0.13%",
+                           "MemUsage":  "10.21MiB / 7.46GiB",
+                           "Name":  "aegis-cluster-nats1-1",
+                           "NetIO":  "1.73MB / 2.22MB",
+                           "PIDs":  "13"
+                       },
+                       {
+                           "BlockIO":  "8.19kB / 889kB",
+                           "CPUPerc":  "0.00%",
+                           "Container":  "1f9099c8b782c7edccf15d4298bebd248851d4087e700503c5ee69bb1d54c820",
+                           "ID":  "1f9099c8b782",
+                           "MemPerc":  "0.40%",
+                           "MemUsage":  "30.64MiB / 7.46GiB",
+                           "Name":  "infra-bacula-1",
+                           "NetIO":  "4.22kB / 126B",
+                           "PIDs":  "13"
+                       },
+                       {
+                           "BlockIO":  "19.4MB / 344MB",
+                           "CPUPerc":  "49.91%",
+                           "Container":  "7c2b80defe8fa9b945d9059f14143ad90190020d54eec8ad546d26af783372d1",
+                           "ID":  "7c2b80defe8f",
+                           "MemPerc":  "1.71%",
+                           "MemUsage":  "130.8MiB / 7.46GiB",
+                           "Name":  "infra-postgres-1",
+                           "NetIO":  "77.4MB / 99.1MB",
+                           "PIDs":  "10"
+                       },
+                       {
+                           "BlockIO":  "0B / 4.28MB",
+                           "CPUPerc":  "0.70%",
+                           "Container":  "b69a3e6135ccbdd6ce2d5c999a84d66f14e2a35800d0357bb0000829c11e4668",
+                           "ID":  "b69a3e6135cc",
+                           "MemPerc":  "0.10%",
+                           "MemUsage":  "7.398MiB / 7.46GiB",
+                           "Name":  "infra-nats1-1",
+                           "NetIO":  "1.53MB / 2.15MB",
+                           "PIDs":  "14"
+                       },
+                       {
+                           "BlockIO":  "60.3MB / 0B",
+                           "CPUPerc":  "1.41%",
+                           "Container":  "1fb099407dfab97d89586b268c685d6a0513ac2441dcce6b5e5c3f5929e8f913",
+                           "ID":  "1fb099407dfa",
+                           "MemPerc":  "0.73%",
+                           "MemUsage":  "55.68MiB / 7.46GiB",
+                           "Name":  "flash_auction_cep-api-1",
+                           "NetIO":  "2.19MB / 7.11MB",
+                           "PIDs":  "5"
+                       },
+                       {
+                           "BlockIO":  "35.1MB / 90.1kB",
+                           "CPUPerc":  "8.53%",
+                           "Container":  "db05a1b130ef976bb7d78aab1b34f2cc72cf7261fcef8195cf6d88c14105ea01",
+                           "ID":  "db05a1b130ef",
+                           "MemPerc":  "0.18%",
+                           "MemUsage":  "14.06MiB / 7.46GiB",
+                           "Name":  "flash_auction_cep-redis-1",
+                           "NetIO":  "7.11MB / 2.19MB",
+                           "PIDs":  "6"
+                       }
+                   ]
+}

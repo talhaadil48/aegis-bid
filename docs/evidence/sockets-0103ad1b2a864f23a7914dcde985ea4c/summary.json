@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "run_id": "0103ad1b2a864f23a7914dcde985ea4c",
+  "requested": 10000,
+  "simultaneously_held": 10000,
+  "overlap_seconds": 19.270817,
+  "required": 10000,
+  "shards": 2,
+  "handshake_errors": 0,
+  "scope": "Local Docker socket capacity; shared demo identity; not independent hosts, unique bidders or bid throughput",
+  "commit": "50a287b4818411cf3c4571174f7229ffdbdc4631",
+  "sampled_at": "2026-11-23T12:58:35.808412+00:00",
+  "gateway_samples": [
+    {
+      "at": "2026-11-23T12:58:13.312235+00:00",
+      "metrics": "gateway_connected_clients 5594\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 11088\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:16.491764+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 44440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:19.637624+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 74440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:22.791368+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 104440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:25.947376+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 134440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:29.101728+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 164440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:32.344891+00:00",
+      "metrics": "gateway_connected_clients 10000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 204440\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    }
+  ],
+  "machine": "12 CPUs 8009699328 bytes"
+}
