@@ -53,6 +53,25 @@ services:
     build: {context: .., dockerfile: infra/Web.Dockerfile}
     ports: ["127.0.0.1:58080:80"]
     depends_on: [api]
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    ports: ["127.0.0.1:59090:9090"]
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    profiles: [monitoring]
+  grafana:
+    image: grafana/grafana:11.6.0
+    ports: ["127.0.0.1:53000:3000"]
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-local-change-before-use}
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    profiles: [monitoring]
 volumes:
   postgres-data:
   nats-data:
+  prometheus-data:
+  grafana-data:

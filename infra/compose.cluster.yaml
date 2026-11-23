@@ -1,0 +1,19 @@
+# Opt-in three-node JetStream: same workstation, not independent failure domains.
+services:
+  nats1:
+    command: ["-js", "--name", "n1", "--cluster_name", "aegis", "--cluster", "nats://0.0.0.0:6222", "--routes", "nats://nats2:6222,nats://nats3:6222", "-sd", "/data", "-m", "8222"]
+  nats2:
+    image: nats:2.11
+    command: ["-js", "--name", "n2", "--cluster_name", "aegis", "--cluster", "nats://0.0.0.0:6222", "--routes", "nats://nats1:6222,nats://nats3:6222", "-sd", "/data", "-m", "8222"]
+    volumes: ["nats2-data:/data"]
+  nats3:
+    image: nats:2.11
+    command: ["-js", "--name", "n3", "--cluster_name", "aegis", "--cluster", "nats://0.0.0.0:6222", "--routes", "nats://nats1:6222,nats://nats2:6222", "-sd", "/data", "-m", "8222"]
+    volumes: ["nats3-data:/data"]
+  worker:
+    environment: {NATS_REPLICAS: '3'}
+  relay:
+    environment: {NATS_REPLICAS: '3'}
+volumes:
+  nats2-data:
+  nats3-data:
