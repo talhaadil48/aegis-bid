@@ -1,0 +1,20 @@
+[Unit]
+Description=AegisBid independent encrypted offsite exporter
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=aegis-backup
+WorkingDirectory=/opt/aegisbid
+EnvironmentFile=/etc/aegisbid/offsite.env
+ExecStart=/opt/aegisbid/.venv/bin/python -m scripts.offsite_ship --staging /srv/aegisbid/backup-staging --receipts /var/lib/aegisbid/receipts
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/srv/aegisbid/backup-staging
+ReadWritePaths=/var/lib/aegisbid/receipts
+PrivateTmp=true
+UMask=0077
+[Install]
+WantedBy=multi-user.target

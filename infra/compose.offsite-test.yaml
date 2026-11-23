@@ -1,0 +1,13 @@
+# Protocol/retention rehearsal only; this host is not an offsite failure domain.
+services:
+  object-store:
+    build: {context: .., dockerfile: infra/offsite/Minio.Dockerfile}
+    image: aegis-offsite-test:local
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: localbackup
+      MINIO_ROOT_PASSWORD: ${OFFSITE_TEST_PASSWORD:?Set OFFSITE_TEST_PASSWORD}
+    ports: ["127.0.0.1:19000:9000"]
+    volumes: ["test-objects:/data"]
+volumes:
+  test-objects:
