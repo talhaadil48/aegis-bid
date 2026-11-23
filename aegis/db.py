@@ -1,3 +1,4 @@
+import atexit
 from contextlib import contextmanager
 from pathlib import Path
 from threading import Lock
@@ -19,6 +20,9 @@ def close_pools():
         pool.close()
 
 
+atexit.register(close_pools)
+
+
 @contextmanager
 def connection(url=None):
     target = url or DATABASE_URL
@@ -32,6 +36,7 @@ def connection(url=None):
                 max_size=16,
                 timeout=5,
                 name="aegis-db",
+                open=True,
             )
             _pools[target] = pool
     with pool.connection() as conn:

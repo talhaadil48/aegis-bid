@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "timestamp": "2026-11-23T13:53:09.893956+00:00",
+  "region": "ap-southeast-1",
+  "endpoint": "https://s3.ap-southeast-1.amazonaws.com",
+  "account_fingerprint": "5c6afdd0e6246a83",
+  "bucket": "aegisbid-proof-a6436e18c36240999f55",
+  "compliance_version_deletion_denied": true,
+  "private_public_access_block": true,
+  "client_encryption": "AES-256-GCM",
+  "server_encryption": "AES256",
+  "retained_until": "2026-12-23T13:53:04+00:00",
+  "receipt": {
+    "snapshot_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+    "bucket": "aegisbid-proof-a6436e18c36240999f55",
+    "index": {
+      "key": "aegis/920d53d5-92b4-4bfe-8834-316ae68abb9a/index.gcm",
+      "version_id": "SwnFfAjyTl_Z2Tsh9IV3_TGmaH2xQAN8",
+      "cipher_sha256": "b3147e8bd8bc37ce7b7364802d27a64de7da4474cebd66d6e9862249736c3adb"
+    },
+    "key_id": "470b942fd47623b5",
+    "files": 2,
+    "checkpoint": "2026-11-23T12:33:28.840242+00:00",
+    "completed_at": "2026-11-23T13:53:07.688795+00:00",
+    "retained_until": "2026-12-23T13:53:04+00:00"
+  },
+  "file_verification": {
+    "status": "PASS",
+    "snapshot_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+    "files": 2,
+    "restored_at": "2026-11-23T13:53:08.889650+00:00",
+    "scope": "Version-pinned authenticated decryption and file verification; database recovery must run separately"
+  },
+  "database_verification": {
+    "run_id": "3fa1d08d-3b77-4940-8f9e-58f8ded8163e",
+    "backup_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+    "status": "PASS",
+    "checksum_verified": true,
+    "counts": {
+      "auctions": 1,
+      "bid_requests": 20,
+      "bid_decisions": 20,
+      "auction_events": 21,
+      "winners": 3
+    },
+    "errors": [],
+    "restore_started_at": "2026-11-23T13:53:08.889679+00:00",
+    "finished_at": "2026-11-23T13:53:09.870214+00:00",
+    "rto_s": 0.980535,
+    "protected_checkpoint": "2026-11-23T12:33:28.840242+00:00",
+    "rpo_s": null,
+    "scope": "Isolated logical snapshot restore and independent ledger replay; RPO requires actual failure timestamp; no external signed anchor checked",
+    "isolated_database": "aegis_restore_13a8f979531f48a19a0d2e39352f5969"
+  },
+  "offsite_restore_and_verify_s": 1.9728572000167333,
+  "key_custody": "User home .aegisbid/backup-keys, outside repository and application containers",
+  "scope": "Actual remote AWS S3 backup and isolated recovery; primary application is local. Repository is in the configured AWS account, not a separately administered account. Test objects remain protected for 30 days; no compute infrastructure created."
+}
