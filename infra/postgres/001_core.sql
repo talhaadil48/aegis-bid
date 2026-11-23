@@ -60,3 +60,10 @@ CREATE TABLE IF NOT EXISTS incidents (
 CREATE INDEX IF NOT EXISTS requests_pending ON bid_requests(auction_id,intake_seq) WHERE state='QUEUED';
 CREATE INDEX IF NOT EXISTS outbox_pending ON outbox(id) WHERE published_at IS NULL;
 INSERT INTO schema_migrations VALUES(1) ON CONFLICT DO NOTHING;
+-- Admission refusals are durable receipts, not events appended after a sealed auction.
+CREATE TABLE IF NOT EXISTS admission_outcomes (
+ request_id uuid PRIMARY KEY REFERENCES bid_requests(request_id),
+ status text NOT NULL CHECK(status='CLOSED'), reason text NOT NULL,
+ finalized_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+INSERT INTO schema_migrations VALUES(2) ON CONFLICT DO NOTHING;

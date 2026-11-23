@@ -13,7 +13,7 @@ from nats.js.api import AckPolicy, ConsumerConfig, StreamConfig
 
 from aegis.config import NATS_URL
 from aegis.db import connection
-from aegis.engine import Fenced, close, process
+from aegis.engine import Fenced, close, finalize_stranded, process
 
 log = logging.getLogger("aegis.pipeline")
 
@@ -75,6 +75,7 @@ async def relay_once(js):
 
 
 def reconcile(holder):
+    finalize_stranded()
     with connection() as c:
         if c.execute("SELECT 1 FROM incidents WHERE scenario='pause-queue-consumer' AND state='ACTIVE'").fetchone():
             return

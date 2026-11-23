@@ -12,6 +12,7 @@ The two root documents are the requirements baseline. Proposed capacity and reco
 | 06 | Physical backups, durable continuous WAL archive, PITR | Local and CI recovery beyond the base backup; matching ledger anchor |
 | 07 | Encrypted offsite transport, S3 version pinning, COMPLIANCE retention | Real object-store round trip and database restore; local + CI |
 | 08 | Three-zone infrastructure, PostgreSQL/NATS TLS quorum, HA workloads | Real node-loss recovery, cloud schema validation, Kubernetes admission checks, CI |
+| 11 | Terminal late-bid admission and legacy queue repair | 29 PostgreSQL/NATS tests; stable CLOSED retry/history; unchanged sealed winners and audit anchor |
 
 The implementation phases and their recorded proofs are in Git history. See `measurements.md` for measured results and `ha-deployment.md` for cloud commissioning. Phase 08 also records an actual remote AWS S3 backup/restore, with keys kept outside the repository and application containers.
 
@@ -24,3 +25,5 @@ External deployment constraint: the configured AWS profile can use S3 but return
 Still outside these four production extensions: payment settlement, a full legacy-system benchmark, adaptive deadline-based fleet pre-warming, a multi-host/unique-identity 50k benchmark and a real whole-zone outage rehearsal. Submission identity, narrated video and screenshots require the student's own material.
 
 Git flow: phase branch from main; implement; run required checks; commit and push phase; merge with `--no-ff` only after checks pass; push main. GitHub pull requests are optional review wrappers; merges retain phase history.
+
+Late-request fix: an authenticated valid request admitted after the deadline or final close is stored with state CLOSED and an admission outcome containing a reason and timestamp. These are admission receipts outside the sealed bidding ledger; no post-close bid event changes the winners or anchor. Same-payload UUID retries return the existing result, including earlier accepted bids. Reconciliation repairs legacy queued requests on already closed auctions. Terminal POST responses use HTTP 200; pending durable admissions use HTTP 202.

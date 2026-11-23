@@ -113,7 +113,7 @@ class Bid(BaseModel):
 
 
 @app.post("/v1/auctions/{aid}/bids", status_code=202)
-def bid(aid: UUID, body: Bid, user=Depends(roles("bidder"))):
+def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidder"))):
     limit(("bid", str(user["id"])), 120)
     try:
         r = admit(aid, user["id"], body.request_id, body.amount_cents)
@@ -123,7 +123,14 @@ def bid(aid: UUID, body: Bid, user=Depends(roles("bidder"))):
         raise HTTPException(409, str(e)) from None
     except OverflowError as e:
         raise HTTPException(429, str(e)) from None
-    return {"request_id": r["request_id"], "state": r["state"], "message": "Durably queued; query for final decision"}
+    response.status_code = 202 if r["state"] == "QUEUED" else 200
+    return {
+        "request_id": r["request_id"],
+        "state": r["state"],
+        "message": "Durably queued; query for final decision"
+        if r["state"] == "QUEUED"
+        else "Final result; query for recorded reason",
+    }
 
 
 @app.get("/v1/bid-requests/{rid}")
@@ -133,6 +140,12 @@ def request_status(rid: UUID, user=Depends(current_user)):
         if not r or (r["bidder_id"] != user["id"] and user["role"] != "admin"):
             raise HTTPException(404, "Request not found")
         r["decision"] = c.execute("SELECT * FROM bid_decisions WHERE request_id=%s", (rid,)).fetchone()
+        if r["decision"] is None:
+            r["decision"] = c.execute(
+                "SELECT request_id,status,reason,finalized_at, NULL::bigint AS decision_seq "
+                "FROM admission_outcomes WHERE request_id=%s",
+                (rid,),
+            ).fetchone()
         return r
 
 
@@ -140,7 +153,9 @@ def request_status(rid: UUID, user=Depends(current_user)):
 def history(user=Depends(current_user)):
     with connection() as c:
         return c.execute(
-            "SELECT r.*,d.reason,d.decision_seq FROM bid_requests r LEFT JOIN bid_decisions d USING(request_id) WHERE r.bidder_id=%s ORDER BY admitted_at DESC LIMIT 100",
+            "SELECT r.*,coalesce(d.reason,o.reason) reason,d.decision_seq FROM bid_requests r "
+            "LEFT JOIN bid_decisions d USING(request_id) LEFT JOIN admission_outcomes o USING(request_id) "
+            "WHERE r.bidder_id=%s ORDER BY admitted_at DESC LIMIT 100",
             (user["id"],),
         ).fetchall()
 
