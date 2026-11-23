@@ -1,0 +1,30 @@
+name: Protected object-store recovery
+on:
+  push:
+    paths: ['aegis/offsite.py', 'scripts/*offsite*.py', 'infra/offsite/**', 'infra/compose.offsite-test.yaml', '.github/workflows/offsite.yml']
+  workflow_dispatch:
+jobs:
+  locked-restore:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env: {POSTGRES_DB: aegisbid, POSTGRES_USER: aegis, POSTGRES_PASSWORD: aegis-local}
+        ports: ['55432:5432']
+        options: --health-cmd "pg_isready -U aegis -d aegisbid" --health-interval 3s --health-retries 20
+    env:
+      POSTGRES_PASSWORD: aegis-local
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.13'}
+      - run: pip install -r requirements.lock -r requirements-backup.lock && pip install --no-deps -e .
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client-18
+      - run: python -c "import pathlib; pathlib.Path('.env').write_text('POSTGRES_PASSWORD=aegis-local\n')"
+      - run: python -m scripts.rehearse_recovery
+      - run: python -c "from pathlib import Path; from scripts.rehearse_offsite import main; main(next(Path('backup-staging').glob('*/manifest.json')).parent)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: object-store-recovery-evidence
+          path: docs/evidence/offsite-*.json
