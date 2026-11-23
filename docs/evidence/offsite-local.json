@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "object_lock_delete_blocked": true,
+  "newer_corrupt_index_ignored": true,
+  "cipher": "AES-256-GCM",
+  "receipt": {
+    "snapshot_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+    "bucket": "aegis-rehearsal-2a185f8b54a04cfe",
+    "index": {
+      "key": "aegis/920d53d5-92b4-4bfe-8834-316ae68abb9a/index.gcm",
+      "version_id": "222f946b-a5fb-4b5f-b3e0-ba304ade4adf",
+      "cipher_sha256": "ce6746367d825c9c19a86b0fd485c875bd43c1ee3487b255b2c73d2fd673d3a5"
+    },
+    "key_id": "f2c5b1a433589bf3",
+    "files": 2,
+    "checkpoint": "2026-11-23T12:33:28.840242+00:00",
+    "completed_at": "2026-11-23T13:17:22.059145+00:00",
+    "retained_until": "2026-11-24T13:17:21+00:00"
+  },
+  "database_report": {
+    "run_id": "4cdbb771-0092-4567-84a7-c2b31610f515",
+    "backup_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+    "status": "PASS",
+    "checksum_verified": true,
+    "counts": {
+      "auctions": 1,
+      "bid_requests": 20,
+      "bid_decisions": 20,
+      "auction_events": 21,
+      "winners": 3
+    },
+    "errors": [],
+    "restore_started_at": "2026-11-23T13:17:22.136614+00:00",
+    "finished_at": "2026-11-23T13:17:23.197633+00:00",
+    "rto_s": 1.061019,
+    "protected_checkpoint": "2026-11-23T12:33:28.840242+00:00",
+    "rpo_s": null,
+    "scope": "Isolated logical snapshot restore and independent ledger replay; RPO requires actual failure timestamp; no external signed anchor checked",
+    "isolated_database": "aegis_restore_8e519399b2254b34b0b3fd3fa86a0df4"
+  },
+  "scope": "S3-compatible local MinIO protocol rehearsal; not physically offsite, no independent cloud account provisioned"
+}
