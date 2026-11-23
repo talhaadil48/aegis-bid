@@ -33,6 +33,7 @@ def token(user):
 
 
 def identity(raw):
+    config.require_secret()
     try:
         payload = jwt.decode(
             raw or "",

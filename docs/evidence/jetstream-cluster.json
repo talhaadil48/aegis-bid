@@ -1,0 +1,9 @@
+{
+  "timestamp": "2026-11-23T12:39:11.107891+00:00",
+  "replicas": 3,
+  "healthy_publish_seq": 1,
+  "single_node_loss_publish_seq": 2,
+  "quorum_loss_false_ack": false,
+  "status": "PASS",
+  "scope": "Three containers on one host; durable stream quorum only; SQL intake remains independent"
+}

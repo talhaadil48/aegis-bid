@@ -9,7 +9,7 @@ Requires Python 3.12+, Node 20+, Docker Engine/Compose, and Git. Run from this r
 1. Copy `.env.example` to `.env`; replace every placeholder. Use a URL-safe PostgreSQL password and a random session secret of at least 32 characters. Keep `.env` untracked.
 2. `docker compose --env-file .env -f infra/compose.yaml up -d --build`
 3. Seed accounts: `docker compose --env-file .env -f infra/compose.yaml run --rm -e DEMO_PASSWORD=<your-demo-password> api python -m scripts.seed_demo`. For a private shell, export the password and use `-e DEMO_PASSWORD` instead of putting it in command history.
-4. Open `http://localhost:58080`. Accounts: `bidder1`, `bidder2`, `seller`, `admin`, `auditor`. Seeding does not reset existing passwords.
+4. Open `http://localhost:18080` (override with `WEB_PORT`). Accounts: `bidder1`, `bidder2`, `seller`, `admin`, `auditor`. Seeding does not reset existing passwords.
 
 Ports bind to loopback. This is a disposable local deployment; do not expose it publicly without TLS, production secret management, external rate limits and independent backup infrastructure.
 
@@ -39,3 +39,9 @@ Run `ruff check aegis tests scripts` and `pytest -q`. To exercise infrastructure
 Currency uses integer cents. Each valid bid exceeds the current high by the configured increment. Retrying a request UUID with the same payload has one business effect; changing its payload returns 409. Admission uses a database timestamp and per-auction sequence. Queued bids admitted before close are drained before winner allocation. Top unique bidders win at most the auction stock and pay their own recorded offers. Payment collection is outside this prototype.
 
 Admin metrics come from real database records. WebSockets send coalesced authoritative snapshots each second and reconnect automatically. Bid history resolves final status independently. API instances report their own socket count; horizontal aggregation requires Prometheus. No 50,000-client result or production RPO/RTO is claimed.
+
+## Recovery and evidence
+
+See [recovery procedures](docs/recovery.md), [operations](docs/runbook.md), and [measured results](docs/measurements.md). `python -m scripts.rehearse_recovery` builds an isolated source and restore database for a non-destructive drill. PostgreSQL 18 client tools (`pg_dump`, `pg_restore`) must be on PATH. `python -m scripts.backup_export backup-staging/<new-run>` exports the configured database. Backup artifacts contain private records and stay untracked.
+
+The Bacula profile has its own PostgreSQL Catalog, file daemon, storage daemon, persistent media and alternate restore directory. It is a local classroom deployment, not offsite protection. Set `BACULA_PASSWORD` to 24+ URL-safe random characters, then start with `docker compose --env-file .env -f infra/compose.bacula.yaml up -d --build`. Do not use `--remove-orphans` when running separate Compose files in the same project.

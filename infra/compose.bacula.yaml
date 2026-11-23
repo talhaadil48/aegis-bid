@@ -1,0 +1,17 @@
+# Single-host classroom rehearsal. Production requires an independent backup host.
+services:
+  bacula:
+    build: {context: .., dockerfile: infra/bacula/Dockerfile}
+    image: aegis-bacula:local
+    environment:
+      BACULA_PASSWORD: ${BACULA_PASSWORD:?Set BACULA_PASSWORD}
+    volumes:
+      - ../backup-staging:/staging:ro
+      - ../restore-output:/restore
+      - bacula-volumes:/volumes
+      - bacula-catalog:/var/lib/postgresql
+      - bacula-state:/var/lib/bacula
+volumes:
+  bacula-volumes:
+  bacula-catalog:
+  bacula-state:

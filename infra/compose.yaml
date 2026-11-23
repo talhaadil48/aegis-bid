@@ -14,7 +14,7 @@ services:
   nats1:
     image: nats:2.11
     command: ["-js", "-sd", "/data", "-m", "8222"]
-    ports: ["127.0.0.1:54222:4222"]
+    ports: ["127.0.0.1:${NATS_PORT:-54222}:4222"]
     volumes: ["nats-data:/data"]
   migrate:
     build: {context: .., dockerfile: infra/Dockerfile}
@@ -51,7 +51,7 @@ services:
       nats1: {condition: service_started}
   web:
     build: {context: .., dockerfile: infra/Web.Dockerfile}
-    ports: ["127.0.0.1:58080:80"]
+    ports: ["127.0.0.1:${WEB_PORT:-18080}:80"]
     depends_on: [api]
   prometheus:
     image: prom/prometheus:v3.2.1

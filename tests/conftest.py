@@ -2,9 +2,30 @@ import os
 import uuid
 from datetime import UTC, datetime, timedelta
 
+import psycopg
 import pytest
+from psycopg import sql
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
+from aegis import config, db
 from aegis.db import connection, migrate
+
+
+@pytest.fixture(scope="session", autouse=True)
+def isolated_test_database():
+    config.SECRET = "integration-test-secret-with-at-least-32-characters"
+    if os.getenv("RUN_INTEGRATION") != "1":
+        yield
+        return
+    source = db.DATABASE_URL
+    name = "aegis_test_" + uuid.uuid4().hex
+    with psycopg.connect(source, autocommit=True) as c:
+        c.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(name)))
+    fields = conninfo_to_dict(source)
+    fields["dbname"] = name
+    db.DATABASE_URL = make_conninfo(**fields)
+    yield
+    db.DATABASE_URL = source
 
 
 @pytest.fixture

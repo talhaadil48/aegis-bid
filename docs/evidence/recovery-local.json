@@ -1,0 +1,21 @@
+{
+  "run_id": "fa66be9d-d673-4256-aae5-99c2dc46261d",
+  "backup_id": "920d53d5-92b4-4bfe-8834-316ae68abb9a",
+  "status": "PASS",
+  "checksum_verified": true,
+  "counts": {
+    "auctions": 1,
+    "bid_requests": 20,
+    "bid_decisions": 20,
+    "auction_events": 21,
+    "winners": 3
+  },
+  "errors": [],
+  "restore_started_at": "2026-11-23T12:33:30.289359+00:00",
+  "finished_at": "2026-11-23T12:33:32.030420+00:00",
+  "rto_s": 1.741061,
+  "protected_checkpoint": "2026-11-23T12:33:28.840242+00:00",
+  "rpo_s": null,
+  "scope": "Isolated logical snapshot restore and independent ledger replay; RPO requires actual failure timestamp; no external signed anchor checked",
+  "isolated_database": "aegis_restore_9aeafe7e5eb64d2c833256dd47d60f8f"
+}

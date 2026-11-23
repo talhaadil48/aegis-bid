@@ -14,13 +14,15 @@ jobs:
         options: --health-cmd "pg_isready -U aegis -d aegisbid" --health-interval 3s --health-retries 20
     env:
       RUN_INTEGRATION: '1'
+      RUN_NATS: '1'
       SESSION_SECRET: ci-test-secret-at-least-32-characters-long
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - run: pip install -e '.[dev]'
+      - run: pip install -r requirements.lock && pip install --no-deps -e .
+      - run: docker run -d -p 54222:4222 nats:2.11 -js
       - run: ruff check aegis tests scripts
       - run: pytest -q
   frontend:

@@ -1,0 +1,16 @@
+{
+  "run_id": "46283854-0b79-4633-a791-09cfba82cde8",
+  "timestamp": "2026-11-23T12:33:32.533281+00:00",
+  "commit": "bb25f10aed0f30c7eb24b8a4a96d6dcbdb6c7181",
+  "machine": "Windows-11-10.0.26200-SP0",
+  "bids": 30,
+  "concurrency": 10,
+  "elapsed_s": 3.7700970000005327,
+  "completed_per_second": 7.957354943386274,
+  "p50_s": 1.1618504999787547,
+  "p95_s": 1.5380523999920115,
+  "p99_s": 1.753362300049048,
+  "error_rate": 0.0,
+  "websocket_connections": "NOT_MEASURED",
+  "scope": "Single authenticated user; per-user rate limits intentionally apply; HTTP end-to-end decision latency"
+}
