@@ -1,7 +1,8 @@
 {
-  "pdf_pages": 6,
+  "pdf_pages": 7,
   "body_font_sizes_pt": [
     10.2,
+    9.149999999999999,
     10.2,
     10.2,
     10.2,
@@ -9,9 +10,10 @@
     10.049999999999999
   ],
   "source_commit": "6a0d253",
-  "words": 1881,
+  "words": 1996,
   "section_titles": [
     "System objectives and implemented architecture",
+    "Complete system flow and recovery paths",
     "Transactional correctness and data model",
     "Realtime scaling, API contracts and user workflows",
     "Security, independent audit and observability",

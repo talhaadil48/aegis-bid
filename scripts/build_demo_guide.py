@@ -71,8 +71,8 @@ def main():
                         ],
                         [
                             "2:40-3:00",
-                            "Auditor view + report page 4",
-                            "Auditors replay rules and check hash links. Ed25519 verification needs a trusted signing key; unsigned evidence is INCOMPLETE. Close: durability, one business effect per UUID, verifiable recovery; remaining production work is listed on page 6.",
+                            "Auditor view + report page 5",
+                            "Auditors replay rules and check hash links. Ed25519 verification needs a trusted signing key; unsigned evidence is INCOMPLETE. Close: durability, one business effect per UUID, verifiable recovery; remaining production work is listed on page 7.",
                         ],
                     ],
                 },
@@ -107,7 +107,7 @@ def main():
                 ),
                 heading("3. Open the evidence files in advance"),
                 paragraph(
-                    "<b>Report:</b> AegisBid_Technical_Report_6_Pages.pdf, especially pages 1, 4 and 6. <b>Backup:</b> docs/evidence/recovery-bacula.json and bacula-console.txt. <b>Recorded capacity/recovery:</b> sockets-8be4e979f1bb4723bfcb86fe7a90f37a/summary.json, ha-local.json, pitr-local.json and s3-offsite.json. The helper selects safe fields; avoid displaying raw bucket/account details."
+                    "<b>Report:</b> AegisBid_Technical_Report_7_Pages.pdf, especially pages 1, 2, 5 and 7. <b>Backup:</b> docs/evidence/recovery-bacula.json and bacula-console.txt. <b>Recorded capacity/recovery:</b> sockets-8be4e979f1bb4723bfcb86fe7a90f37a/summary.json, ha-local.json, pitr-local.json and s3-offsite.json. The helper selects safe fields; avoid displaying raw bucket/account details."
                 ),
                 paragraph(
                     "The auditor screen may correctly show INCOMPLETE without AUDIT_SIGNING_KEY. Do not present it as a trusted signed PASS. To demonstrate signed verification, use an honestly labelled prior recording of the signed/tampered fixture check: RUN_INTEGRATION=1, then pytest tests/test_evidence.py -v in the configured local test environment. An owner receipt hash is not an independently signed receipt."

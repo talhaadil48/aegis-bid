@@ -1,4 +1,4 @@
-"""Build a verified six-page technical PDF and an editable Word companion."""
+"""Build the verified report with a complete system design page and Word companion."""
 
 import json
 import re
@@ -17,6 +17,8 @@ from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+from scripts.system_diagram import system_design
 
 ROOT = Path(__file__).resolve().parents[1]
 NAVY = colors.HexColor("#16334D")
@@ -117,6 +119,8 @@ def blocks(page, size, width):
             result.extend([table, Spacer(1, 7)])
         elif kind == "flow":
             result.append(flow(block["labels"], width))
+        elif kind == "system_design":
+            result.append(system_design(width))
         elif kind == "refs":
             for number, title, url in block["items"]:
                 result.append(Paragraph(f'[{number}] <link href="{url}" color="#126C78">{title}</link>', s["small"]))
@@ -183,6 +187,8 @@ def create_word(content, sizes, destination):
                                 run.font.size = Pt(8.2)
             elif kind == "flow":
                 document.add_paragraph("  >  ".join(block["labels"]))
+            elif kind == "system_design":
+                document.add_picture(str(destination.parent / "AegisBid_Complete_System_Flow.png"), width=Inches(7.0))
             elif kind == "refs":
                 for number, title, url in block["items"]:
                     p = document.add_paragraph(f"[{number}] {title}: {url}")
@@ -197,6 +203,16 @@ def main():
     content = json.loads((ROOT / "docs/report/report-content.json").read_text(encoding="utf-8"))
     output = ROOT / "docs/submission"
     output.mkdir(exist_ok=True)
+    expected_pages = content["expected_pages"]
+    if len(content["pages"]) != expected_pages:
+        raise RuntimeError("Source page count does not match the declared report length")
+    import pypdfium2
+    from reportlab.graphics import renderPDF, renderSVG
+
+    diagram = system_design(1058)
+    renderSVG.drawToFile(diagram, str(output / "AegisBid_Complete_System_Flow.svg"))
+    with pypdfium2.PdfDocument(renderPDF.drawToString(diagram)) as diagram_pdf:
+        diagram_pdf[0].render().to_pil().save(output / "AegisBid_Complete_System_Flow.png")
     sizes = []
     writer = PdfWriter()
     with tempfile.TemporaryDirectory() as temporary:
@@ -208,7 +224,7 @@ def main():
                 canvas.setFont("Helvetica", 8)
                 canvas.setFillColor(NAVY)
                 canvas.drawString(42, A4[1] - 20, "AEGISBID OMEGA  |  CEP 1 TECHNICAL REPORT")
-                canvas.drawRightString(A4[0] - 42, 22, f"{page_index + 1} / 6")
+                canvas.drawRightString(A4[0] - 42, 22, f"{page_index + 1} / {expected_pages}")
                 canvas.drawString(42, 22, "23 November 2026  |  Source baseline " + content["implementation_commit"])
 
             path = Path(temporary) / f"page-{index}.pdf"
@@ -253,19 +269,21 @@ def main():
                     break
             else:
                 raise RuntimeError(f"Page {index + 1} overflowed; edit content rather than shrinking below 9 pt")
-        pdf = output / "AegisBid_Technical_Report_6_Pages.pdf"
-        writer.add_metadata({"/Title": "AegisBid Omega | Six-page technical report", "/Subject": content["subtitle"]})
+        pdf = output / f"AegisBid_Technical_Report_{expected_pages}_Pages.pdf"
+        writer.add_metadata(
+            {"/Title": "AegisBid Omega | Technical report with full system flow", "/Subject": content["subtitle"]}
+        )
         with pdf.open("wb") as stream:
             writer.write(stream)
     checked = PdfReader(pdf)
-    if len(checked.pages) != 6:
-        raise RuntimeError("Report must contain exactly six pages")
+    if len(checked.pages) != expected_pages:
+        raise RuntimeError(f"Report must contain exactly {expected_pages} pages")
     for index, page in enumerate(content["pages"]):
         if page["title"] not in checked.pages[index].extract_text():
             raise RuntimeError("Report section is on the wrong page")
     create_word(content, sizes, output / "AegisBid_Technical_Report_Editable.docx")
     metadata = {
-        "pdf_pages": 6,
+        "pdf_pages": expected_pages,
         "body_font_sizes_pt": sizes,
         "source_commit": content["implementation_commit"],
         "words": sum(len(plain(b.get("text", "")).split()) for p in content["pages"] for b in p["blocks"]),
