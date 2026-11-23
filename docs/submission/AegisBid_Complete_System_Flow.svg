@@ -2,146 +2,145 @@
 <!DOCTYPE svg
   PUBLIC '-//W3C//DTD SVG 1.0//EN'
   'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
-<svg width="1058" height="1300.0" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1058 1300" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1058" height="1322.5" preserveAspectRatio="xMinYMin meet" viewBox="0 0 1058 1322" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
 	<title>...</title>
 	<desc>...</desc>
 	<clipPath id="clip">
-		<rect x="0" y="0" width="1058" height="1300.0"/>
+		<rect x="0" y="0" width="1058" height="1322.5"/>
 	</clipPath>
-	<g id="group" transform="scale(1,-1) translate(0,-1300)" style="clip-path: url(#clip)">
-		<g transform=" matrix(2,0,0,2,0,0)">
-			<rect x="28" y="601" width="110" height="38" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="69.54025" y="626" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1252) scale(1,-1)">Bidder</text>
-			<text x="46.41345" y="614" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1228) scale(1,-1)">Bid / history / winners</text>
-			<path d="M 83,601 L 83,581 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="83 581, 80 586, 86 586" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<rect x="149" y="601" width="110" height="38" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="192.423" y="626" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1252) scale(1,-1)">Seller</text>
-			<text x="161.63075" y="614" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1228) scale(1,-1)">Create / schedule / close</text>
-			<path d="M 204,601 L 204,581 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="204 581, 201 586, 207 586" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<rect x="270" y="601" width="110" height="38" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="297.137" y="626" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1252) scale(1,-1)">Administrator</text>
-			<text x="294.1923" y="614" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1228) scale(1,-1)">Metrics / incidents</text>
-			<path d="M 325,601 L 325,581 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="325 581, 322 586, 328 586" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<rect x="391" y="601" width="110" height="38" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="430.89125" y="626" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1252) scale(1,-1)">Auditor</text>
-			<text x="398.91835" y="614" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1228) scale(1,-1)">Export / independent replay</text>
-			<path d="M 446,601 L 446,581 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="446 581, 443 586, 449 586" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<rect x="28" y="544" width="473" height="37" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="166.36325" y="568" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1136) scale(1,-1)">Next.js role views + Nginx same-origin boundary</text>
-			<text x="103.90879999999999" y="556" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1112) scale(1,-1)">HTTPS in production | HTTP / WebSocket proxy | session cookie | reconnect + version refresh</text>
-			<path d="M 178,544 L 178,519 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="178 519, 175 524, 181 524" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="185" y="529" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1058) scale(1,-1)">authenticated HTTP</text>
-			<rect x="28" y="472" width="300" height="47" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="90.13974999999999" y="506" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1012) scale(1,-1)">FastAPI: authenticate + authorize + validate</text>
-			<text x="86.45854999999999" y="494" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,988) scale(1,-1)">scrypt / HS256 | RBAC / owner checks | origin + limits</text>
-			<text x="93.16139999999999" y="484" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,968) scale(1,-1)">bidder identity from session; UUID + integer cents</text>
-			<rect x="351" y="472" width="150" height="47" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="403.56425" y="506" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1012) scale(1,-1)">Operations</text>
-			<text x="388.1237" y="494" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,988) scale(1,-1)">Prometheus / Grafana</text>
-			<text x="386.8455" y="484" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,968) scale(1,-1)">admin-only local chaos</text>
-			<path d="M 328,495 L 351,495 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9; stroke-dasharray: 3, 2;"/>
-			<polygon points="351 495, 346 492, 346 498" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<path d="M 133,472 L 133,446 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="133 446, 130 451, 136 451" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="141" y="456" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,912) scale(1,-1)">POST bid</text>
-			<rect x="28" y="399" width="210" height="47" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="89.06775" y="433" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,866) scale(1,-1)">1. Durable SQL intake</text>
-			<text x="48.48479999999999" y="421" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,842) scale(1,-1)">UUID + immutable payload; admission time + seq</text>
-			<text x="46.89474999999999" y="411" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,822) scale(1,-1)">COMMIT -&gt; HTTP 202 QUEUED; retry reuses row</text>
-			<rect x="291" y="399" width="210" height="47" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="342.62425" y="433" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,866) scale(1,-1)">2. NATS JetStream journal</text>
-			<text x="320.58235" y="421" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,842) scale(1,-1)">relay publishes Nats-Msg-Id = request UUID</text>
-			<text x="310.84955" y="411" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,822) scale(1,-1)">file-backed stream; retries; explicit consumer ACK</text>
-			<path d="M 238,422 L 291,422 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="291 422, 286 419, 286 425" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="256.4155" y="430" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,860) scale(1,-1)">relay</text>
-			<path d="M 133,399 L 133,375 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="133 375, 130 380, 136 380" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="143" y="382" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,764) scale(1,-1)">SQL reconcile</text>
-			<path d="M 396,399 L 396,387 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 396,387 L 133,387 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 133,387 L 133,375 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="133 375, 130 380, 136 380" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="258.5165" y="379" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,758) scale(1,-1)">command delivery / redelivery</text>
-			<rect x="28" y="326" width="210" height="49" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="69.22874999999999" y="362" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,724) scale(1,-1)">3. Worker: serialize one auction</text>
-			<text x="49.755300000000005" y="350" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,700) scale(1,-1)">lock auction, then 5 s lease; verify holder / epoch</text>
-			<text x="50.72935" y="340" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,680) scale(1,-1)">first QUEUED intake_seq; price + deadline rules</text>
-			<rect x="291" y="326" width="210" height="49" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="348.99925" y="362" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,724) scale(1,-1)">4. One SQL transaction</text>
-			<text x="322.8038" y="350" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,700) scale(1,-1)">decision + offer + request + event + outbox</text>
-			<text x="308.05830000000003" y="340" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,680) scale(1,-1)">COMMIT before ACK; retry has one business effect</text>
-			<path d="M 238,350 L 291,350 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="291 350, 286 347, 286 353" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="253.689" y="358" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,716) scale(1,-1)">decide</text>
-			<path d="M 396,326 L 396,301 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="396 301, 393 306, 399 306" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<rect x="28" y="250" width="473" height="51" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(85%,92%,93%); fill-rule: evenodd;"/>
-			<text x="184.20475" y="288" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,576) scale(1,-1)">PostgreSQL: authoritative durable state</text>
-			<text x="105.19854999999998" y="276" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,552) scale(1,-1)">users | auctions | intake | fenced leases | decisions | offers | winners | chained events | outbox</text>
-			<text x="98.99234999999999" y="266" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,532) scale(1,-1)">Deadline close: drain eligible intake -&gt; rank distinct offers -&gt; stock-limited allocation + close event</text>
-			<path d="M 100,250 L 100,223 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="100 223, 97 228, 103 228" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<path d="M 263,250 L 263,223 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="263 223, 260 228, 266 228" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<path d="M 427,250 L 427,223 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="427 223, 424 228, 430 228" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="204.4485" y="235" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,470) scale(1,-1)">committed read models / event export</text>
-			<rect x="28" y="159" width="145" height="64" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="62.475249999999996" y="210" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,420) scale(1,-1)">Realtime read path</text>
-			<text x="53.4145" y="198" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,396) scale(1,-1)">authenticated snapshot API</text>
-			<text x="57.056599999999996" y="188" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,376) scale(1,-1)">Go hub polls 1 s / auction</text>
-			<text x="44.64805" y="178" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,356) scale(1,-1)">prepared frames; one-slot queue</text>
-			<text x="52.77925" y="168" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,336) scale(1,-1)">WebSocket fanout to clients</text>
-			<rect x="191" y="159" width="145" height="64" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="226.899" y="210" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,420) scale(1,-1)">Independent audit</text>
-			<text x="209.78865" y="198" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,396) scale(1,-1)">SHA-256 canonical event chain</text>
-			<text x="217.916" y="188" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,376) scale(1,-1)">optional Ed25519 manifest</text>
-			<text x="212.57605" y="178" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,356) scale(1,-1)">replay prices / cutoff / winners</text>
-			<text x="220.91514999999998" y="168" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,336) scale(1,-1)">trusted key: PASS / FAIL</text>
-			<rect x="354" y="159" width="147" height="64" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(91%,95%,96%); fill-rule: evenodd;"/>
-			<text x="388.77825" y="210" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,420) scale(1,-1)">Notification outbox</text>
-			<text x="379.78695" y="198" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,396) scale(1,-1)">relay publishes live subjects</text>
-			<text x="376.79165" y="188" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,376) scale(1,-1)">SQL marks published / retries</text>
-			<text x="374.8628" y="178" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,356) scale(1,-1)">Go gateway currently polls API</text>
-			<text x="383.63695" y="168" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,336) scale(1,-1)">not this NATS live subject</text>
-			<path d="M 28,191 L 10,191 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 10,191 L 10,562 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 10,562 L 28,562 Z" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="28 562, 23 559, 23 565" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 1; fill: rgb(7%,42%,47%); fill-rule: evenodd;"/>
-			<text x="14" y="533" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,1066) scale(1,-1)">WS</text>
-			<text x="154.129" y="146" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,292) scale(1,-1)">Unsigned export: INCOMPLETE | owner receipt: event/hash reference</text>
-			<path d="M 501,276 L 518,276 Z" style="stroke: rgb(61%,40%,8%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 518,276 L 518,136 Z" style="stroke: rgb(61%,40%,8%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 518,136 L 420,136 Z" style="stroke: rgb(61%,40%,8%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<path d="M 420,136 L 420,133 Z" style="stroke: rgb(61%,40%,8%); stroke-linecap: butt; stroke-width: 0.9;"/>
-			<polygon points="420 133, 417 138, 423 138" style="stroke: rgb(61%,40%,8%); stroke-linecap: butt; stroke-width: 1; fill: rgb(61%,40%,8%); fill-rule: evenodd;"/>
-			<rect x="28" y="68" width="473" height="65" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(100%,95%,85%); fill-rule: evenodd;"/>
-			<text x="178.52675" y="120" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,240) scale(1,-1)">Backup, recovery and integrity verification</text>
-			<path d="M 185.5,72 L 185.5,113 Z" style="stroke: rgb(84%,73%,48%); stroke-linecap: butt; stroke-width: 0.6;"/>
-			<path d="M 343,72 L 343,113 Z" style="stroke: rgb(84%,73%,48%); stroke-linecap: butt; stroke-width: 0.6;"/>
-			<text x="76.544" y="108" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,216) scale(1,-1)">Logical / Bacula</text>
-			<text x="52.676" y="96" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,192) scale(1,-1)">consistent pg_dump + checksums</text>
-			<text x="62.0864" y="86" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,172) scale(1,-1)">Director / FD / SD + Catalog</text>
-			<text x="57.18319999999999" y="76" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,152) scale(1,-1)">alternate restore; replay verifier</text>
-			<text x="212.656" y="108" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,216) scale(1,-1)">Physical / continuous WAL</text>
-			<text x="208.26839999999999" y="96" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,192) scale(1,-1)">pg_basebackup + pg_verifybackup</text>
-			<text x="212.5812" y="86" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,172) scale(1,-1)">archive WAL; named/time target</text>
-			<text x="216.2784" y="76" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,152) scale(1,-1)">isolated PITR + ledger anchor</text>
-			<text x="390.88" y="108" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,216) scale(1,-1)">Remote S3 vault</text>
-			<text x="374.4836" y="96" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,192) scale(1,-1)">AES-GCM + exact VersionIds</text>
-			<text x="360.0764" y="86" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,172) scale(1,-1)">COMPLIANCE retention + key custody</text>
-			<text x="372.5828" y="76" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,152) scale(1,-1)">decrypt -&gt; isolated DB -&gt; verify</text>
-			<text x="111.88299999999998" y="54" style="font-family: Helvetica; font-size: 7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,108) scale(1,-1)">Restore is isolated; verification and measured recovery certificate precede any production cutover.</text>
-			<rect x="28" y="0" width="473" height="43" rx="4" ry="4" style="stroke: rgb(7%,42%,47%); stroke-linecap: butt; stroke-width: 0.8; fill: rgb(94%,95%,96%); fill-rule: evenodd;"/>
-			<text x="210.423" y="30" style="font-family: Helvetica-Bold; font-size: 8.5px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,60) scale(1,-1)">HA / deployment boundary</text>
-			<text x="95.13465" y="18" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,36) scale(1,-1)">Local proof: kind node loss + synchronous PostgreSQL promotion; three-replica NATS TLS/quorum</text>
-			<text x="69.5668" y="8" style="font-family: Helvetica; font-size: 7.7px;fill: rgb(8%,20%,30%); stroke:none;" transform="translate(0,16) scale(1,-1)">Production templates: 3-zone EKS, CNPG, spread/HPA, remote Barman WAL; real zone/PITR RPO proof pending</text>
+	<g id="group" transform="scale(1,-1) translate(0,-1322)" style="clip-path: url(#clip)">
+		<g transform=" matrix(2.034615,0,0,2.034615,0,0)">
+			<text x="20" y="640" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(21%,40%,66%); stroke:none;" transform="translate(0,1280) scale(1,-1)">01</text>
+			<text x="43" y="640" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1280) scale(1,-1)">ACCESS &amp; IDENTITY</text>
+			<rect x="20" y="606" width="111" height="22" rx="6" ry="6" style="stroke: rgb(95%,96%,98%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="61.8819" y="613.5" style="font-family: Helvetica-Bold; font-size: 8.6px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1227) scale(1,-1)">Bidder</text>
+			<path d="M 75.5,606 L 75.5,599 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<rect x="143" y="606" width="111" height="22" rx="6" ry="6" style="stroke: rgb(95%,96%,98%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="186.7868" y="613.5" style="font-family: Helvetica-Bold; font-size: 8.6px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1227) scale(1,-1)">Seller</text>
+			<path d="M 198.5,606 L 198.5,599 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<rect x="266" y="606" width="111" height="22" rx="6" ry="6" style="stroke: rgb(95%,96%,98%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="293.3092" y="613.5" style="font-family: Helvetica-Bold; font-size: 8.6px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1227) scale(1,-1)">Administrator</text>
+			<path d="M 321.5,606 L 321.5,599 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<rect x="389" y="606" width="111" height="22" rx="6" ry="6" style="stroke: rgb(95%,96%,98%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(95%,96%,98%); fill-rule: evenodd;"/>
+			<text x="429.2135" y="613.5" style="font-family: Helvetica-Bold; font-size: 8.6px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1227) scale(1,-1)">Auditor</text>
+			<path d="M 444.5,606 L 444.5,599 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<rect x="20" y="530" width="218" height="62" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 32,578 L 32,565 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="42" y="569" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1138) scale(1,-1)">Web application</text>
+			<text x="32" y="553.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,1106) scale(1,-1)">Next.js role views + Nginx proxy</text>
+			<text x="32" y="541.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,1083) scale(1,-1)">Session cookie / HTTP / WebSocket</text>
+			<rect x="282" y="530" width="218" height="62" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 294,578 L 294,565 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="304" y="569" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1138) scale(1,-1)">FastAPI</text>
+			<text x="294" y="553.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,1106) scale(1,-1)">Identity, role and ownership checks</text>
+			<text x="294" y="541.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,1083) scale(1,-1)">Origin / limits / UUID / integer cents</text>
+			<path d="M 75.5,599 L 444.5,599 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 129,599 L 129,592 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="129 592, 126.3 596.5, 131.7 596.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 238,561 L 282,561 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="282 561, 277.5 558.3, 277.5 563.7" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<text x="20" y="510" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(21%,40%,66%); stroke:none;" transform="translate(0,1020) scale(1,-1)">02</text>
+			<text x="43" y="510" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,1020) scale(1,-1)">DURABLE BID PROCESSING</text>
+			<path d="M 429,475 L 429,491 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9; stroke-dasharray: 3, 3;"/>
+			<path d="M 429,491 L 91,491 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9; stroke-dasharray: 3, 3;"/>
+			<path d="M 91,491 L 91,475 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9; stroke-dasharray: 3, 3;"/>
+			<polygon points="91 475, 88.3 479.5, 93.7 479.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<rect x="178" y="485" width="164" height="15" style="stroke: rgb(100%,100%,100%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<text x="200.1818" y="490" style="font-family: Helvetica; font-size: 7.8px;fill: rgb(21%,40%,66%); stroke:none;" transform="translate(0,980) scale(1,-1)">Worker also reconciles SQL intake</text>
+			<rect x="358" y="412" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 370,461 L 370,448 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="380" y="452" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,904) scale(1,-1)">SQL intake</text>
+			<text x="370" y="436.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,872) scale(1,-1)">UUID + admission sequence</text>
+			<text x="370" y="424.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,849) scale(1,-1)">Commit -&gt; 202 QUEUED</text>
+			<rect x="189" y="412" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 201,461 L 201,448 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="211" y="452" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,904) scale(1,-1)">JetStream</text>
+			<text x="201" y="436.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,872) scale(1,-1)">Relay -&gt; durable command</text>
+			<text x="201" y="424.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,849) scale(1,-1)">Same UUID / retry + ACK</text>
+			<rect x="20" y="412" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 32,461 L 32,448 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="42" y="452" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,904) scale(1,-1)">Auction worker</text>
+			<text x="32" y="436.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,872) scale(1,-1)">Lock auction + lease epoch</text>
+			<text x="32" y="424.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,849) scale(1,-1)">Price / cutoff / intake order</text>
+			<path d="M 475,530 L 475,475 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="475 475, 472.3 479.5, 477.7 479.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 358,444 L 331,444 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="331 444, 335.5 441.3, 335.5 446.7" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 189,444 L 162,444 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="162 444, 166.5 441.3, 166.5 446.7" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 91,412 L 91,390 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="91 390, 88.3 394.5, 93.7 394.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<text x="100" y="398" style="font-family: Helvetica; font-size: 7.5px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,796) scale(1,-1)">commit</text>
+			<rect x="20" y="325" width="480" height="65" rx="6" ry="6" style="stroke: rgb(9%,16%,27%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(9%,16%,27%); fill-rule: evenodd;"/>
+			<text x="35" y="369" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,738) scale(1,-1)">PostgreSQL  /  one atomic decision</text>
+			<text x="35" y="352" style="font-family: Helvetica; font-size: 9px;fill: rgb(100%,100%,100%); stroke:none;" transform="translate(0,704) scale(1,-1)">Decision + offer + request state + hash event + outbox</text>
+			<text x="35" y="337" style="font-family: Helvetica; font-size: 8.5px;fill: rgb(79%,85%,92%); stroke:none;" transform="translate(0,674) scale(1,-1)">At close: drain intake -&gt; rank distinct bidders -&gt; allocate stock</text>
+			<text x="20" y="301" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(21%,40%,66%); stroke:none;" transform="translate(0,602) scale(1,-1)">03</text>
+			<text x="43" y="301" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,602) scale(1,-1)">COMMITTED OUTPUTS</text>
+			<path d="M 260,325 L 260,293 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 91,293 L 429,293 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 91,293 L 91,281 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="91 281, 88.3 285.5, 93.7 285.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 260,293 L 260,281 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="260 281, 257.3 285.5, 262.7 285.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<path d="M 429,293 L 429,281 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="429 281, 426.3 285.5, 431.7 285.5" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(21%,40%,66%); fill-rule: evenodd;"/>
+			<rect x="20" y="205" width="142" height="76" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 32,267 L 32,254 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="42" y="258" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,516) scale(1,-1)">Live updates</text>
+			<text x="32" y="242.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,484) scale(1,-1)">Go polls API: 1 s / auction</text>
+			<text x="32" y="230.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,461) scale(1,-1)">Prepared WebSocket frames</text>
+			<text x="32" y="219.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,438) scale(1,-1)">One-slot queue -&gt; role views</text>
+			<rect x="189" y="205" width="142" height="76" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 201,267 L 201,254 Z" style="stroke: rgb(45%,33%,62%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="211" y="258" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,516) scale(1,-1)">Audit &amp; replay</text>
+			<text x="201" y="242.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,484) scale(1,-1)">SHA-256 event chain</text>
+			<text x="201" y="230.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,461) scale(1,-1)">Optional Ed25519 signature</text>
+			<text x="201" y="219.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,438) scale(1,-1)">Rules + winners verified</text>
+			<rect x="358" y="205" width="142" height="76" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 370,267 L 370,254 Z" style="stroke: rgb(21%,40%,66%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="380" y="258" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,516) scale(1,-1)">Notifications</text>
+			<text x="370" y="242.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,484) scale(1,-1)">SQL outbox -&gt; relay</text>
+			<text x="370" y="230.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,461) scale(1,-1)">NATS live subjects + retries</text>
+			<text x="370" y="219.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,438) scale(1,-1)">Go uses the API read path</text>
+			<text x="20" y="181" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(8%,45%,41%); stroke:none;" transform="translate(0,362) scale(1,-1)">04</text>
+			<text x="43" y="181" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,362) scale(1,-1)">BACKUP &amp; VERIFIED RECOVERY</text>
+			<path d="M 500,358 L 510,358 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 510,358 L 510,173 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 510,173 L 91,173 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 91,173 L 91,161 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="91 161, 88.3 165.5, 93.7 165.5" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(65%,47%,19%); fill-rule: evenodd;"/>
+			<path d="M 260,173 L 260,161 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="260 161, 257.3 165.5, 262.7 165.5" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(65%,47%,19%); fill-rule: evenodd;"/>
+			<path d="M 429,173 L 429,161 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="429 161, 426.3 165.5, 431.7 165.5" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(65%,47%,19%); fill-rule: evenodd;"/>
+			<rect x="20" y="98" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 32,147 L 32,134 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="42" y="138" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,276) scale(1,-1)">Bacula</text>
+			<text x="32" y="122.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,244) scale(1,-1)">pg_dump + file checksums</text>
+			<text x="32" y="110.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,221) scale(1,-1)">Director / FD / SD / Catalog</text>
+			<rect x="189" y="98" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 201,147 L 201,134 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="211" y="138" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,276) scale(1,-1)">Physical PITR</text>
+			<text x="201" y="122.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,244) scale(1,-1)">Base backup + archived WAL</text>
+			<text x="201" y="110.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,221) scale(1,-1)">Named / time recovery target</text>
+			<rect x="358" y="98" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<path d="M 370,147 L 370,134 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 2.5;"/>
+			<text x="380" y="138" style="font-family: Helvetica-Bold; font-size: 10px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,276) scale(1,-1)">S3 vault</text>
+			<text x="370" y="122.0" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,244) scale(1,-1)">AES-GCM + exact versions</text>
+			<text x="370" y="110.5" style="font-family: Helvetica; font-size: 8.2px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,221) scale(1,-1)">COMPLIANCE retention</text>
+			<path d="M 91,98 L 91,89 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 260,98 L 260,89 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 429,98 L 429,89 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 91,89 L 429,89 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<path d="M 260,89 L 260,78 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.9;"/>
+			<polygon points="260 78, 257.3 82.5, 262.7 82.5" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(8%,45%,41%); fill-rule: evenodd;"/>
+			<rect x="20" y="53" width="480" height="25" rx="6" ry="6" style="stroke: rgb(92%,96%,94%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(92%,96%,94%); fill-rule: evenodd;"/>
+			<text x="117.95509999999999" y="61.5" style="font-family: Helvetica-Bold; font-size: 8.7px;fill: rgb(8%,45%,41%); stroke:none;" transform="translate(0,123) scale(1,-1)">Isolated restore   -&gt;   verify ledger + winners   -&gt;   recovery certificate</text>
+			<text x="20" y="32" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(21%,40%,66%); stroke:none;" transform="translate(0,64) scale(1,-1)">05</text>
+			<text x="43" y="32" style="font-family: Helvetica-Bold; font-size: 8px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,64) scale(1,-1)">PLATFORM &amp; OPERATIONS</text>
+			<text x="20" y="16" style="font-family: Helvetica; font-size: 8px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,32) scale(1,-1)">Observe: Prometheus / Grafana    |    Control: admin metrics + allowlisted local chaos</text>
+			<text x="20" y="2" style="font-family: Helvetica; font-size: 7.9px;fill: rgb(33%,40%,48%); stroke:none;" transform="translate(0,4) scale(1,-1)">HA: local failover tested    |    Target: 3-zone EKS, CNPG + NATS    |    Real zone proof pending</text>
 		</g>
 	</g>
 </svg>
