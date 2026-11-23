@@ -1,0 +1,22 @@
+{
+  "established": 5000,
+  "handshake_errors": 0,
+  "held_end": 5000,
+  "held_start": 5000,
+  "hold_ended_at": "2026-11-23T12:58:33.91264967Z",
+  "hold_seconds": 20,
+  "hold_started_at": "2026-11-23T12:58:13.455332987Z",
+  "messages_received": 109601,
+  "p50_handshake_s": 0.009842453,
+  "p95_handshake_s": 0.03050421,
+  "p99_handshake_s": 0.069988036,
+  "peak": 5000,
+  "ramp_seconds": 1.356304733,
+  "ramp_started_at": "2026-11-23T12:58:12.099028214Z",
+  "requested": 5000,
+  "run_id": "0103ad1b2a864f23a7914dcde985ea4c",
+  "schema_version": 1,
+  "scope": "WebSocket capacity with real authenticated snapshots; not bid throughput or unique bidder count",
+  "shard": "0",
+  "target": "ws://gateway:8081/v1/live/auctions/9608b159-b9e7-432c-89ec-6ede866dbcca"
+}

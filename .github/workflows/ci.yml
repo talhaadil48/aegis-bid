@@ -38,3 +38,13 @@ jobs:
         working-directory: apps/web
       - run: npm run build
         working-directory: apps/web
+  realtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache-dependency-path: services/realtime/go.sum
+      - run: go test -race ./... && go build ./...
+        working-directory: services/realtime

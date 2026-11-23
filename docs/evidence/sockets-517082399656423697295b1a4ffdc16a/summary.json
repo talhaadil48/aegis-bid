@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "run_id": "517082399656423697295b1a4ffdc16a",
+  "requested": 1000,
+  "simultaneously_held": 1000,
+  "overlap_seconds": 15.079398,
+  "required": 1000,
+  "shards": 1,
+  "handshake_errors": 0,
+  "scope": "Local Docker socket capacity; shared demo identity; not independent hosts, unique bidders or bid throughput",
+  "commit": "50a287b4818411cf3c4571174f7229ffdbdc4631",
+  "sampled_at": "2026-11-23T12:58:07.481217+00:00",
+  "gateway_samples": [
+    {
+      "at": "2026-11-23T12:57:51.985720+00:00",
+      "metrics": "gateway_connected_clients 505\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 1605\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:57:55.088681+00:00",
+      "metrics": "gateway_connected_clients 1000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 5100\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:57:58.165186+00:00",
+      "metrics": "gateway_connected_clients 1000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 8100\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:01.248701+00:00",
+      "metrics": "gateway_connected_clients 1000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 11100\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    },
+    {
+      "at": "2026-11-23T12:58:04.325437+00:00",
+      "metrics": "gateway_connected_clients 1000\ngateway_auction_hubs 1\ngateway_snapshots_sent_total 14100\ngateway_slow_disconnects_total 0\ngateway_auth_failures_total 0\n"
+    }
+  ],
+  "machine": "12 CPUs 8009699328 bytes"
+}
