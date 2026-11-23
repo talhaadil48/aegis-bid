@@ -38,7 +38,7 @@ Run `ruff check aegis tests scripts` and `pytest -q`. To exercise infrastructure
 
 Currency uses integer cents. Each valid bid exceeds the current high by the configured increment. Retrying a request UUID with the same payload has one business effect; changing its payload returns 409. Admission uses a database timestamp and per-auction sequence. Queued bids admitted before close are drained before winner allocation. Top unique bidders win at most the auction stock and pay their own recorded offers. Payment collection is outside this prototype.
 
-Admin metrics come from real database records. WebSockets send coalesced authoritative snapshots each second and reconnect automatically. Bid history resolves final status independently. API instances report their own socket count; horizontal aggregation requires Prometheus. No 50,000-client result or production RPO/RTO is claimed.
+Admin metrics come from real database records. WebSockets send coalesced authoritative snapshots each second and reconnect automatically. Bid history resolves final status independently. API instances report their own socket count; horizontal aggregation requires Prometheus. A recorded 50,000-socket hold demonstrates shared-host connection capacity; distinct-client bid throughput and production RPO/RTO remain unproven.
 
 ## Recovery and evidence
 
@@ -49,3 +49,11 @@ The [HA commissioning guide](docs/ha-deployment.md) covers three-zone infrastruc
 See [recovery procedures](docs/recovery.md), [operations](docs/runbook.md), and [measured results](docs/measurements.md). `python -m scripts.rehearse_recovery` builds an isolated source and restore database for a non-destructive drill. PostgreSQL 18 client tools (`pg_dump`, `pg_restore`) must be on PATH. `python -m scripts.backup_export backup-staging/<new-run>` exports the configured database. Backup artifacts contain private records and stay untracked.
 
 The Bacula profile has its own PostgreSQL Catalog, file daemon, storage daemon, persistent media and alternate restore directory. It is a local classroom deployment, not offsite protection. Set `BACULA_PASSWORD` to 24+ URL-safe random characters, then start with `docker compose --env-file .env -f infra/compose.bacula.yaml up -d --build`. Do not use `--remove-orphans` when running separate Compose files in the same project.
+
+## Submission and demonstration
+
+The [seven-page technical report](docs/submission/AegisBid_Technical_Report_7_Pages.pdf) contains the original six technical pages plus a complete system flowchart on page 2. It describes transaction rules, realtime scaling, security, audit, HA, recovery and measured limits. The diagram is also available as [vector SVG](docs/submission/AegisBid_Complete_System_Flow.svg) and [PNG](docs/submission/AegisBid_Complete_System_Flow.png). An [editable Word companion](docs/submission/AegisBid_Technical_Report_Editable.docx) is included; PDF pagination is the validated submission format. Fill in your name and roll number before submitting.
+
+Follow the [three-minute demo guide](docs/submission/AegisBid_3_Minute_Demo_Guide.pdf), also available as [searchable HTML](docs/submission/AegisBid_3_Minute_Demo_Guide.html). The local helper provides `python -m scripts.demo --check`, `--prepare`, `--race`, `--recover`, `--bacula` and `--evidence`. `--recover` kills and explicitly restarts the disposable local worker. The helper does not contact AWS or overwrite historical evidence.
+
+Regenerate with `pip install -r requirements-report.lock`, `python -m scripts.build_report` and `python -m scripts.build_demo_guide`. The report source is `docs/report/report-content.json`; the builder verifies exactly seven PDF pages and the section assigned to each page. The submission workflow also builds both documents and uploads them as CI artifacts.

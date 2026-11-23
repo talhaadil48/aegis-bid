@@ -5,3 +5,7 @@
 *.json text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+# Preserve PDF byte offsets and Office ZIP containers across Windows/Linux.
+*.pdf binary
+*.docx binary
+*.png binary
