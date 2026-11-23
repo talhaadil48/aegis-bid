@@ -25,6 +25,7 @@ def isolated_test_database():
     fields["dbname"] = name
     db.DATABASE_URL = make_conninfo(**fields)
     yield
+    db.close_pools()
     db.DATABASE_URL = source
 
 

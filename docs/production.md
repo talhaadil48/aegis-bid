@@ -2,6 +2,8 @@
 
 This runbook separates deployable mechanisms from measured infrastructure. A one-host result does not establish independent zones or offsite survival.
 
+The complete multi-zone commissioning sequence is in [ha-deployment.md](ha-deployment.md), including the three-zone EKS foundation, TLS, synchronous PostgreSQL, three-node NATS, ingress, workload rendering and continuous object-store recovery.
+
 ## Scalable realtime gateway and socket workload
 
 `docker compose --env-file .env -f infra/compose.yaml -f infra/compose.scale.yaml up -d --build gateway web` enables the Go gateway and routes `/v1/live/` through it. The gateway fetches one authoritative snapshot per active auction per second and shares prepared frames among subscribers. Each connection has a single bounded update slot, a read limit, ping/pong expiry and a write deadline. API remains the authenticated decision/admission authority. Session identity is verified through the API and cached for at most 30 seconds. Snapshot source failure closes subscribers after three failed polls so reconnect can reconcile.

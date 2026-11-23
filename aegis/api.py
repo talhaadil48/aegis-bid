@@ -1,4 +1,5 @@
 import asyncio
+import os
 import time
 from collections import defaultdict, deque
 from datetime import UTC, datetime
@@ -36,7 +37,7 @@ def limit(key, maximum, seconds=60):
 async def security(request: Request, call_next):
     if request.method not in ("GET", "HEAD", "OPTIONS"):
         origin = request.headers.get("origin")
-        if origin and origin != str(request.base_url).rstrip("/"):
+        if origin and origin != os.getenv("PUBLIC_ORIGIN", str(request.base_url).rstrip("/")):
             return Response("Cross-origin request denied", status_code=403)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -247,9 +248,8 @@ def backups(user=Depends(roles("admin"))):
 async def live(ws: WebSocket, aid: UUID):
     try:
         user = await asyncio.to_thread(identity, ws.cookies.get("aegis_session"))
-        if (
-            ws.headers.get("origin")
-            and ws.headers["origin"] != f"{ws.url.scheme.replace('ws', 'http')}://{ws.url.netloc}"
+        if ws.headers.get("origin") and ws.headers["origin"] != os.getenv(
+            "PUBLIC_ORIGIN", f"{ws.url.scheme.replace('ws', 'http')}://{ws.url.netloc}"
         ):
             raise HTTPException(403, "Origin denied")
         limit(("socket", str(user["id"])), 30)
@@ -278,6 +278,11 @@ def health():
     with connection() as c:
         c.execute("SELECT 1")
     return {"database": "ok"}
+
+
+@app.get("/livez")
+def livez():
+    return {"process": "ok"}
 
 
 # Register operation routes after the application and dependencies exist.

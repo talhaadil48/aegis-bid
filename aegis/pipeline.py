@@ -3,6 +3,10 @@ import json
 import logging
 import os
 import socket
+import ssl
+import tempfile
+import time
+from pathlib import Path
 
 import nats
 from nats.js.api import AckPolicy, ConsumerConfig, StreamConfig
@@ -15,10 +19,19 @@ log = logging.getLogger("aegis.pipeline")
 
 
 async def connect():
-    nc = await nats.connect(NATS_URL, connect_timeout=2, max_reconnect_attempts=3)
+    ca_file = os.getenv("NATS_CA_FILE")
+    if os.getenv("ENVIRONMENT") == "production" and not ca_file:
+        raise RuntimeError("Production NATS requires a verified TLS CA")
+    tls = ssl.create_default_context(cafile=ca_file) if ca_file else None
+    nc = await nats.connect(
+        NATS_URL, connect_timeout=2, max_reconnect_attempts=3, tls=tls, tls_hostname=os.getenv("NATS_TLS_SERVER_NAME")
+    )
     js = nc.jetstream()
     try:
-        await js.stream_info("COMMANDS")
+        info = await js.stream_info("COMMANDS")
+        if info.config.num_replicas != int(os.getenv("NATS_REPLICAS", "1")):
+            await nc.close()
+            raise RuntimeError("Existing stream replication differs from required durability; migrate explicitly")
     except nats.js.errors.NotFoundError:
         await js.add_stream(
             config=StreamConfig(
@@ -110,6 +123,9 @@ async def run(mode):
                         else:
                             await message.nak(delay=1)
                 await asyncio.sleep(0.1)
+                Path(
+                    os.getenv("PIPELINE_HEALTH_FILE", str(Path(tempfile.gettempdir()) / "aegis-pipeline-health"))
+                ).write_text(str(time.time()))
             except Exception:
                 log.exception("Pipeline iteration failed; durable work retained")
                 await asyncio.sleep(1)

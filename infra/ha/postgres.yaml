@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aegis
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: aegis-pg
+  namespace: aegis
+spec:
+  instances: 3
+  primaryUpdateStrategy: supervised
+  failoverDelay: 5
+  switchoverDelay: 60
+  bootstrap:
+    initdb:
+      database: aegisbid
+      owner: aegis
+  postgresql:
+    synchronous:
+      method: any
+      number: 1
+      dataDurability: required
+      failoverQuorum: true
+    parameters:
+      synchronous_commit: 'on'
+      archive_timeout: '60s'
+      max_connections: '200'
+  probes:
+    liveness:
+      isolationCheck:
+        enabled: true
+  affinity:
+    enablePodAntiAffinity: true
+    podAntiAffinityType: required
+    topologyKey: topology.kubernetes.io/zone
+  storage:
+    size: 10Gi
+  resources:
+    requests: {cpu: 100m, memory: 256Mi}
+    limits: {memory: 1Gi}
