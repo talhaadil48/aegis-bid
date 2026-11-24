@@ -15,7 +15,7 @@ IMAGE = "registry.example/aegis@sha256:" + "a" * 64
 def test_production_ha_boundaries():
     objects = render(IMAGE, IMAGE, IMAGE, "https://auction.example")["items"]
     deployments = [o for o in objects if o["kind"] == "Deployment"]
-    assert {o["metadata"]["name"] for o in deployments} == {"api", "worker", "relay", "gateway", "web"}
+    assert {o["metadata"]["name"] for o in deployments} == {"api", "worker", "relay", "gateway", "admission", "web"}
     for deployment in deployments:
         pod = deployment["spec"]["template"]["spec"]
         assert pod["topologySpreadConstraints"][0]["minDomains"] == 2
@@ -26,6 +26,10 @@ def test_production_ha_boundaries():
             assert "BACKUP_ENCRYPTION_KEY" not in str(container)
     ingress = next(o for o in objects if o["kind"] == "Ingress")
     assert ingress["spec"]["tls"][0]["hosts"] == ["auction.example"]
+    paths = ingress["spec"]["rules"][0]["http"]["paths"]
+    routes = {p["path"]: p["backend"]["service"]["name"] for p in paths}
+    assert routes["/v1/auctions"] == "admission"
+    assert routes["/v1/live/"] == "gateway"
     assert any(o["kind"] == "NetworkPolicy" and o["metadata"]["name"] == "default-deny" for o in objects)
     for bad in ["http://auction.example", "https://auction.example/path"]:
         with pytest.raises(ValueError):

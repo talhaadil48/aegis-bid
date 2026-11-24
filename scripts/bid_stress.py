@@ -295,7 +295,7 @@ def run(args):
                 {
                     "run_id": run_id,
                     "shard": shard,
-                    "api_url": "http://gateway:8081" if args.ingress == "gateway" else "http://api:8000",
+                    "api_url": "http://admission:8081" if args.ingress == "gateway" else "http://api:8000",
                     "ws_url": f"ws://gateway:8081/v1/live/auctions/{aid}",
                     "auction_id": aid,
                     "total": args.bidders,
@@ -480,6 +480,7 @@ def run(args):
             "scenario": args.fault,
             "profile": "http_only" if args.no_sockets else "live_and_http",
             "bid_ingress": args.ingress,
+            "separate_admission_and_realtime_services": True,
             "auction_id": str(aid),
             "window_start": start.isoformat(),
             "window_close": end.isoformat(),

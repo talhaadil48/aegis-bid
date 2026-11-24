@@ -60,6 +60,20 @@ services:
     depends_on:
       migrate: {condition: service_completed_successfully}
       nats: {condition: service_started}
+  admission:
+    image: aegis-stress-tools:local
+    environment:
+      API_URL: http://api:8000
+      PUBLIC_ORIGIN: http://localhost:18080
+      ADMISSION_SERVICE_KEY: ${STRESS_ADMISSION_KEY}
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 384MiB
+    mem_limit: 512m
+    ulimits:
+      nofile: {soft: 100000, hard: 100000}
+    sysctls:
+      net.core.somaxconn: '65535'
+    depends_on: [api]
   gateway:
     image: aegis-stress-tools:local
     environment:

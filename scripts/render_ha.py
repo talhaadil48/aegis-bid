@@ -202,6 +202,19 @@ def render(api_image, gateway_image, web_image, origin):
         ],
     )
     gateway["spec"]["template"]["spec"]["containers"][0]["securityContext"]["runAsUser"] = 65532
+    admission = workload(
+        "admission",
+        gateway_image,
+        8081,
+        environment=[
+            env("API_URL", "http://api:8000"),
+            env("PUBLIC_ORIGIN", origin),
+            {"name": "ADMISSION_SERVICE_KEY", "valueFrom": secret("aegis-runtime", "admission-key")},
+            env("GOMAXPROCS", "2"),
+            env("GOMEMLIMIT", "768MiB"),
+        ],
+    )
+    admission["spec"]["template"]["spec"]["containers"][0]["securityContext"]["runAsUser"] = 65532
     add(
         "HorizontalPodAutoscaler",
         "gateway",
@@ -253,7 +266,7 @@ def render(api_image, gateway_image, web_image, origin):
                             }
                             for path, name, port in [
                                 ("/v1/live/", "gateway", 8081),
-                                ("/v1/auctions", "gateway", 8081),
+                                ("/v1/auctions", "admission", 8081),
                                 ("/v1/", "api", 8000),
                                 ("/", "web", 8080),
                             ]

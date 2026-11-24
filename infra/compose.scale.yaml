@@ -1,4 +1,19 @@
 services:
+  admission:
+    build: {context: .., dockerfile: infra/Realtime.Dockerfile}
+    environment:
+      API_URL: http://api:8000
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:18080}
+      ADMISSION_SERVICE_KEY: ${ADMISSION_SERVICE_KEY:?Set a shared 32-character admission service key}
+      GOMAXPROCS: '2'
+      GOMEMLIMIT: 384MiB
+    mem_limit: 512m
+    ulimits:
+      nofile: {soft: 100000, hard: 100000}
+    sysctls:
+      net.core.somaxconn: '65535'
+    restart: unless-stopped
+    depends_on: [api]
   gateway:
     build: {context: .., dockerfile: infra/Realtime.Dockerfile}
     environment:
