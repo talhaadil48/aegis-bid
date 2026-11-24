@@ -4,6 +4,7 @@ import os
 from uuid import UUID
 
 from psycopg import sql
+from psycopg.pq import TransactionStatus
 from psycopg.types.json import Jsonb
 
 from aegis.db import connection
@@ -52,23 +53,40 @@ def admit_many(auction_id, entries):
         return result
 
 
+def decision_prefix(c, auction_id, holder, limit, expected_epoch):
+    key = "aegis-intake:" + str(auction_id).lower()
+    c.execute("SELECT pg_advisory_lock(hashtextextended(%s,0))", (key,))
+    try:
+        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR NO KEY UPDATE SKIP LOCKED", (auction_id,)).fetchone()
+        if not a:
+            return None
+        epoch = acquire(c, auction_id, holder)
+        if expected_epoch is not None and epoch != expected_epoch:
+            raise Fenced("Stale fencing epoch")
+        rows = (
+            c.execute(
+                "SELECT * FROM bid_requests WHERE auction_id=%s AND state='QUEUED' ORDER BY intake_seq LIMIT %s FOR UPDATE",
+                (auction_id, limit),
+            ).fetchall()
+            if a["status"] != "CLOSED"
+            else []
+        )
+        return a, epoch, rows
+    finally:
+        if not c.closed:
+            if c.info.transaction_status == TransactionStatus.INERROR:
+                c.rollback()
+            c.execute("SELECT pg_advisory_unlock(hashtextextended(%s,0))", (key,))
+
+
 def process_many(auction_id, holder, limit=512, expected_epoch=None):
     if not 1 <= limit <= 1024:
         raise ValueError("Decision batch must be between 1 and 1024")
     with connection() as c:
-        # Retain one decision authority while allowing FK-safe journal inserts.
-        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR NO KEY UPDATE", (auction_id,)).fetchone()
-        if not a:
+        prefix = decision_prefix(c, auction_id, holder, limit, expected_epoch)
+        if prefix is None:
             return []
-        epoch = acquire(c, auction_id, holder)
-        if expected_epoch is not None and epoch != expected_epoch:
-            raise Fenced("Stale fencing epoch")
-        if a["status"] == "CLOSED":
-            return []
-        requests = c.execute(
-            "SELECT * FROM bid_requests WHERE auction_id=%s AND state='QUEUED' ORDER BY intake_seq LIMIT %s FOR UPDATE",
-            (auction_id, limit),
-        ).fetchall()
+        a, epoch, requests = prefix
         if not requests:
             return []
         high = c.execute(
@@ -146,5 +164,8 @@ def process_many(auction_id, holder, limit=512, expected_epoch=None):
             events,
         )
         insert_rows(c, "outbox", [("auction_id", "uuid"), ("event_type", "text"), ("body", "jsonb")], notifications)
-        c.execute("UPDATE auctions SET version=%s WHERE id=%s", (a["version"], a["id"]))
+        c.execute(
+            "UPDATE auctions SET version=%s,processed_intake_seq=%s WHERE id=%s",
+            (a["version"], requests[-1]["intake_seq"], a["id"]),
+        )
         return result

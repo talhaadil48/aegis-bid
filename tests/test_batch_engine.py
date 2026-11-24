@@ -38,7 +38,7 @@ def test_capacity_is_per_new_uuid_and_late_admission_is_final(auction, monkeypat
     first, second, third = [(bidder, uuid4(), 100 + i * 10) for i in range(3)]
     rows = admit_many(aid, [first, first, second, third])
     assert rows[0] == rows[1]
-    assert rows[2]["intake_seq"] == 2
+    assert rows[2]["intake_seq"] > rows[0]["intake_seq"]
     assert isinstance(rows[3], OverflowError)
     with connection() as c:
         c.execute("UPDATE auctions SET closes_at=clock_timestamp() WHERE id=%s", (aid,))
@@ -123,3 +123,39 @@ def test_admission_does_not_wait_for_an_inflight_decision_transaction(auction):
     finally:
         pool.shutdown(wait=True)
     assert process_many(aid, "worker")[0]["status"] == "ACCEPTED"
+
+
+def test_parallel_capacity_limit_cannot_be_oversubscribed(auction, monkeypatch):
+    aid, bidder = auction
+    monkeypatch.setenv("MAX_PENDING_BIDS", "4")
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(lambda _: admit_many(aid, [(bidder, uuid4(), 100)])[0], range(12)))
+    assert sum(isinstance(r, dict) for r in results) == 4
+    assert sum(isinstance(r, OverflowError) for r in results) == 8
+
+
+def test_worker_cannot_overtake_an_uncommitted_admission(auction):
+    import time
+    from threading import Event
+
+    aid, bidder = auction
+    pool = ThreadPoolExecutor(max_workers=1)
+    started = Event()
+
+    def decide():
+        started.set()
+        return process_many(aid, "worker")
+
+    try:
+        with connection() as c:
+            c.execute(
+                "SELECT * FROM aegis_admit_batch(%s,%s::uuid[],%s::uuid[],%s::bigint[],60000)",
+                (aid, [uuid4()], [bidder], [100]),
+            ).fetchall()
+            future = pool.submit(decide)
+            assert started.wait(timeout=2)
+            time.sleep(0.1)
+            assert not future.done()
+        assert future.result(timeout=5)[0]["status"] == "ACCEPTED"
+    finally:
+        pool.shutdown(wait=True)

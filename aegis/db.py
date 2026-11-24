@@ -45,7 +45,8 @@ def connection(url=None):
 
 def migrate():
     with connection() as conn:
-        conn.execute(Path("infra/postgres/001_core.sql").read_text())
+        for path in sorted(Path("infra/postgres").glob("[0-9]*.sql")):
+            conn.execute(path.read_text())
 
 
 if __name__ == "__main__":

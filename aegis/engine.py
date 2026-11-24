@@ -91,6 +91,10 @@ def process(auction_id, holder, expected_epoch=None):
 
 def close(auction_id, holder):
     with connection() as c:
+        if not c.execute(
+            "SELECT 1 FROM auctions WHERE id=%s AND status='OPEN' AND closes_at<=clock_timestamp()", (auction_id,)
+        ).fetchone():
+            return False
         lock_intake(c, auction_id)
         a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (auction_id,)).fetchone()
         if not a or a["status"] == "CLOSED":
