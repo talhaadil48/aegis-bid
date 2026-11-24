@@ -6,7 +6,7 @@ from weakref import WeakKeyDictionary
 _loops = WeakKeyDictionary()
 
 
-async def grouped(name, key, item, execute, maximum=512, capacity=8192):
+async def grouped(name, key, item, execute, maximum=512, capacity=8192, collect_delay=0.002):
     loop = asyncio.get_running_loop()
     groups = _loops.setdefault(loop, {})
     group_key = (name, str(key))
@@ -21,7 +21,7 @@ async def grouped(name, key, item, execute, maximum=512, capacity=8192):
     async def drain():
         try:
             while group["pending"]:
-                await asyncio.sleep(0.002)
+                await asyncio.sleep(collect_delay)
                 batch = group["pending"][:maximum]
                 del group["pending"][:maximum]
                 try:
