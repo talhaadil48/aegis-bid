@@ -39,6 +39,8 @@ Run `ruff check aegis tests scripts` and `pytest -q`. To exercise infrastructure
 
 ## Decision rules
 
+The seller workspace opens on **My auctions**. Use **Marketplace** to browse other listings and the title or status filters to narrow either list. Select one of your auctions to see bidder and decision counts, the five latest bid requests, and **Auction audit**. Sellers can download audit JSON and end auctions they own. Audit exports identify bidders using pseudonyms.
+
 Currency uses integer cents. Each valid bid exceeds the current high by the configured increment. Retrying a request UUID with the same payload has one business effect; changing its payload returns 409. Admission uses a database timestamp and per-auction sequence. Queued bids admitted before close are drained before winner allocation. Top unique bidders win at most the auction stock and pay their own recorded offers. Payment collection is outside this prototype.
 
 Admin metrics come from real database records. WebSockets send coalesced authoritative snapshots each second and reconnect automatically. Bid history resolves final status independently. API instances report their own socket count; horizontal aggregation requires Prometheus. A recorded 50,000-socket hold demonstrates shared-host connection capacity; distinct-client bid throughput and production RPO/RTO remain unproven.

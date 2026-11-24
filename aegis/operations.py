@@ -12,11 +12,58 @@ from aegis.evidence import export_auction
 
 
 @app.get("/v1/audit/auctions/{aid}")
-def audit(aid: UUID, user=Depends(roles("admin", "auditor"))):
+def audit(aid: UUID, user=Depends(roles("admin", "auditor", "seller"))):
     try:
-        return export_auction(aid)
+        return export_auction(aid, seller_id=user["id"] if user["role"] == "seller" else None)
     except LookupError:
         raise HTTPException(404, "Auction not found") from None
+
+
+@app.get("/v1/seller/auctions")
+def seller_auctions(user=Depends(roles("seller"))):
+    with connection() as c:
+        return c.execute(
+            """
+            SELECT id, seller_id, title, stock, opens_at, closes_at, status
+            FROM auctions WHERE seller_id=%s ORDER BY closes_at DESC, id LIMIT 100
+            """,
+            (user["id"],),
+        ).fetchall()
+
+
+@app.get("/v1/seller/auctions/{aid}/activity")
+def seller_activity(aid: UUID, user=Depends(roles("seller"))):
+    with connection() as c:
+        c.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+        owned = c.execute("SELECT 1 FROM auctions WHERE id=%s AND seller_id=%s", (aid, user["id"])).fetchone()
+        if not owned:
+            raise HTTPException(404, "Auction not found")
+        counts = c.execute(
+            """
+            SELECT count(DISTINCT bidder_id) AS bidders, count(*) AS total,
+                   count(*) FILTER (WHERE state='ACCEPTED') AS accepted,
+                   count(*) FILTER (WHERE state='REJECTED') AS rejected,
+                   count(*) FILTER (WHERE state='QUEUED') AS queued,
+                   count(*) FILTER (WHERE state='CLOSED') AS closed
+            FROM bid_requests WHERE auction_id=%s
+            """,
+            (aid,),
+        ).fetchone()
+        recent = c.execute(
+            """
+            SELECT r.request_id, r.intake_seq, r.amount_cents, r.state, r.admitted_at,
+                   d.committed_at, coalesce(d.reason,o.reason) AS reason
+            FROM (
+                SELECT request_id, intake_seq, amount_cents, state, admitted_at
+                FROM bid_requests WHERE auction_id=%s ORDER BY intake_seq DESC LIMIT 5
+            ) r
+            LEFT JOIN bid_decisions d USING (request_id)
+            LEFT JOIN admission_outcomes o USING (request_id)
+            ORDER BY r.intake_seq DESC
+            """,
+            (aid,),
+        ).fetchall()
+    return {"counts": counts, "recent": recent}
 
 
 @app.get("/v1/bid-requests/{rid}/receipt")
