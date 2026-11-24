@@ -487,7 +487,7 @@ def run(args):
             "offered_spread_s": args.spread,
             "api_workers": args.workers,
             "shards": shards,
-            "max_generator_http_connections": shards * 512,
+            "max_generator_http_connections": shards * 1024,
             "transport_warmup_health_requests": shards * 256,
             "population_gate": population_ok,
             "close_window_gate": workload_ok,

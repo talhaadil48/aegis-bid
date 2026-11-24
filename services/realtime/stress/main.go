@@ -95,7 +95,7 @@ func main() {
 	gate := make(chan struct{})
 	handshakes := make(chan struct{}, *ramp)
 	var plan Plan
-	transport := &http.Transport{MaxIdleConns: 512, MaxIdleConnsPerHost: 512, MaxConnsPerHost: 512, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
+	transport := &http.Transport{MaxIdleConns: 1024, MaxIdleConnsPerHost: 1024, MaxConnsPerHost: 1024, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
 	client := &http.Client{Transport: transport, Timeout: 90 * time.Second}
 	beginRamp := time.Now().UTC()
 	for i, profile := range c.Users {
@@ -205,7 +205,7 @@ func main() {
 		}()
 	}
 	warm.Wait()
-	writeJSON(filepath.Join(*output, fmt.Sprintf("ready-%d.json", c.Shard)), map[string]any{"run_id": c.Run, "shard": c.Shard, "requested": len(c.Users), "active": active.Load(), "ws_errors": wsErrors.Load(), "ramp_started": beginRamp, "ready_at": time.Now().UTC()})
+	writeJSON(filepath.Join(*output, fmt.Sprintf("ready-%d.json", c.Shard)), map[string]any{"run_id": c.Run, "shard": c.Shard, "requested": len(c.Users), "active": active.Load(), "ws_errors": wsErrors.Load(), "http_warmup_errors": warmErrors.Load(), "ramp_started": beginRamp, "ready_at": time.Now().UTC()})
 	for readJSON(filepath.Join(*control, "start.json"), &plan) != nil {
 		time.Sleep(100 * time.Millisecond)
 	}
