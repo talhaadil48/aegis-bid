@@ -184,6 +184,27 @@ func main() {
 		}(i, profile)
 	}
 	ready.Wait()
+	// Prepare HTTP transport before the measured auction window; no bids or
+	// business state are created by these public health requests.
+	var warm sync.WaitGroup
+	var warmErrors atomic.Int64
+	for i := 0; i < 256; i++ {
+		warm.Add(1)
+		go func() {
+			defer warm.Done()
+			response, err := client.Get(c.URL + "/health")
+			if err != nil {
+				warmErrors.Add(1)
+				return
+			}
+			_, _ = io.Copy(io.Discard, response.Body)
+			_ = response.Body.Close()
+			if response.StatusCode != 200 {
+				warmErrors.Add(1)
+			}
+		}()
+	}
+	warm.Wait()
 	writeJSON(filepath.Join(*output, fmt.Sprintf("ready-%d.json", c.Shard)), map[string]any{"run_id": c.Run, "shard": c.Shard, "requested": len(c.Users), "active": active.Load(), "ws_errors": wsErrors.Load(), "ramp_started": beginRamp, "ready_at": time.Now().UTC()})
 	for readJSON(filepath.Join(*control, "start.json"), &plan) != nil {
 		time.Sleep(100 * time.Millisecond)

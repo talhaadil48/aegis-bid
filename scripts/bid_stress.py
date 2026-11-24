@@ -380,7 +380,7 @@ def run(args):
                 next_progress = time.monotonic() + 5
             if len(list(output.glob("ingress-*.json"))) == shards and row["status"] == "CLOSED" and row["queued"] == 0:
                 break
-            time.sleep(0.25)
+            time.sleep(1)
         else:
             raise TimeoutError("Bidding did not reach final results within the drain timeout")
         print(
@@ -488,6 +488,7 @@ def run(args):
             "api_workers": args.workers,
             "shards": shards,
             "max_generator_http_connections": shards * 512,
+            "transport_warmup_health_requests": shards * 256,
             "population_gate": population_ok,
             "close_window_gate": workload_ok,
             "correctness_gate": correctness_ok,
