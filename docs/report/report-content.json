@@ -160,7 +160,7 @@
       ]
     },
     {
-      "title": "Bacula restore and correctness evidence",
+      "title": "Bacula restore and correctness verification",
       "blocks": [
         {
           "type": "callout",
@@ -226,10 +226,6 @@
         {
           "type": "p",
           "text": "Production recovery must also protect the Catalog, daemon configuration, media index and encryption/signing keys on an independent recovery domain. The local single-host Bacula rehearsal validates backup/restore mechanics; independent-site survival requires a separately operated deployment."
-        },
-        {
-          "type": "p",
-          "text": "<b>Evidence:</b> docs/evidence/bacula-console.txt; recovery-bacula.json/.html. Source: scripts/restore_sandbox.py and verify_recovery.py; docs/recovery.md."
         }
       ]
     },
@@ -375,7 +371,7 @@
         },
         {
           "type": "h",
-          "text": "Workload and evidence boundaries"
+          "text": "Test setup and measured scope"
         },
         {
           "type": "p",
@@ -383,7 +379,7 @@
         },
         {
           "type": "p",
-          "text": "<b>Selected run prefixes:</b> 6a341563 (normal), 93aedc3e (worker kill), source f607529. Full IDs, image hashes and replay commands are in docs/bidding-proof.md and docs/evidence/bidding-index.json."
+          "text": "The normal run and worker-kill run are identified by prefixes 6a341563 and 93aedc3e; both used source commit f607529. Full run IDs, image hashes and replay commands remain in the repository bidding-proof records."
         }
       ]
     },
@@ -433,7 +429,7 @@
         },
         {
           "type": "h",
-          "text": "Scope of the successful evidence"
+          "text": "Deployment and capacity limits"
         },
         {
           "type": "p",

@@ -15,12 +15,12 @@
   "source_commit": "f607529 proofs / 9474f91 checkpoint",
   "student_name": "Talha Adil",
   "roll_number": "CS-23114",
-  "words": 1193,
+  "words": 1195,
   "section_titles": [
     "Implemented features and technology",
     "Complete system and recovery flow",
     "Bacula architecture and backup pipeline",
-    "Bacula restore and correctness evidence",
+    "Bacula restore and correctness verification",
     "Auction issues and implemented safeguards",
     "Selected successful 50,000-bid experiments",
     "Recovery layers, scope and demonstration"
