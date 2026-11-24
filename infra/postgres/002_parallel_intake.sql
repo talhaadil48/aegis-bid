@@ -1,4 +1,12 @@
 ALTER TABLE auctions ADD COLUMN IF NOT EXISTS processed_intake_seq bigint NOT NULL DEFAULT 0;
+CREATE TABLE IF NOT EXISTS command_queue (
+ request_id uuid PRIMARY KEY REFERENCES bid_requests(request_id),
+ published_at timestamptz
+);
+CREATE INDEX IF NOT EXISTS commands_unpublished ON command_queue(request_id) WHERE published_at IS NULL;
+INSERT INTO command_queue(request_id,published_at)
+ SELECT r.request_id,r.published_at FROM bid_requests r WHERE r.state<>'CLOSED'
+ ON CONFLICT DO NOTHING;
 
 CREATE OR REPLACE FUNCTION aegis_init_intake_sequence() RETURNS trigger
 LANGUAGE plpgsql SET search_path=public,pg_catalog AS $$
@@ -87,6 +95,9 @@ BEGIN
   SELECT f.rid,p_aid,f.uid,f.amount,f.seq,stamp,CASE WHEN expired THEN 'CLOSED' ELSE 'QUEUED' END
   FROM fresh f WHERE expired OR f.pos<=p_capacity-pending
   RETURNING bid_requests.request_id
+ ), commands AS (
+  INSERT INTO command_queue(request_id) SELECT n.request_id FROM introduced n WHERE NOT expired
+  RETURNING command_queue.request_id
  )
  INSERT INTO admission_outcomes(request_id,status,reason)
  SELECT n.request_id,'CLOSED','Auction deadline passed' FROM introduced n WHERE expired;
@@ -99,3 +110,4 @@ BEGIN
  LEFT JOIN bid_requests r ON r.request_id=i.rid ORDER BY i.ord;
 END $$;
 INSERT INTO schema_migrations VALUES(4) ON CONFLICT DO NOTHING;
+INSERT INTO schema_migrations VALUES(5) ON CONFLICT DO NOTHING;

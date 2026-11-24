@@ -51,7 +51,7 @@ async def connect():
 def pending():
     with connection() as c:
         return c.execute(
-            "SELECT * FROM bid_requests WHERE published_at IS NULL ORDER BY admitted_at,intake_seq LIMIT 1000"
+            "SELECT r.* FROM command_queue q JOIN bid_requests r USING(request_id) WHERE q.published_at IS NULL ORDER BY q.request_id LIMIT 1000"
         ).fetchall()
 
 
@@ -74,9 +74,10 @@ async def relay_once(js):
     if rows:
         with connection() as c:
             c.execute(
-                "UPDATE bid_requests SET published_at=clock_timestamp() WHERE request_id=ANY(%s)",
+                "UPDATE command_queue SET published_at=clock_timestamp() WHERE request_id=ANY(%s)",
                 ([r["request_id"] for r in rows],),
             )
+        sync_publications([r["request_id"] for r in rows])
     with connection() as c:
         rows = c.execute("SELECT * FROM outbox WHERE published_at IS NULL ORDER BY id LIMIT 1000").fetchall()
     for row in rows:
@@ -87,6 +88,16 @@ async def relay_once(js):
             c.execute(
                 "UPDATE outbox SET published_at=clock_timestamp() WHERE id=ANY(%s)", ([row["id"] for row in rows],)
             )
+
+
+def sync_publications(ids):
+    if not ids:
+        return
+    with connection() as c:
+        c.execute(
+            "UPDATE bid_requests r SET published_at=q.published_at FROM command_queue q WHERE r.request_id=q.request_id AND r.request_id=ANY(%s) AND r.state<>'QUEUED' AND r.published_at IS NULL AND q.published_at IS NOT NULL",
+            (ids,),
+        )
 
 
 def reconcile(holder):
@@ -100,6 +111,7 @@ def reconcile(holder):
         try:
             for _ in range(8):
                 batch = process_many(row["id"], holder)
+                sync_publications([r["request_id"] for r in batch])
                 processed += len(batch)
                 if len(batch) < 512:
                     break

@@ -120,9 +120,15 @@ def process_many(auction_id, holder, limit=512, expected_epoch=None):
             digest = event_hash(previous, payload)
             events.append((a["id"], seq, Jsonb(payload), previous, digest))
             previous = digest
-            notifications.append(
-                (a["id"], "bid.decision", Jsonb({"auction_id": str(a["id"]), "version": seq, "type": "bid.decision"}))
+        # All decisions become visible together; one notification names that
+        # committed version while the full per-bid event chain remains intact.
+        notifications.append(
+            (
+                a["id"],
+                "bid.decision",
+                Jsonb({"auction_id": str(a["id"]), "version": a["version"], "type": "bid.decision"}),
             )
+        )
         fields = [
             ("request_id", "uuid"),
             ("auction_id", "uuid"),

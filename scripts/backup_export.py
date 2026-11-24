@@ -50,7 +50,15 @@ def export(directory):
             snapshot = c.execute("SELECT pg_export_snapshot() snapshot,clock_timestamp() checkpoint").fetchone()
             counts = {
                 table: c.execute(f"SELECT count(*) n FROM {table}").fetchone()["n"]
-                for table in ["auctions", "bid_requests", "bid_decisions", "auction_events", "winners", "admission_outcomes"]
+                for table in [
+                    "auctions",
+                    "bid_requests",
+                    "bid_decisions",
+                    "auction_events",
+                    "winners",
+                    "admission_outcomes",
+                    "command_queue",
+                ]
             }
             anchors = c.execute(
                 "SELECT auction_id,max(event_seq) event_seq FROM auction_events GROUP BY auction_id ORDER BY auction_id"

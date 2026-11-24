@@ -25,6 +25,9 @@ def test_group_commit_order_prices_duplicates_and_signed_replay(auction):
     with pytest.raises(Fenced):
         process_many(aid, "other")
     assert [r["status"] for r in process_many(aid, "worker")] == ["REJECTED", "ACCEPTED"]
+    with connection() as c:
+        notifications = c.execute("SELECT body FROM outbox WHERE auction_id=%s ORDER BY id", (aid,)).fetchall()
+        assert [r["body"]["version"] for r in notifications] == [3, 5]
     assert process_many(aid, "worker") == []
     with connection() as c:
         c.execute("UPDATE auctions SET closes_at=clock_timestamp() WHERE id=%s", (aid,))

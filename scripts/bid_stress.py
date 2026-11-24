@@ -56,7 +56,7 @@ def sample(aid):
             "(SELECT count(*) FROM bid_decisions WHERE auction_id=a.id AND status='ACCEPTED') accepted,"
             "(SELECT count(*) FROM bid_decisions WHERE auction_id=a.id AND status='REJECTED') rejected,"
             "(SELECT count(*) FROM admission_outcomes o JOIN bid_requests r USING(request_id) WHERE r.auction_id=a.id) late,"
-            "(SELECT count(*) FROM bid_requests WHERE auction_id=a.id AND published_at IS NULL) unpublished "
+            "(SELECT count(*) FROM command_queue q JOIN bid_requests r USING(request_id) WHERE r.auction_id=a.id AND q.published_at IS NULL) unpublished "
             "FROM auctions a WHERE id=%s",
             (aid,),
         ).fetchone()
