@@ -69,11 +69,11 @@ services:
       MAX_USER_CONNECTIONS: '10'
       PUBLIC_ORIGIN: http://localhost:18080
       ADMISSION_SERVICE_KEY: ${STRESS_ADMISSION_KEY}
-      GOMAXPROCS: '2'
+      GOMAXPROCS: '4'
       GOGC: '150'
-      GOMEMLIMIT: 1500MiB
+      GOMEMLIMIT: 2GiB
     ports: ["127.0.0.1:18082:8081"]
-    mem_limit: 2000m
+    mem_limit: 2400m
     ulimits:
       nofile: {soft: 200000, hard: 200000}
     sysctls:
