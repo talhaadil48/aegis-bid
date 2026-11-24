@@ -35,7 +35,7 @@ type admissionProxy struct {
 }
 
 func newAdmissionProxy(upstream, origin string) *admissionProxy {
-	return &admissionProxy{groups: make(map[string]chan *admissionJob), upstream: upstream, key: os.Getenv("ADMISSION_SERVICE_KEY"), origin: origin, client: &http.Client{Timeout: 10 * time.Second, Transport: &http.Transport{MaxIdleConns: 64, MaxIdleConnsPerHost: 64, MaxConnsPerHost: 64, IdleConnTimeout: 60 * time.Second}}}
+	return &admissionProxy{groups: make(map[string]chan *admissionJob), upstream: upstream, key: os.Getenv("ADMISSION_SERVICE_KEY"), origin: origin, client: &http.Client{Timeout: 10 * time.Second, Transport: &http.Transport{DisableKeepAlives: true, MaxIdleConns: 64, MaxIdleConnsPerHost: 64, MaxConnsPerHost: 64, IdleConnTimeout: 60 * time.Second}}}
 }
 func (p *admissionProxy) serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
@@ -118,7 +118,7 @@ func (p *admissionProxy) serve(w http.ResponseWriter, r *http.Request) {
 }
 func (p *admissionProxy) drain(auction string, group chan *admissionJob) {
 	idle := time.NewTimer(30 * time.Second)
-	slots := make(chan struct{}, 4)
+	slots := make(chan struct{}, 8)
 	defer idle.Stop()
 	for {
 		var first *admissionJob
@@ -142,7 +142,7 @@ func (p *admissionProxy) drain(auction string, group chan *admissionJob) {
 			}
 		}
 		batch := []*admissionJob{first}
-		timer := time.NewTimer(50 * time.Millisecond)
+		timer := time.NewTimer(100 * time.Millisecond)
 	collect:
 		for len(batch) < 512 {
 			select {
