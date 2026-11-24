@@ -1,0 +1,6 @@
+{
+  "run_id": "51b26614daf343a8930f6a1a874381cc",
+  "status": "FAIL",
+  "requested_bidders": 50000,
+  "error": "HTTPStatusError: Client error '404 Not Found' for url 'http://127.0.0.1:15810/v1/bid-requests/308f5323-6117-4f00-94e5-e90fc30f2ef6'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404"
+}

@@ -1,0 +1,6 @@
+{
+  "run_id": "024671f132f64f3496c1ff719a06e1ca",
+  "status": "FAIL",
+  "requested_bidders": 5000,
+  "error": "TimeoutError: Distinct socket ramp did not complete"
+}

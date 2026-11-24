@@ -1,0 +1,6 @@
+{
+  "run_id": "8c8831d0a8cf48f9a4058f84d0afd92d",
+  "status": "FAIL",
+  "requested_bidders": 500,
+  "error": "CalledProcessError: Command '['docker', 'compose', '-p', 'aegis-stress-8c8831d0a8', '-f', 'infra/compose.stress.yaml', 'up', '-d']' returned non-zero exit status 1."
+}

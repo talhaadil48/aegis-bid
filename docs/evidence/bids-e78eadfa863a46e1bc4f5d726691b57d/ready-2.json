@@ -1,0 +1,9 @@
+{
+  "active": 0,
+  "ramp_started": "2026-11-24T07:14:21.774164247Z",
+  "ready_at": "2026-11-24T07:14:21.853351313Z",
+  "requested": 10000,
+  "run_id": "e78eadfa863a46e1bc4f5d726691b57d",
+  "shard": 2,
+  "ws_errors": 0
+}

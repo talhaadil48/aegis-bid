@@ -1,0 +1,10 @@
+{
+  "active": 10000,
+  "http_warmup_errors": 0,
+  "ramp_started": "2026-11-24T08:54:04.669712309Z",
+  "ready_at": "2026-11-24T08:55:40.840702382Z",
+  "requested": 10000,
+  "run_id": "55597cb72d694ecca70fc42103a0f784",
+  "shard": 1,
+  "ws_errors": 0
+}

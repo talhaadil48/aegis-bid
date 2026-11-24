@@ -7,17 +7,17 @@
     10.2,
     10.2,
     10.2,
-    10.049999999999999
+    9.75
   ],
-  "source_commit": "6a0d253",
-  "words": 1954,
+  "source_commit": "f607529 proofs / 9474f91 checkpoint",
+  "words": 1957,
   "section_titles": [
-    "System objectives and implemented architecture",
+    "Implementation stack and execution contracts",
     "Complete system flow and recovery paths",
-    "Transactional correctness and data model",
-    "Realtime scaling, API contracts and user workflows",
-    "Security, independent audit and observability",
-    "High availability, backup and disaster recovery",
-    "Experimental results, limitations and reproducibility"
+    "Ordering, idempotency and terminal outcomes",
+    "Bottlenecks, implemented changes and API behavior",
+    "Authentication, signed audit and operations",
+    "HA, backup transport and verified restoration",
+    "Measured results, regressions and reproducibility"
   ]
 }

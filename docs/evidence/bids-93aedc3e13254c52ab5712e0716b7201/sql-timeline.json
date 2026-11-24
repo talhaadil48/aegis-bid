@@ -1,0 +1,222 @@
+[
+  {
+    "at": "2026-11-24 08:43:13.154257+00:00",
+    "status": "OPEN",
+    "version": 0,
+    "admitted": 0,
+    "queued": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:14.162097+00:00",
+    "status": "OPEN",
+    "version": 0,
+    "admitted": 0,
+    "queued": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:15.169674+00:00",
+    "status": "OPEN",
+    "version": 0,
+    "admitted": 0,
+    "queued": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:16.177613+00:00",
+    "status": "OPEN",
+    "version": 0,
+    "admitted": 0,
+    "queued": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:17.219063+00:00",
+    "status": "OPEN",
+    "version": 0,
+    "admitted": 0,
+    "queued": 0,
+    "accepted": 0,
+    "rejected": 0,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:18.230577+00:00",
+    "status": "OPEN",
+    "version": 1024,
+    "admitted": 4573,
+    "queued": 3549,
+    "accepted": 333,
+    "rejected": 691,
+    "late": 0,
+    "unpublished": 3061
+  },
+  {
+    "at": "2026-11-24 08:43:19.248180+00:00",
+    "status": "OPEN",
+    "version": 3072,
+    "admitted": 8616,
+    "queued": 5544,
+    "accepted": 836,
+    "rejected": 2236,
+    "late": 0,
+    "unpublished": 4104
+  },
+  {
+    "at": "2026-11-24 08:43:20.267258+00:00",
+    "status": "OPEN",
+    "version": 4608,
+    "admitted": 14235,
+    "queued": 9627,
+    "accepted": 1411,
+    "rejected": 3197,
+    "late": 0,
+    "unpublished": 6723
+  },
+  {
+    "at": "2026-11-24 08:43:21.292672+00:00",
+    "status": "OPEN",
+    "version": 6656,
+    "admitted": 21912,
+    "queued": 15256,
+    "accepted": 2345,
+    "rejected": 4311,
+    "late": 0,
+    "unpublished": 11400
+  },
+  {
+    "at": "2026-11-24 08:43:26.133327+00:00",
+    "status": "OPEN",
+    "version": 7680,
+    "admitted": 48442,
+    "queued": 40762,
+    "accepted": 2623,
+    "rejected": 5057,
+    "late": 0,
+    "unpublished": 22930
+  },
+  {
+    "at": "2026-11-24 08:43:27.202601+00:00",
+    "status": "OPEN",
+    "version": 9728,
+    "admitted": 50000,
+    "queued": 40272,
+    "accepted": 3198,
+    "rejected": 6530,
+    "late": 0,
+    "unpublished": 20488
+  },
+  {
+    "at": "2026-11-24 08:43:28.248026+00:00",
+    "status": "OPEN",
+    "version": 14336,
+    "admitted": 50000,
+    "queued": 35664,
+    "accepted": 3776,
+    "rejected": 10560,
+    "late": 0,
+    "unpublished": 16488
+  },
+  {
+    "at": "2026-11-24 08:43:29.300324+00:00",
+    "status": "OPEN",
+    "version": 19456,
+    "admitted": 50000,
+    "queued": 30544,
+    "accepted": 4779,
+    "rejected": 14677,
+    "late": 0,
+    "unpublished": 11488
+  },
+  {
+    "at": "2026-11-24 08:43:30.351005+00:00",
+    "status": "OPEN",
+    "version": 23552,
+    "admitted": 50000,
+    "queued": 26448,
+    "accepted": 6498,
+    "rejected": 17054,
+    "late": 0,
+    "unpublished": 7488
+  },
+  {
+    "at": "2026-11-24 08:43:31.407016+00:00",
+    "status": "OPEN",
+    "version": 28160,
+    "admitted": 50000,
+    "queued": 21840,
+    "accepted": 8555,
+    "rejected": 19605,
+    "late": 0,
+    "unpublished": 3488
+  },
+  {
+    "at": "2026-11-24 08:43:32.438825+00:00",
+    "status": "OPEN",
+    "version": 32768,
+    "admitted": 50000,
+    "queued": 17232,
+    "accepted": 10562,
+    "rejected": 22206,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:33.467418+00:00",
+    "status": "OPEN",
+    "version": 37376,
+    "admitted": 50000,
+    "queued": 12624,
+    "accepted": 12497,
+    "rejected": 24879,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:34.493242+00:00",
+    "status": "OPEN",
+    "version": 42496,
+    "admitted": 50000,
+    "queued": 7504,
+    "accepted": 14663,
+    "rejected": 27833,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:35.530759+00:00",
+    "status": "OPEN",
+    "version": 47104,
+    "admitted": 50000,
+    "queued": 2896,
+    "accepted": 16860,
+    "rejected": 30244,
+    "late": 0,
+    "unpublished": 0
+  },
+  {
+    "at": "2026-11-24 08:43:36.563394+00:00",
+    "status": "CLOSED",
+    "version": 50001,
+    "admitted": 50000,
+    "queued": 0,
+    "accepted": 18290,
+    "rejected": 31710,
+    "late": 0,
+    "unpublished": 0
+  }
+]

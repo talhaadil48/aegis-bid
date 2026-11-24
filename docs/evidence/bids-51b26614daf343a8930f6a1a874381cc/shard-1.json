@@ -1,0 +1,25 @@
+{
+  "active_at_end": 0,
+  "active_at_window_start": 10000,
+  "handshake_errors": 0,
+  "held_ended_at": "2026-11-23T15:29:15.584366148Z",
+  "held_started_at": "2026-11-23T15:28:00.128819774Z",
+  "http_finished_at": "2026-11-23T15:29:12.039869876Z",
+  "http_statuses": {
+    "0": 3618,
+    "200": 6330,
+    "202": 52
+  },
+  "initial_states": {
+    "": 3618,
+    "CLOSED": 6330,
+    "QUEUED": 52
+  },
+  "request_errors": 3618,
+  "requested": 10000,
+  "run_id": "51b26614daf343a8930f6a1a874381cc",
+  "shard": 1,
+  "snapshots_received": 1045614,
+  "starts_in_window": 9492,
+  "writes_in_window": 2816
+}

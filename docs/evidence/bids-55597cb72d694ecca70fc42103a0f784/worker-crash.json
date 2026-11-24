@@ -1,0 +1,38 @@
+{
+  "requested_at": "2026-11-24T08:56:54.930144+00:00",
+  "checkpoint": {
+    "event_seq": 2560,
+    "event_hash": "c56802fe14cc5c183e22bc8dd47aef5ea4f2972bbeaa8051e268f76675181a4a"
+  },
+  "lease_before": {
+    "holder_id": "2401cb5b5b90-1-8c6e1aec39f9",
+    "epoch": 1
+  },
+  "active_db_sessions_before": 1,
+  "before": {
+    "at": "2026-11-24 08:56:54.975906+00:00",
+    "status": "OPEN",
+    "version": 3072,
+    "admitted": 14329,
+    "queued": 11257,
+    "accepted": 317,
+    "rejected": 2755,
+    "late": 0,
+    "unpublished": 7318
+  },
+  "stopped": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 137,
+    "Error": "",
+    "StartedAt": "2026-11-24T08:53:55.666130386Z",
+    "FinishedAt": "2026-11-24T08:56:55.307825669Z"
+  },
+  "restart_requested_at": "2026-11-24T08:57:05.828498+00:00",
+  "running_after_start": true
+}

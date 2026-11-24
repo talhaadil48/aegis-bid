@@ -1,0 +1,93 @@
+{
+  "run_id": "ea6873fc0a684a38a0283feb46e3da04",
+  "status": "FAIL",
+  "commit": "744f7ddaa347cfbdee099ff253bba6025eb6df46",
+  "source_files_changed": false,
+  "harness_sha256": "4fee447ce95f8d81d24f22953b67a407ef9de7087c715c9b2beb4d54ed9e0b8b",
+  "timestamp": "2026-11-24T08:19:12.721149+00:00",
+  "scenario": "none",
+  "profile": "http_only",
+  "bid_ingress": "gateway",
+  "auction_id": "f1b6c6e4-20d5-487b-8b2f-0671b4b704bd",
+  "window_start": "2026-11-24T08:18:17.342142+00:00",
+  "window_close": "2026-11-24T08:18:27.342142+00:00",
+  "window_s": 10,
+  "offered_spread_s": 9,
+  "api_workers": 6,
+  "shards": 5,
+  "max_generator_http_connections": 2560,
+  "transport_warmup_health_requests": 1280,
+  "population_gate": true,
+  "close_window_gate": false,
+  "correctness_gate": true,
+  "failure_gate": true,
+  "request_errors": 0,
+  "distinct_authenticated_sockets_at_start": 0,
+  "distinct_authenticated_sockets_at_end": 0,
+  "client_write_count_in_window": 41405,
+  "http_ingress_latency_s": {
+    "p50": 1.317416,
+    "p95": 4.332541,
+    "p99": 4.51091
+  },
+  "audit": {
+    "status": "PASS",
+    "errors": [],
+    "signature_verified": true,
+    "events": 41406,
+    "decisions": 41405,
+    "winners": 20,
+    "scope": "Single exported auction; unsigned evidence has no independent trusted anchor"
+  },
+  "tampered_winners_verification": "FAIL",
+  "winner_count": 20,
+  "winning_amount_total_cents": 8527300,
+  "sql": {
+    "requested_bidders": 50000,
+    "durable_requests": 50000,
+    "distinct_bidder_ids": 50000,
+    "missing_request_ids": 0,
+    "payload_or_history_mismatches": 0,
+    "outside_server_admission_window": 8595,
+    "final_states": {
+      "ACCEPTED": 994,
+      "REJECTED": 40411,
+      "CLOSED": 8595
+    },
+    "states_at_deadline": {
+      "ACCEPTED": 539,
+      "REJECTED": 10213,
+      "QUEUED": 30653,
+      "CLOSED": 0
+    },
+    "decision_latency_s": {
+      "p50": 17.869835,
+      "p95": 22.233066,
+      "p99": 22.350513
+    },
+    "last_decision_after_deadline_s": 22.072001,
+    "full_sql_histories_checked": 50000,
+    "owner_http_history_checks": 64,
+    "owner_http_history_expected": 64,
+    "idempotent_http_retries": 64,
+    "pre_crash_checkpoint_preserved": true,
+    "stale_worker_fenced": true,
+    "lease_after": {
+      "holder_id": "28c74f20a0d9-1-0625ab4add38",
+      "epoch": 1
+    },
+    "durability_settings": {
+      "fsync": "on",
+      "synchronous_commit": "on",
+      "full_page_writes": "on"
+    },
+    "postgres_version": "PostgreSQL 18.7 (Debian 18.7-1.pgdg13+5) on x86_64-pc-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit",
+    "auction_status": "CLOSED",
+    "post_close_new_request_terminal": true,
+    "sealed_anchor_unchanged_after_late_request": true
+  },
+  "machine": "12 CPUs 8009699328 bytes",
+  "app_image_id": "sha256:d0c304233d20e94dbab94f6cb3ae1e90aebfb4f6ebca9bf4f38d75d0e68b00c3",
+  "tools_image_id": "sha256:1370a68f19951aa3ad52cff4a15c390ef685eb065b9090328209f6f4f42edf07",
+  "scope": "One local Docker host; distinct seeded users and pre-issued real HS256 sessions; HTTP connections pooled across virtual users. Profile explicitly identifies whether live sockets were held. 50k bidding claim requires 50,000 users and every gate passing. No password-login throughput, independent load hosts or real cloud zones claimed."
+}

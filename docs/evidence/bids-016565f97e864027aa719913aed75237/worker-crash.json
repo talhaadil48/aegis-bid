@@ -1,0 +1,40 @@
+{
+  "requested_at": "2026-11-24T09:09:06.403689+00:00",
+  "checkpoint": {
+    "event_seq": 4608,
+    "event_hash": "214d40de01d4cd6fa11e78e5ce09a8757993869b001af4d2bc27acf3fe21b8d7"
+  },
+  "lease_before": {
+    "holder_id": "f7c20eacee18-1-1ccec9347d20",
+    "epoch": 1
+  },
+  "active_db_sessions_before": 1,
+  "before": {
+    "at": "2026-11-24 09:09:06.417550+00:00",
+    "status": "OPEN",
+    "version": 6144,
+    "admitted": 21363,
+    "queued": 15219,
+    "accepted": 410,
+    "rejected": 5734,
+    "late": 0,
+    "unpublished": 11827
+  },
+  "migration_started_before": "2026-11-24T09:08:44.269024634Z",
+  "stopped": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 137,
+    "Error": "",
+    "StartedAt": "2026-11-24T09:08:45.083012412Z",
+    "FinishedAt": "2026-11-24T09:09:06.757079247Z"
+  },
+  "migration_started_after": "2026-11-24T09:08:44.269024634Z",
+  "restart_requested_at": "2026-11-24T09:09:08.865499+00:00",
+  "running_after_start": true
+}

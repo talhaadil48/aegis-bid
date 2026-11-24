@@ -36,8 +36,8 @@ def main():
                     "rows": [
                         [
                             "0:00-0:12",
-                            "Title + architecture on report page 1",
-                            "AegisBid Omega: durable flash auctions with independent verification and disaster recovery. Name, roll number, project objective.",
+                            "Title/name + implementation stack on report page 1",
+                            "AegisBid Omega. PostgreSQL decides bids, Go handles ingress/fanout, NATS journals commands and Bacula/WAL/S3 protect recovery. State your name and roll number.",
                         ],
                         [
                             "0:12-0:32",
@@ -57,12 +57,12 @@ def main():
                         [
                             "1:15-1:55",
                             "Terminal: --bidding; report page 7",
-                            "Label these recorded tests. 50,000 distinct authenticated users offered bids in the final ten seconds; normal and actual worker-SIGKILL HTTP runs passed. Show zero errors/missing/late, accepted/rejected/queued counts, drain time and 20 verified winners. State the live-profile result exactly as recorded.",
+                            "Say: two historical HTTP runs passed 50,000 distinct bidders, including real worker SIGKILL; all 20 winners replayed correctly. Point to cutoff queue and decision tail. Then show current regressions: HTTP 42,794 eligible; combined live 30,782. Current repeatable 50k is still open.",
                         ],
                         [
                             "1:55-2:15",
                             "Terminal: --verify-bidding",
-                            "Replay the saved original client requests against signed events: 50,000 bidder/UUID/amount matches, rule replay and 20 winners. Tampered winners fail. This verification runs now; the stress workload itself was recorded earlier.",
+                            "Run offline replay now: 50,000 original bidder/UUID/amount matches and 20 winners must PASS. The recorded stress checks also rejected tampered winners. The workload was recorded earlier; verification runs now.",
                         ],
                         [
                             "2:15-2:40",
@@ -71,14 +71,14 @@ def main():
                         ],
                         [
                             "2:40-3:00",
-                            "Terminal: --late; final winners",
-                            "Close the demo auction, submit a new UUID and show terminal CLOSED. The owner sees the same state; the sealed anchor and winners remain unchanged. Finish on correct allocation and transparent production limits.",
+                            "Terminal: --late (or rehearsed --closed-test)",
+                            "Show terminal CLOSED for a new late UUID and unchanged sealed anchor/winners. If using the fallback, label it live isolated API/database checks and show 3 passed. Finish on correct allocation and the remaining production limits.",
                         ],
                     ],
                 },
                 heading("Delivery cues"),
                 paragraph(
-                    "Keep browser, terminal and PDF viewer arranged before starting. Point to one useful field at a time. Spend the most attention on the distinct-bidder and crash results. Admission within ten seconds does not mean all decisions finish by cutoff: show the recorded backlog and tail. Do not read every row."
+                    "Open the bidder browser, report pages 2/7 and prepared terminals before recording. For --race expect PASS with one ACCEPTED and one REJECTED. For --verify-bidding expect PASS, 50,000 matched requests and 20 winners. For --late expect CLOSED and unchanged anchor/winners. Admission within ten seconds does not mean every decision finishes by cutoff."
                 ),
                 paragraph(
                     "Pre-expand the evidence output or use a clearly labelled recorded clip when a step exceeds its slot. Do not call stored JSON a live stress experiment. The failure test sends real SIGKILL and explicitly restarts the worker. HTTP pools are bounded; 50,000 virtual bidders does not mean 50,000 simultaneous HTTP transactions."
@@ -90,20 +90,20 @@ def main():
             "blocks": [
                 heading("1. Prepare locally before recording"),
                 paragraph(
-                    "Run these from the repository root in PowerShell, with the existing local .env and seeded users. DEMO_PASSWORD must match those accounts. Never display .env, cookie caches, passwords or AWS credentials in the video. These helpers do not invoke AWS."
+                    "Run from the repository root in PowerShell with local .env and seeded accounts; DEMO_PASSWORD must match. Running containers can predate the new code. Follow the coordinated image/migration upgrade in docs/runbook.md before relying on new fixes; this document update does not deploy the app. Keep secrets/cookie caches out of the recording. Helpers make no AWS calls."
                 ),
                 code(
                     ".venv\\Scripts\\python.exe -m scripts.demo --check\n.venv\\Scripts\\python.exe -m scripts.demo --prepare"
                 ),
                 paragraph(
-                    "Open <b>http://localhost:18080</b>. Select the new <b>CEP demo HH:MM UTC</b> title printed by --prepare. It lasts 45 minutes, has stock 3, reserve 10000 cents and increment 500 cents. Use distinct browser profiles or different browsers for bidder1, seller, admin and auditor; ordinary tabs share login cookies. Sign in before recording. Prepare a fresh auction after rehearsal."
+                    "Open <b>http://localhost:18080</b>; select the printed <b>CEP demo HH:MM UTC</b> auction: 45 minutes, stock 3, reserve 10000 cents, increment 500 cents. Use separate browser profiles for bidder1, seller, admin and auditor; tabs share cookies. Rehearse --race and --late and require PASS, then rerun --prepare for a fresh recording auction. --check confirms reachability/auth, not version readiness."
                 ),
                 heading("2. Pretype these in separate terminal tabs"),
                 code(
                     ".venv\\Scripts\\python.exe -m scripts.demo --race\n.venv\\Scripts\\python.exe -m scripts.demo --bidding\n.venv\\Scripts\\python.exe -m scripts.demo --verify-bidding\n.venv\\Scripts\\python.exe -m scripts.demo --evidence\n.venv\\Scripts\\python.exe -m scripts.demo --late"
                 ),
                 paragraph(
-                    "--race uses bidder1 and bidder2 at the current eligible amount; avoid concurrent manual bids. --bidding reads selected immutable runs from docs/evidence/bidding-index.json. --verify-bidding independently replays the saved full client CSV and signed ledger. --late closes this demo auction, checks a new terminal request and unchanged anchor/winners: run it last. Optional --recover kills/restarts the local worker and tests 20 same-UUID retries; rehearse that separately. --bacula lists existing Catalog jobs."
+                    "--race uses bidder1/bidder2 at the same eligible amount; avoid concurrent manual bids. --bidding reads historical passes and latest trials; it does not generate load. --verify-bidding replays the saved CSV/signature/ledger offline. --late closes this auction and verifies a new CLOSED receipt: run it last. Optional --recover tests real SIGKILL plus 20 same-UUID retries outside the short video. --bacula lists existing jobs."
                 ),
                 heading("3. Open the evidence files in advance"),
                 paragraph(
@@ -114,19 +114,30 @@ def main():
                 ),
                 heading("4. If something is unavailable"),
                 paragraph(
-                    "After --late or an expired auction, rerun --prepare and select its new title. If optional --recover is interrupted, start the worker using the command below. Use README startup if the app is stopped. The ordered-intake upgrade requires coordinated migration; see docs/runbook.md. Never reset data volumes for this demo."
+                    "After --late or expiration, rerun --prepare. If --late fails, upgrade/rehearse or replace its slot with the isolated API test below: expect 3 passed. This helper loads the private .env, enables integration checks and creates a separate test database. PostgreSQL must be running and its configured user able to create that database. Never improvise a successful result or reset live data volumes."
                 ),
-                code("docker compose --env-file .env -f infra/compose.yaml start worker"),
+                code(".venv\\Scripts\\python.exe -m scripts.demo --closed-test"),
                 paragraph(
-                    "If Bacula is stopped, show the existing completed job listing and recovery report and label them recorded. Do not run a restore into the live demo database. Do not rerun the 50k test, kind failure drill or cloud backup inside the three-minute recording. Admin API socket metrics cover their own process; Go gateway socket metrics are at http://127.0.0.1:18081/metrics."
+                    "If Bacula is stopped, show recorded completed jobs/recovery JSON. If a live command fails, use a pre-recorded successful rehearsal and label it recorded. Keep 50k runs, kind failures, cloud backups and restores outside this presentation. For an interrupted optional --recover, restart only the stopped worker container with docker start; Compose start can rerun migration dependencies."
                 ),
                 heading("Likely viva questions: concise answers"),
                 paragraph(
-                    "<b>Exactly once?</b> One committed SQL effect per stable UUID; transport can redeliver. <b>50k proof?</b> Real distinct users and original HTTP requests, final-ten-second admission timestamps, reported queue/drain, full signed replay; state live-profile scope separately. <b>Why separate Go services?</b> Isolate HTTP intake from socket fanout. <b>HA vs backup?</b> Promotion handles a primary failure; WAL/PITR and remote copies address historical corruption/site loss. <b>Production complete?</b> Physical multi-zone, multi-host load, independent-account backups and continuous production offsite PITR/RPO remain. The closed-auction admission bug is fixed."
+                    "<b>Exactly once?</b> One SQL effect per UUID; transport can redeliver. <b>50k proof?</b> Two historical distinct-user HTTP passes with backlog/drain and signed replay; later regressions and combined-live capacity remain open. <b>Why Go services?</b> Bounded ingress and shared-frame fanout; service separation is an attempted optimization. <b>HA vs backup?</b> Promotion handles primary loss; PITR/remote copies address corruption/site loss. <b>Production complete?</b> Real multi-zone, independent-account backup and continuous offsite RPO remain unproven."
                 ),
             ],
         },
     ]
+    cursor = 0
+    for row in pages[0]["blocks"][1]["rows"]:
+        begin, end = [
+            sum(int(value) * factor for value, factor in zip(stamp.split(":"), (60, 1), strict=True))
+            for stamp in row[0].split("-")
+        ]
+        if begin != cursor or end <= begin:
+            raise RuntimeError("Demo slots must be consecutive and positive")
+        cursor = end
+    if cursor != 180:
+        raise RuntimeError("Demo timeline must total exactly 180 seconds")
     output = ROOT / "docs/submission/AegisBid_3_Minute_Demo_Guide.pdf"
     story = []
     for index, page in enumerate(pages):

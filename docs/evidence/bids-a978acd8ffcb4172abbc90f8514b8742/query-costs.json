@@ -1,0 +1,177 @@
+[
+  {
+    "query": "SELECT * FROM aegis_admit_batch($1,$2::uuid[],$3::uuid[],$4::bigint[],$5)",
+    "calls": 179,
+    "total_exec_time": 14103.672751999999,
+    "mean_exec_time": 78.79146788826816,
+    "rows": 48368
+  },
+  {
+    "query": "INSERT INTO \"bid_decisions\" (\"request_id\",\"auction_id\",\"bidder_id\",\"status\",\"reason\",\"effective_amount_cents\",\"decision_seq\",\"epoch\") SELECT * FROM unnest($1::uuid[],$2::uuid[],$3::uuid[],$4::text[],$5::text[],$6::bigint[],$7::bigint[],$8::bigint[]) RETURNING *",
+    "calls": 42,
+    "total_exec_time": 2269.706302,
+    "mean_exec_time": 54.04062623809525,
+    "rows": 21391
+  },
+  {
+    "query": "SELECT r.request_id FROM bid_requests r JOIN auctions a ON a.id=r.auction_id WHERE a.status=$1 AND r.state=$2 ORDER BY r.auction_id,r.intake_seq LIMIT $3 FOR UPDATE OF r SKIP LOCKED",
+    "calls": 395,
+    "total_exec_time": 2201.219434,
+    "mean_exec_time": 5.572707427848099,
+    "rows": 0
+  },
+  {
+    "query": "SELECT id,username,role FROM users WHERE id=ANY($1)",
+    "calls": 6146,
+    "total_exec_time": 1499.3891690000005,
+    "mean_exec_time": 0.24396179124633866,
+    "rows": 100323
+  },
+  {
+    "query": "COPY users(id,username,password_hash,role) FROM STDIN",
+    "calls": 1,
+    "total_exec_time": 1349.10665,
+    "mean_exec_time": 1349.10665,
+    "rows": 50001
+  },
+  {
+    "query": "INSERT INTO \"auction_events\" (\"auction_id\",\"event_seq\",\"payload\",\"prev_hash\",\"event_hash\") SELECT * FROM unnest($1::uuid[],$2::bigint[],$3::jsonb[],$4::text[],$5::text[])",
+    "calls": 45,
+    "total_exec_time": 1222.184046,
+    "mean_exec_time": 27.159645466666667,
+    "rows": 22644
+  },
+  {
+    "query": "SELECT clock_timestamp() at,a.status,a.version,(SELECT count(*) FROM bid_requests WHERE auction_id=a.id) admitted,(SELECT count(*) FROM bid_requests WHERE auction_id=a.id AND state=$2) queued,(SELECT count(*) FROM bid_decisions WHERE auction_id=a.id AND status=$3) accepted,(SELECT count(*) FROM bid_",
+    "calls": 24,
+    "total_exec_time": 1209.998084,
+    "mean_exec_time": 50.41658683333333,
+    "rows": 24
+  },
+  {
+    "query": "UPDATE bid_requests r SET published_at=q.published_at FROM command_queue q WHERE r.request_id=q.request_id AND r.request_id=ANY($1) AND r.state<>$2 AND r.published_at IS NULL AND q.published_at IS NOT NULL",
+    "calls": 71,
+    "total_exec_time": 1168.429299,
+    "mean_exec_time": 16.45675069014084,
+    "rows": 22644
+  },
+  {
+    "query": "UPDATE bid_requests r SET state=v.state FROM unnest($1::uuid[],$2::text[]) v(id,state) WHERE r.request_id=v.id",
+    "calls": 45,
+    "total_exec_time": 1076.3707570000004,
+    "mean_exec_time": 23.91935015555556,
+    "rows": 22644
+  },
+  {
+    "query": "SELECT pg_advisory_lock(hashtextextended($1,$2))",
+    "calls": 265,
+    "total_exec_time": 1056.442456,
+    "mean_exec_time": 3.9865753056603777,
+    "rows": 265
+  },
+  {
+    "query": "SELECT r.*,coalesce(d.reason,o.reason) reason,d.decision_seq FROM bid_requests r LEFT JOIN bid_decisions d USING(request_id) LEFT JOIN admission_outcomes o USING(request_id) WHERE r.bidder_id=$1 ORDER BY admitted_at DESC LIMIT $2",
+    "calls": 64,
+    "total_exec_time": 621.5901360000001,
+    "mean_exec_time": 9.712345875,
+    "rows": 64
+  },
+  {
+    "query": "SELECT r.* FROM command_queue q JOIN bid_requests r USING(request_id) WHERE q.published_at IS NULL ORDER BY q.request_id LIMIT $1",
+    "calls": 1690,
+    "total_exec_time": 576.6168479999994,
+    "mean_exec_time": 0.3411934011834319,
+    "rows": 22644
+  },
+  {
+    "query": "SELECT r.*,d.status decision_status,d.effective_amount_cents,d.committed_at,d.decision_seq,o.status admission_status FROM bid_requests r LEFT JOIN bid_decisions d USING(request_id) LEFT JOIN admission_outcomes o USING(request_id) WHERE r.auction_id=$1 ORDER BY r.intake_seq",
+    "calls": 1,
+    "total_exec_time": 486.586883,
+    "mean_exec_time": 486.586883,
+    "rows": 50000
+  },
+  {
+    "query": "UPDATE command_queue SET published_at=clock_timestamp() WHERE request_id=ANY($1)",
+    "calls": 26,
+    "total_exec_time": 469.79792199999997,
+    "mean_exec_time": 18.069150846153843,
+    "rows": 22644
+  },
+  {
+    "query": "SELECT * FROM aegis_admit_batch($1,$2::uuid[],$3::uuid[],$4::bigint[],$5)",
+    "calls": 9,
+    "total_exec_time": 403.59571600000004,
+    "mean_exec_time": 44.84396844444444,
+    "rows": 1696
+  },
+  {
+    "query": "SELECT event_seq,payload,prev_hash,event_hash FROM auction_events WHERE auction_id=$1 ORDER BY event_seq",
+    "calls": 1,
+    "total_exec_time": 305.09360499999997,
+    "mean_exec_time": 305.09360499999997,
+    "rows": 22645
+  },
+  {
+    "query": "CREATE DATABASE \"aegis_stress_a978acd8ff\"",
+    "calls": 1,
+    "total_exec_time": 259.8166,
+    "mean_exec_time": 259.8166,
+    "rows": 0
+  },
+  {
+    "query": "SELECT * FROM bid_requests WHERE auction_id=$1 AND state=$3 ORDER BY intake_seq LIMIT $2 FOR UPDATE",
+    "calls": 264,
+    "total_exec_time": 187.49389400000004,
+    "mean_exec_time": 0.7102041439393937,
+    "rows": 23156
+  },
+  {
+    "query": "INSERT INTO command_queue(request_id,published_at)\n SELECT r.request_id,r.published_at FROM bid_requests r WHERE r.state<>$1\n ON CONFLICT DO NOTHING",
+    "calls": 3,
+    "total_exec_time": 183.112977,
+    "mean_exec_time": 61.037659,
+    "rows": 0
+  },
+  {
+    "query": "INSERT INTO \"bid_decisions\" (\"request_id\",\"auction_id\",\"bidder_id\",\"status\",\"reason\",\"effective_amount_cents\",\"decision_seq\",\"epoch\") SELECT * FROM unnest($1::uuid[],$2::uuid[],$3::uuid[],$4::text[],$5::text[],$6::bigint[],$7::bigint[],$8::bigint[]) RETURNING *",
+    "calls": 3,
+    "total_exec_time": 172.857394,
+    "mean_exec_time": 57.619131333333335,
+    "rows": 1253
+  },
+  {
+    "query": "SELECT request_id FROM bid_requests WHERE request_id=ANY($1::uuid[]) AND state<>$2",
+    "calls": 171,
+    "total_exec_time": 99.84733500000002,
+    "mean_exec_time": 0.5839025438596489,
+    "rows": 17100
+  },
+  {
+    "query": "CREATE INDEX IF NOT EXISTS requests_pending ON bid_requests(auction_id,intake_seq) WHERE state='QUEUED'",
+    "calls": 3,
+    "total_exec_time": 94.190808,
+    "mean_exec_time": 31.396936000000004,
+    "rows": 0
+  },
+  {
+    "query": "SELECT * FROM outbox WHERE published_at IS NULL ORDER BY id LIMIT $1",
+    "calls": 1690,
+    "total_exec_time": 62.372886000000065,
+    "mean_exec_time": 0.03690703313609474,
+    "rows": 46
+  },
+  {
+    "query": "CREATE EXTENSION IF NOT EXISTS pg_stat_statements",
+    "calls": 1,
+    "total_exec_time": 45.718695,
+    "mean_exec_time": 45.718695,
+    "rows": 0
+  },
+  {
+    "query": "SELECT $2 FROM bid_requests WHERE auction_id=$1 AND state=$3 LIMIT $4",
+    "calls": 5,
+    "total_exec_time": 25.34006,
+    "mean_exec_time": 5.0680119999999995,
+    "rows": 4
+  }
+]

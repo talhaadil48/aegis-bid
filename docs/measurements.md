@@ -1,4 +1,4 @@
-# Measured local results · 23 November 2026
+# Measured local results · 24 November 2026
 
 Machine: Windows 11, Docker Desktop Linux containers; Python 3.13; PostgreSQL 18; NATS 2.11; Next.js 16.4.6; Debian-packaged Bacula 9.6.7. Workstation resources were shared during these tests. These are coursework smoke/drill measurements, not capacity forecasts.
 
@@ -11,10 +11,10 @@ Machine: Windows 11, Docker Desktop Linux containers; Python 3.13; PostgreSQL 18
 | Bacula backup | Catalog job 1, 4 entries, 39,802 bytes, successful T | `evidence/bacula-console.txt` |
 | Bacula restore | Catalog job 2, 4 entries, successful T; restored dump/manifest into alternate directory | `evidence/bacula-console.txt` |
 | Restored Bacula database | Counts, hashes and independent winner replay PASS; DB import + verification 1.25 s | `evidence/recovery-bacula.json` and HTML |
-| Test suite | 14 passing tests, real PostgreSQL + NATS enabled | Reproduce with README instructions |
+| Test suite | 39 passing tests, real PostgreSQL + NATS enabled | Reproduce with README instructions |
 | Frontend | Production export builds; npm audit reported zero vulnerabilities after Next.js update | Reproduce with locked npm dependencies |
 
-No 50,000-socket test, multi-host load test, full-site disaster, offsite media loss or measured RPO has been performed. The baseline comparison is an explicitly synthetic race demonstration. Browser rendering was not inspected with an automated browser; build and HTTP smoke tests passed.
+The initial smoke measurements below were subsequently extended by the socket, distinct-bidder and recovery experiments described later. No multi-host load test, full-site disaster or offsite-media-loss exercise has been performed. The baseline comparison is an explicitly synthetic race demonstration. Browser rendering was not inspected with an automated browser; build and HTTP smoke tests passed.
 
 ## Production extension measurements
 
@@ -30,3 +30,11 @@ The Go gateway retained **50,000 authenticated WebSockets concurrently for a sha
 | Infrastructure validation | EKS and S3 CloudFormation templates pass cfn-lint; Kubernetes workload and Barman resources pass actual API-server dry runs | Reproduce with `docs/ha-deployment.md` |
 
 PITR RPO in the controlled drill is the interval between the chosen restore point and injected corruption; it is not a measured full-site/offsite RPO. The remote S3 measurement used a small 20-decision dataset. No EKS compute stack was launched: the available AWS principal denied EKS management calls. All source and report scopes distinguish these limits.
+
+## Distinct-bidder close-window results (24 November)
+
+These are historical successes for their recorded baselines. Later configuration trials regressed: the latest HTTP-only worker run (`bids-016565f97e864027aa719913aed75237`) admitted 42,794 requests inside the window; the latest combined-live worker run (`bids-5bcdf2d89415464281f02b6d75e4a36f`) admitted 30,782 while retaining 50,000 distinct sockets. Both failed the workload gate and passed their recorded correctness gate. Current repeatable 50k capacity remains unproven; phase 13 is unmerged.
+
+The earlier 30-request HTTP smoke test is superseded for capacity evidence by two passing 50,000-distinct-user HTTP runs: normal and real worker SIGKILL during bidding. Both recorded 50,000 client writes and SQL admission timestamps within the final ten seconds, zero request errors/missing IDs/late admissions, all final results, full signed replay, 20 winners and successful terminal post-close probes. The normal run had 30,032 queued by recorded decision time at cutoff and a 13.335 s decision tail; the worker run had 40,272 queued and an 8.913 s tail. These timestamp counts are not exact transaction-commit visibility measurements.
+
+See [the detailed bidding proof](bidding-proof.md) for accepted/rejected counts, latency definitions, immutable evidence paths, replay commands, image IDs, failed trials and scope. These runs use five HTTP pools totaling at most 5,120 connections across 50,000 pre-authenticated users on one 12-CPU/7.46-GiB Docker VM. They do not claim 50,000 simultaneous HTTP transactions, all decisions completed before cutoff, login throughput or a production cloud deployment.

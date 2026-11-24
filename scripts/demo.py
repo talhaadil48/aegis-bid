@@ -146,7 +146,9 @@ def recover():
             raise RuntimeError("Prepare an open auction first")
         rid = str(uuid4())
         payload = {"request_id": rid, "amount_cents": snapshot["minimum_next_cents"]}
-        worker = subprocess.run([*compose, "ps", "-q", "worker"], check=True, capture_output=True, text=True).stdout.strip()
+        worker = subprocess.run(
+            [*compose, "ps", "-q", "worker"], check=True, capture_output=True, text=True
+        ).stdout.strip()
         subprocess.run([*compose, "kill", "-s", "SIGKILL", "worker"], check=True)
         start = time.monotonic()
         try:
@@ -214,34 +216,54 @@ def evidence():
 def bidding():
     root = Path("docs/evidence")
     index = json.loads((root / "bidding-index.json").read_text())
-    for label, selected in index["selected"].items():
-        record = json.loads((root / selected["summary"]).read_text())
+    records = [
+        ("Historical " + label.replace("_", " "), json.loads((root / selected["summary"]).read_text()))
+        for label, selected in index["selected"].items()
+    ]
+    trials = [json.loads((root / trial["summary"]).read_text()) for trial in index["trials"]]
+    for profile in ("http_only", "live_and_http"):
+        candidates = [
+            record
+            for record in trials
+            if record.get("profile") == profile and record.get("sql", {}).get("requested_bidders") == 50000
+        ]
+        if candidates:
+            latest = max(candidates, key=lambda record: record["timestamp"])
+            if not any(record["run_id"] == latest["run_id"] for _, record in records):
+                records.append(("Latest " + profile, latest))
+    print("RECORDED BIDDING EVIDENCE: historical passes and latest recorded trials")
+    print("Eligible = SQL admission timestamp in final ten seconds; pooled HTTP; pre-issued real sessions.")
+    print(f"{'Run':<9} {'Profile/fault':<23} {'Eligible':>8} {'Late':>7} {'Errors':>7} {'Gate':<5} {'Tail s':>8}")
+    for _, record in records:
         sql = record["sql"]
-        print("Recorded distinct-bidder proof:", label)
+        eligible = sql["durable_requests"] - sql["outside_server_admission_window"]
+        profile = record["profile"] + "/" + record["scenario"]
         print(
-            json.dumps(
-                {
-                    "status": record["status"],
-                    "run_id": record["run_id"],
-                    "profile": record["profile"],
-                    "distinct_bidders": sql["distinct_bidder_ids"],
-                    "client_writes_in_final_ten_seconds": record["client_write_count_in_window"],
-                    "outside_server_admission_window": sql["outside_server_admission_window"],
-                    "request_errors": record["request_errors"],
-                    "recorded_states_at_cutoff": sql["states_at_deadline"],
-                    "final_states": sql["final_states"],
-                    "last_recorded_decision_after_cutoff_s": sql["last_decision_after_deadline_s"],
-                    "distinct_live_sockets_start_end": [
-                        record["distinct_authenticated_sockets_at_start"],
-                        record["distinct_authenticated_sockets_at_end"],
-                    ],
-                    "signed_replay": record["audit"]["status"],
-                    "winners": record["winner_count"],
-                    "scope": "Recorded local evidence; pooled HTTP connections; final decisions may drain after cutoff",
-                },
-                indent=2,
-            )
+            f"{record['run_id'][:8]:<9} {profile:<23} {eligible:>8,} "
+            f"{sql['outside_server_admission_window']:>7,} {record['request_errors']:>7,} "
+            f"{record['status']:<5} {sql['last_decision_after_deadline_s']:>8.3f}"
         )
+    for label, record in records:
+        sql = record["sql"]
+        if label.startswith("Historical"):
+            cutoff = sql["states_at_deadline"]
+            final = sql["final_states"]
+            print(
+                f"{record['run_id'][:8]} cutoff A/R/Q: "
+                f"{cutoff.get('ACCEPTED', 0):,}/{cutoff.get('REJECTED', 0):,}/{cutoff.get('QUEUED', 0):,}; "
+                f"final A/R: {final.get('ACCEPTED', 0):,}/{final.get('REJECTED', 0):,}; "
+                f"signed replay {record['audit']['status']}; {record['winner_count']} winners"
+            )
+            if record["scenario"] == "worker":
+                fault = json.loads((root / ("bids-" + record["run_id"]) / "worker-crash.json").read_text())
+                print(
+                    f"Worker SIGKILL exit {fault['stopped']['ExitCode']}; "
+                    f"epoch {fault['lease_before']['epoch']} -> {sql['lease_after']['epoch']}; "
+                    f"checkpoint preserved={sql['pre_crash_checkpoint_preserved']}; "
+                    f"stale holder fenced={sql['stale_worker_fenced']}"
+                )
+    print("Tail = last recorded decision after cutoff; timestamp reconstruction is not exact commit visibility.")
+    print("Current repeatable 50k and combined-live capacity remain unproven. See report page 7.")
 
 
 def verify_bidding():
@@ -254,6 +276,14 @@ def verify_bidding():
     print(json.dumps(result, indent=2))
     if result["status"] != "PASS":
         raise RuntimeError("Saved client requests did not match the signed evidence")
+
+
+def closed_test():
+    import pytest
+
+    os.environ["RUN_INTEGRATION"] = "1"
+    print("Live isolated API/database regression checks; separate test database, no full-load run.", flush=True)
+    raise SystemExit(pytest.main(["-q", "tests/test_late_admission.py"]))
 
 
 def late():
@@ -338,7 +368,18 @@ if __name__ == "__main__":
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_mutually_exclusive_group(required=True)
-    for action in ("check", "prepare", "race", "recover", "evidence", "bacula", "bidding", "verify-bidding", "late"):
+    for action in (
+        "check",
+        "prepare",
+        "race",
+        "recover",
+        "evidence",
+        "bacula",
+        "bidding",
+        "verify-bidding",
+        "closed-test",
+        "late",
+    ):
         actions.add_argument("--" + action, action="store_true")
     args = parser.parse_args()
     if os.getenv("ENVIRONMENT", "development") not in ("development", "test"):
@@ -353,5 +394,6 @@ if __name__ == "__main__":
         "bacula": bacula,
         "bidding": bidding,
         "verify_bidding": verify_bidding,
+        "closed_test": closed_test,
         "late": late,
     }[action]()

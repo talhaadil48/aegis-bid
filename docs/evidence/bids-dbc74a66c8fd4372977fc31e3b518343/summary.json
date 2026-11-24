@@ -1,0 +1,6 @@
+{
+  "run_id": "dbc74a66c8fd4372977fc31e3b518343",
+  "status": "FAIL",
+  "requested_bidders": 50000,
+  "error": "RuntimeError: Not all distinct-bidder sockets connected; see ready reports"
+}

@@ -1,0 +1,22 @@
+{
+  "active_at_window_start": 10000,
+  "handshake_errors": 0,
+  "held_started_at": "2026-11-23T15:28:00.12900143Z",
+  "http_finished_at": "2026-11-23T15:29:12.435058078Z",
+  "http_statuses": {
+    "0": 3136,
+    "200": 6809,
+    "202": 55
+  },
+  "initial_states": {
+    "": 3136,
+    "CLOSED": 6809,
+    "QUEUED": 55
+  },
+  "request_errors": 3136,
+  "requested": 10000,
+  "run_id": "51b26614daf343a8930f6a1a874381cc",
+  "shard": 0,
+  "starts_in_window": 9284,
+  "writes_in_window": 2876
+}
