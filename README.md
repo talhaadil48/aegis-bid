@@ -8,8 +8,10 @@ Requires Python 3.12+, Node 20+, Docker Engine/Compose, and Git. Run from this r
 
 1. Copy `.env.example` to `.env`; replace every placeholder. Use a URL-safe PostgreSQL password and a random session secret of at least 32 characters. Keep `.env` untracked.
 2. `docker compose --env-file .env -f infra/compose.yaml up -d --build`
-3. Seed accounts: `docker compose --env-file .env -f infra/compose.yaml run --rm -e DEMO_PASSWORD=<your-demo-password> api python -m scripts.seed_demo`. For a private shell, export the password and use `-e DEMO_PASSWORD` instead of putting it in command history.
-4. Open `http://localhost:18080` (override with `WEB_PORT`). Accounts: `bidder1`, `bidder2`, `seller`, `admin`, `auditor`. Seeding does not reset existing passwords.
+3. Open `http://localhost:18080` (override with `WEB_PORT`) and select **Create an account**. Choose a username and a password of at least 12 characters. The app signs you in as a bidder.
+4. To open the first auction on an empty installation, an operator can provision a seller with `docker compose --env-file .env -f infra/compose.yaml exec api python -m scripts.create_user my-seller --role seller`. Enter the password at the prompt, then sign in as that seller and use **Create an auction**. Use the same command with the appropriate role to provision administrators or auditors.
+
+For an optional classroom demo, export `DEMO_PASSWORD` in your shell and run `docker compose --env-file .env -f infra/compose.yaml run --rm -e DEMO_PASSWORD api python -m scripts.seed_demo`. This seeds `bidder1`, `bidder2`, `seller`, `admin` and `auditor` without resetting existing passwords.
 
 Ports bind to loopback. This is a disposable local deployment; do not expose it publicly without TLS, production secret management, external rate limits and independent backup infrastructure.
 
