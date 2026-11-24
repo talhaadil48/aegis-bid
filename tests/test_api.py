@@ -32,6 +32,34 @@ def test_security_headers_on_success_and_origin_refusal():
     assert refused.headers["Cache-Control"] == "no-store"
 
 
+def test_registration_creates_a_bidder_and_starts_a_session(auction):
+    client = TestClient(app)
+    username = "buyer-" + uuid4().hex[:16]
+    credentials = {"username": username, "password": "registration-test-password"}
+    path = "/v1/auth/register"
+    invalid = client.post(path, json={**credentials, "role": "admin"})
+    assert invalid.status_code == 422
+    assert credentials["password"] not in invalid.text
+    assert client.get("/v1/auth/me").status_code == 401
+
+    created = client.post(path, json=credentials)
+    assert created.status_code == 201
+    account = created.json()
+    assert set(account) == {"id", "username", "role"}
+    assert account["username"] == username
+    assert account["role"] == "bidder"
+    assert "HttpOnly" in created.headers["set-cookie"]
+    assert client.get("/v1/auth/me").json() == account
+    assert client.get("/v1/auctions").status_code == 200
+    assert client.get("/v1/admin/metrics").status_code == 403
+
+    assert client.post("/v1/auth/logout").status_code == 200
+    assert client.get("/v1/auth/me").status_code == 401
+    assert client.post(path, json={**credentials, "password": "different-long-password"}).status_code == 409
+    assert client.get("/v1/auth/me").status_code == 401
+    assert client.post("/v1/auth/login", json=credentials).json() == account
+
+
 def test_bid_authorization_and_lifecycle(auction):
     aid, bidder = auction
     anon = TestClient(app)

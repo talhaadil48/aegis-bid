@@ -3,14 +3,35 @@ import hashlib
 import hmac
 import os
 from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import jwt
 from fastapi import Depends, HTTPException, Request
+from pydantic import BaseModel, ConfigDict, Field
 
 from aegis import config
 from aegis.coalescing import grouped
 from aegis.db import connection
+
+
+class NewAccount(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    username: str = Field(min_length=3, max_length=32, pattern=r"^[A-Za-z0-9_-]+$")
+    password: str = Field(min_length=12, max_length=128)
+
+
+def create_account(account: NewAccount, role: str):
+    password_hash = hash_password(account.password)
+    with connection() as c:
+        return c.execute(
+            """
+            INSERT INTO users (id, username, password_hash, role)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (username) DO NOTHING
+            RETURNING id, username, role
+            """,
+            (uuid4(), account.username, password_hash, role),
+        ).fetchone()
 
 
 def hash_password(password):

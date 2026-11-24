@@ -319,6 +319,9 @@ th {
 .login button {
   width: 100%;
 }
+.auth-switch {
+  margin-top: 12px;
+}
 .page-footer {
   border-top: 1px solid var(--border);
   margin-top: 45px;
