@@ -158,7 +158,16 @@ def system_design(width=511):
     line([(500, 292), (510, 292), (510, 477), (91, 477)], color=AMBER, head=False)
     for x in [91, 260, 429]:
         line([(x, 477), (x, 489)], color=AMBER)
-    card(20, 489, 142, 63, "Bacula / Catalog", ["Prepared SQL backup", "Director / FD / SD"], accent=TEAL)
+    card(
+        20,
+        489,
+        142,
+        63,
+        "Bacula / Catalog",
+        ["Prepared SQL backup", "Director / FD / SD"],
+        accent=TEAL,
+        fill=colors.HexColor("#E8F4EE"),
+    )
     card(189, 489, 142, 63, "Physical PITR", ["Base backup + WAL", "Named / time target"], accent=TEAL)
     card(358, 489, 142, 63, "S3 vault", ["AES-GCM + versions", "COMPLIANCE lock"], accent=TEAL)
     for x in [91, 260, 429]:

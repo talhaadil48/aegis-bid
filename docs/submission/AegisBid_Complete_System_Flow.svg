@@ -120,7 +120,7 @@
 			<polygon points="260 161, 257.3 165.5, 262.7 165.5" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(65%,47%,19%); fill-rule: evenodd;"/>
 			<path d="M 429,173 L 429,161 Z" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.9;"/>
 			<polygon points="429 161, 426.3 165.5, 431.7 165.5" style="stroke: rgb(65%,47%,19%); stroke-linecap: butt; stroke-width: 0.4; fill: rgb(65%,47%,19%); fill-rule: evenodd;"/>
-			<rect x="20" y="98" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(100%,100%,100%); fill-rule: evenodd;"/>
+			<rect x="20" y="98" width="142" height="63" rx="6" ry="6" style="stroke: rgb(86%,89%,92%); stroke-linecap: butt; stroke-width: 0.65; fill: rgb(90%,95%,93%); fill-rule: evenodd;"/>
 			<path d="M 32,147 L 32,134 Z" style="stroke: rgb(8%,45%,41%); stroke-linecap: butt; stroke-width: 2.5;"/>
 			<text x="42" y="138" style="font-family: Helvetica-Bold; font-size: 11px;fill: rgb(9%,16%,27%); stroke:none;" transform="translate(0,276) scale(1,-1)">Bacula / Catalog</text>
 			<text x="32" y="122" style="font-family: Helvetica; font-size: 10px;fill: rgb(23%,30%,38%); stroke:none;" transform="translate(0,244) scale(1,-1)">Prepared SQL backup</text>

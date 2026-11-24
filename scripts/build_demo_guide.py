@@ -41,12 +41,12 @@ def main():
                         [
                             "0:00-0:12",
                             "Title/name + implementation stack on report page 1",
-                            f"I am {name}, {roll}. AegisBid uses PostgreSQL for decisions, Go for ingress/fanout, NATS for commands and Bacula/WAL/S3 for recovery.",
+                            f"I am {name}, {roll}. AegisBid combines durable flash auctions with Bacula-backed, independently verified database recovery.",
                         ],
                         [
                             "0:12-0:32",
                             "Report page 2: complete system flow",
-                            "Trace HTTP bid to Go intake, FastAPI authentication, durable SQL queue, fenced worker, atomic decisions and final allocation. Separate live fanout and verified recovery branches.",
+                            "Trace the bid into SQL and the fenced worker, then follow the recovery branch. Bacula protects prepared database artifacts; restored data is verified in a separate database.",
                         ],
                         [
                             "0:32-0:55",
@@ -54,24 +54,24 @@ def main():
                             "Reserve $100, increment $5, stock 3. Show pending then final state in private history. QUEUED means durable admission, not winning stock. Seller/admin views are already open.",
                         ],
                         [
-                            "0:55-1:15",
+                            "0:55-1:10",
                             "Terminal: --race; refresh private history",
                             "Two authenticated bidders offer the same eligible price. Show one ACCEPTED and one REJECTED, with different ordered sequences. Stable request UUIDs make retries idempotent.",
                         ],
                         [
-                            "1:15-1:55",
-                            "Terminal: --bidding; report page 7",
-                            "Say: two historical HTTP runs passed 50,000 distinct bidders, including real worker SIGKILL; all 20 winners replayed correctly. Point to cutoff queue and decision tail. Then show current regressions: HTTP 42,794 eligible; combined live 30,782. Current repeatable 50k is still open.",
+                            "1:10-1:40",
+                            "Report page 3 + terminal: --bacula",
+                            "Explain Director, File Daemon, Storage Daemon and Catalog. Show recorded jobs 1/2 with T status, four entries and 39,802 bytes. Prepared SQL exports and checksum manifests are backed up; media and Catalog are persistent.",
                         ],
                         [
-                            "1:55-2:15",
-                            "Terminal: --verify-bidding",
-                            "Run offline replay now: 50,000 original bidder/UUID/amount matches and 20 winners must PASS. The recorded stress checks also rejected tampered winners. The workload was recorded earlier; verification runs now.",
+                            "1:40-2:10",
+                            "Report page 4 + recovery-bacula.json",
+                            "Show PASS, checksum_verified=true, 20 decisions, 21 events and three winners. Restore used an alternate path and fresh database. The recorded 1.25218 s covers database import/verification; media retrieval and full-site recovery are outside that timer.",
                         ],
                         [
-                            "2:15-2:40",
-                            "Recorded recovery evidence; --evidence",
-                            "Bacula restored 20 decisions and three winners. Kind node-loss recovery took 67.21 seconds; PITR 3.12 seconds; encrypted S3 restore passed. These are controlled recorded drills. Physical multi-zone AWS deployment and independent-account backup remain pending.",
+                            "2:10-2:40",
+                            "Report page 6 + --verify-bidding",
+                            "Present two selected historical HTTP runs: each accounted for 50,000 distinct requests, with normal/worker-kill verification passing. Show queue/drain time and replay 50,000 signed decisions with 20 winners. These recorded successes do not certify every current layout.",
                         ],
                         [
                             "2:40-3:00",
@@ -82,7 +82,7 @@ def main():
                 },
                 heading("Delivery cues"),
                 paragraph(
-                    "Open the bidder browser, report pages 2/7 and prepared terminals before recording. For --race expect PASS with one ACCEPTED and one REJECTED. For --verify-bidding expect PASS, 50,000 matched requests and 20 winners. For --late expect CLOSED and unchanged anchor/winners. Admission within ten seconds does not mean every decision finishes by cutoff."
+                    "Pre-open the browser, report pages 2/3/4/6 and terminals. Bacula is the main demonstration: show job T status and the separate restore certificate together. Expected outputs: --race one ACCEPTED/one REJECTED; offline replay PASS with 50,000 requests/20 winners; --late CLOSED with unchanged anchor/winners."
                 ),
                 paragraph(
                     "Pre-expand the evidence output or use a clearly labelled recorded clip when a step exceeds its slot. Do not call stored JSON a live stress experiment. The failure test sends real SIGKILL and explicitly restarts the worker. HTTP pools are bounded; 50,000 virtual bidders does not mean 50,000 simultaneous HTTP transactions."
@@ -104,14 +104,14 @@ def main():
                 ),
                 heading("2. Pretype these in separate terminal tabs"),
                 code(
-                    ".venv\\Scripts\\python.exe -m scripts.demo --race\n.venv\\Scripts\\python.exe -m scripts.demo --bidding\n.venv\\Scripts\\python.exe -m scripts.demo --verify-bidding\n.venv\\Scripts\\python.exe -m scripts.demo --evidence\n.venv\\Scripts\\python.exe -m scripts.demo --late"
+                    ".venv\\Scripts\\python.exe -m scripts.demo --race\n.venv\\Scripts\\python.exe -m scripts.demo --bacula\nGet-Content docs/evidence/recovery-bacula.json\n.venv\\Scripts\\python.exe -m scripts.demo --verify-bidding\n.venv\\Scripts\\python.exe -m scripts.demo --late"
                 ),
                 paragraph(
-                    "--race uses bidder1/bidder2 at the same eligible amount; avoid concurrent manual bids. --bidding reads historical passes and latest trials; it does not generate load. --verify-bidding replays the saved CSV/signature/ledger offline. --late closes this auction and verifies a new CLOSED receipt: run it last. Optional --recover tests real SIGKILL plus 20 same-UUID retries outside the short video. --bacula lists existing jobs."
+                    "--race uses two bidders at the same eligible price. --bacula reads existing Catalog jobs; the certificate JSON is recorded recovery evidence. --verify-bidding replays saved client requests/signature/ledger offline. --late closes this auction: run it last. No command above starts a new backup, restore or full-load experiment."
                 ),
                 heading("3. Open the evidence files in advance"),
                 paragraph(
-                    "<b>Report:</b> AegisBid_Technical_Report_7_Pages.pdf, especially pages 2 and 7. <b>Bidding:</b> docs/bidding-proof.md and docs/evidence/bidding-index.json, with the selected run summaries. <b>Recovery:</b> recovery-bacula.json, bacula-console.txt, ha-local.json, pitr-local.json and s3-offsite.json. These are inside docs/evidence. The helper selects safe fields; avoid displaying private bucket/account details."
+                    "<b>Report:</b> pages 2 (flow), 3 (Bacula), 4 (restore) and 6 (selected 50k successes). <b>Recovery:</b> docs/evidence/recovery-bacula.json/.html and bacula-console.txt. <b>Workload:</b> docs/bidding-proof.md and docs/evidence/bidding-index.json retain complete run history. Avoid displaying credentials or private bucket details."
                 ),
                 paragraph(
                     "The live auditor is INCOMPLETE without AUDIT_SIGNING_KEY. --verify-bidding checks the saved signed export; its public key must be distributed/pinned separately for trusted provenance. Owner receipts are hash references, not separate signatures."
@@ -126,7 +126,7 @@ def main():
                 ),
                 heading("Likely viva questions: concise answers"),
                 paragraph(
-                    "<b>Exactly once?</b> One SQL effect per UUID; transport can redeliver. <b>50k proof?</b> Two historical distinct-user HTTP passes with backlog/drain and signed replay; later regressions and combined-live capacity remain open. <b>Why Go services?</b> Bounded ingress and shared-frame fanout; service separation is an attempted optimization. <b>HA vs backup?</b> Promotion handles primary loss; PITR/remote copies address corruption/site loss. <b>Production complete?</b> Real multi-zone, independent-account backup and continuous offsite RPO remain unproven."
+                    "<b>Why Bacula?</b> Scheduled artifact protection, media/Catalog indexing and alternate-path restore. <b>T means correct data?</b> It means normal job completion; checksum/count/rule/winner checks establish recovered-data correctness. <b>1.25 s full-site RTO?</b> It times only import/verification. <b>100%?</b> Full request coverage in the two selected historical runs, not every release or production scenario. <b>Production scope?</b> Current-layout repeatability, real multi-zone, independent-account backup and continuous offsite RPO remain open."
                 ),
             ],
         },
