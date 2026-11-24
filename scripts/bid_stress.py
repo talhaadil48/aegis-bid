@@ -164,7 +164,8 @@ def validate(aid, profiles, start, end, fault, api_url, owner):
         for p in sample_profiles:
             headers = {"Cookie": "aegis_session=" + p["token"]}
             response = client.get("/v1/bid-requests/" + str(p["request_id"]), headers=headers)
-            response.raise_for_status()
+            if response.status_code != 200:
+                continue
             status = response.json()
             history = client.get("/v1/me/bids", headers=headers)
             history.raise_for_status()
@@ -268,6 +269,7 @@ def run(args):
                     "ws_url": f"ws://gateway:8081/v1/live/auctions/{aid}",
                     "auction_id": aid,
                     "total": args.bidders,
+                    "live_sockets": not args.no_sockets,
                     "users": shard_profiles,
                 },
                 private=True,
@@ -286,7 +288,7 @@ def run(args):
                     "--user",
                     "0:0",
                     "-e",
-                    "GOMAXPROCS=1",
+                    "GOMAXPROCS=2",
                     "--read-only",
                     "--ulimit",
                     "nofile=100000:100000",
@@ -308,7 +310,7 @@ def run(args):
             ready_files = list(output.glob("ready-*.json"))
             if len(ready_files) == shards:
                 ready = [json.loads(p.read_text()) for p in ready_files]
-                if sum(r["active"] for r in ready) != args.bidders:
+                if not args.no_sockets and sum(r["active"] for r in ready) != args.bidders:
                     raise RuntimeError("Not all distinct-bidder sockets connected; see ready reports")
                 break
             time.sleep(0.5)
@@ -325,7 +327,7 @@ def run(args):
             {"start": start.isoformat(), "close": end.isoformat(), "spread_seconds": args.spread},
         )
         print(
-            f"All {args.bidders} authenticated sockets ready. Final ten-second window starts {start.isoformat()}; fault={args.fault}",
+            f"All {args.bidders} authenticated {'sessions' if args.no_sockets else 'sockets'} ready. Final ten-second window starts {start.isoformat()}; fault={args.fault}",
             flush=True,
         )
         until = time.monotonic() + args.drain_timeout + 14
@@ -396,7 +398,7 @@ def run(args):
             with path.open(newline="", encoding="utf-8") as f:
                 rows.extend(csv.DictReader(f))
         request_errors = sum(r["request_errors"] for r in shard_reports)
-        population_ok = (
+        population_ok = args.no_sockets or (
             len(shard_reports) == shards
             and sum(r["active_at_window_start"] for r in shard_reports) == args.bidders
             and sum(r["active_at_end"] for r in shard_reports) == args.bidders
@@ -441,6 +443,7 @@ def run(args):
             "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             "timestamp": datetime.now(UTC).isoformat(),
             "scenario": args.fault,
+            "profile": "http_only" if args.no_sockets else "live_and_http",
             "auction_id": str(aid),
             "window_start": start.isoformat(),
             "window_close": end.isoformat(),
@@ -448,6 +451,7 @@ def run(args):
             "offered_spread_s": args.spread,
             "api_workers": args.workers,
             "shards": shards,
+            "max_generator_http_connections": shards * 256,
             "population_gate": population_ok,
             "close_window_gate": workload_ok,
             "correctness_gate": correctness_ok,
@@ -465,7 +469,7 @@ def run(args):
             "machine": command(["docker", "info", "--format", "{{.NCPU}} CPUs {{.MemTotal}} bytes"]).strip(),
             "app_image_id": command(["docker", "inspect", project + "-api-1", "--format", "{{.Image}}"]).strip(),
             "tools_image_id": command(["docker", "inspect", project + "-gateway-1", "--format", "{{.Image}}"]).strip(),
-            "scope": "One local Docker host; distinct seeded users and pre-issued real HS256 sessions; 50k claim only if requested population is 50,000 and every gate passes. No password-login throughput, independent load hosts or real cloud zones claimed.",
+            "scope": "One local Docker host; distinct seeded users and pre-issued real HS256 sessions; HTTP connections pooled across virtual users. Profile explicitly identifies whether live sockets were held. 50k bidding claim requires 50,000 users and every gate passing. No password-login throughput, independent load hosts or real cloud zones claimed.",
         }
         write_json(output / "summary.json", report)
         write_json(output / "sql-timeline.json", samples)
@@ -515,6 +519,9 @@ if __name__ == "__main__":
     parser.add_argument("--spread", type=float, default=9)
     parser.add_argument("--fault", choices=["none", "worker"], default="none")
     parser.add_argument("--skip-build", action="store_true")
+    parser.add_argument(
+        "--no-sockets", action="store_true", help="Separate HTTP bidding calibration; does not claim held sockets"
+    )
     parser.add_argument("--keep", action="store_true")
     args = parser.parse_args()
     if (

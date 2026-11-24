@@ -52,7 +52,7 @@ def verify_run(directory):
         ):
             errors.append("Client did not successfully offer this bid in the window")
     reports = [json.loads(p.read_text()) for p in root.glob("shard-*.json")]
-    if (
+    if summary.get("profile", "live_and_http") != "http_only" and (
         sum(r["active_at_window_start"] for r in reports) != expected
         or sum(r["active_at_end"] for r in reports) != expected
     ):

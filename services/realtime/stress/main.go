@@ -37,6 +37,7 @@ type Config struct {
 	Auction string   `json:"auction_id"`
 	Total   int      `json:"total"`
 	Users   []Bidder `json:"users"`
+	Live    bool     `json:"live_sockets"`
 }
 type Plan struct {
 	Start  time.Time `json:"start"`
@@ -94,49 +95,51 @@ func main() {
 	gate := make(chan struct{})
 	handshakes := make(chan struct{}, *ramp)
 	var plan Plan
-	transport := &http.Transport{MaxIdleConns: 20000, MaxIdleConnsPerHost: 20000, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
+	transport := &http.Transport{MaxIdleConns: 256, MaxIdleConnsPerHost: 256, MaxConnsPerHost: 256, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
 	client := &http.Client{Transport: transport, Timeout: 90 * time.Second}
 	beginRamp := time.Now().UTC()
 	for i, profile := range c.Users {
 		go func(i int, p Bidder) {
 			defer bids.Done()
-			handshakes <- struct{}{}
-			dialer := websocket.Dialer{HandshakeTimeout: 45 * time.Second, ReadBufferSize: 1024, WriteBufferSize: 1024}
-			socket, _, err := dialer.Dial(c.WS, http.Header{"Cookie": []string{"aegis_session=" + p.Token}})
-			if err == nil {
-				_ = socket.SetReadDeadline(time.Now().Add(45 * time.Second))
-				_, body, readErr := socket.ReadMessage()
-				var snapshot struct {
-					Type string `json:"type"`
-				}
-				if readErr != nil || json.Unmarshal(body, &snapshot) != nil || snapshot.Type != "auction.snapshot" {
-					err = fmt.Errorf("initial snapshot unavailable")
-					_ = socket.Close()
-				}
-			}
-			if err != nil {
-				wsErrors.Add(1)
-			} else {
-				active.Add(1)
-				messages.Add(1)
-				socketsMu.Lock()
-				sockets = append(sockets, socket)
-				socketsMu.Unlock()
-				readers.Add(1)
-				go func() {
-					defer readers.Done()
-					defer active.Add(-1)
-					defer socket.Close()
-					for {
-						_ = socket.SetReadDeadline(time.Now().Add(90 * time.Second))
-						if _, _, err := socket.ReadMessage(); err != nil {
-							return
-						}
-						messages.Add(1)
+			if c.Live {
+				handshakes <- struct{}{}
+				dialer := websocket.Dialer{HandshakeTimeout: 45 * time.Second, ReadBufferSize: 1024, WriteBufferSize: 1024}
+				socket, _, err := dialer.Dial(c.WS, http.Header{"Cookie": []string{"aegis_session=" + p.Token}})
+				if err == nil {
+					_ = socket.SetReadDeadline(time.Now().Add(45 * time.Second))
+					_, body, readErr := socket.ReadMessage()
+					var snapshot struct {
+						Type string `json:"type"`
 					}
-				}()
+					if readErr != nil || json.Unmarshal(body, &snapshot) != nil || snapshot.Type != "auction.snapshot" {
+						err = fmt.Errorf("initial snapshot unavailable")
+						_ = socket.Close()
+					}
+				}
+				if err != nil {
+					wsErrors.Add(1)
+				} else {
+					active.Add(1)
+					messages.Add(1)
+					socketsMu.Lock()
+					sockets = append(sockets, socket)
+					socketsMu.Unlock()
+					readers.Add(1)
+					go func() {
+						defer readers.Done()
+						defer active.Add(-1)
+						defer socket.Close()
+						for {
+							_ = socket.SetReadDeadline(time.Now().Add(90 * time.Second))
+							if _, _, err := socket.ReadMessage(); err != nil {
+								return
+							}
+							messages.Add(1)
+						}
+					}()
+				}
+				<-handshakes
 			}
-			<-handshakes
 			ready.Done()
 			<-gate
 			scheduled := plan.Start.Add(time.Duration(float64(p.Index) / float64(c.Total) * plan.Spread * float64(time.Second)))
