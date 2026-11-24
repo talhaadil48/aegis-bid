@@ -11,6 +11,7 @@ import subprocess
 import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from threading import Event, Thread
 from uuid import uuid4
 
 import httpx
@@ -68,6 +69,7 @@ def seed(count, run_id):
     owner, aid = uuid4(), uuid4()
     password_hash = hash_password(secrets.token_urlsafe(32))
     with connection() as c:
+        c.execute("CREATE EXTENSION IF NOT EXISTS pg_stat_statements")
         with c.cursor().copy("COPY users(id,username,password_hash,role) FROM STDIN") as copy:
             copy.write_row((owner, f"stress-owner-{run_id}", password_hash, "admin"))
             for p in profiles:
@@ -234,6 +236,31 @@ def run(args):
     old_signing_key = os.environ.get("AUDIT_SIGNING_KEY")
     containers = []
     samples = []
+    stop_resources = Event()
+
+    def resource_monitor():
+        with (output / "resources.jsonl").open("w", encoding="utf-8") as stream:
+            while not stop_resources.is_set():
+                raw = subprocess.run(
+                    ["docker", "stats", "--no-stream", "--format", "{{json .}}"],
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                ).stdout
+                values = [json.loads(line) for line in raw.splitlines() if line.strip()]
+                stream.write(
+                    json.dumps(
+                        {
+                            "at": datetime.now(UTC).isoformat(),
+                            "containers": [v for v in values if v["Name"].startswith(project + "-")],
+                        }
+                    )
+                    + "\n"
+                )
+                stream.flush()
+                stop_resources.wait(1)
+
+    resource_thread = None
     fault = None
     report = {"run_id": run_id, "status": "FAIL", "requested_bidders": args.bidders}
     try:
@@ -242,6 +269,8 @@ def run(args):
             command(["docker", "build", "-t", "aegis-stress-tools:local", "-f", "infra/Realtime.Dockerfile", "."])
         print(f"Starting isolated project {project}; {args.bidders} distinct bidders", flush=True)
         command([*compose, "up", "-d"], env)
+        resource_thread = Thread(target=resource_monitor, daemon=True)
+        resource_thread.start()
         db.close_pools()
         db.DATABASE_URL = f"postgresql://aegis:{password}@127.0.0.1:55440/{database}"
         config.SECRET = session_key
@@ -376,6 +405,11 @@ def run(args):
         with gzip.open(output / "signed-auction.json.gz", "wt", encoding="utf-8") as f:
             json.dump(audit, f, separators=(",", ":"))
         truth = validate(aid, profiles, start, end, fault, "http://127.0.0.1:15810", owner)
+        with connection() as c:
+            query_costs = c.execute(
+                "SELECT left(query,300) query,calls,total_exec_time,mean_exec_time,rows FROM pg_stat_statements ORDER BY total_exec_time DESC LIMIT 25"
+            ).fetchall()
+        write_json(output / "query-costs.json", query_costs)
         # New late requests must finalize without adding events after the signed close.
         p = profiles[0]
         with httpx.Client(base_url="http://127.0.0.1:15810", timeout=30) as client:
@@ -484,6 +518,9 @@ def run(args):
         print(json.dumps(report, indent=2), flush=True)
         return False
     finally:
+        stop_resources.set()
+        if resource_thread:
+            resource_thread.join(timeout=5)
         (private / "stop").write_text("stop")
         for name in containers:
             subprocess.run(["docker", "rm", "-f", name], capture_output=True, check=False)

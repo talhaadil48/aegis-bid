@@ -5,7 +5,7 @@ services:
       POSTGRES_DB: ${STRESS_DATABASE:?Set isolated database}
       POSTGRES_USER: aegis
       POSTGRES_PASSWORD: ${STRESS_DB_PASSWORD:?Set isolated password}
-    command: [postgres, -c, shared_buffers=256MB, -c, max_connections=100, -c, wal_compression=on, -c, checkpoint_timeout=15min]
+    command: [postgres, -c, shared_buffers=256MB, -c, max_connections=100, -c, wal_compression=on, -c, checkpoint_timeout=15min, -c, shared_preload_libraries=pg_stat_statements]
     ports: ["127.0.0.1:55440:5432"]
     volumes: [stress-postgres:/var/lib/postgresql]
     mem_limit: 1400m

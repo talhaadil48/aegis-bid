@@ -127,7 +127,7 @@ async def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidd
     limit(("bid", str(user["id"])), 120)
     try:
         r = await grouped(
-            "admission", aid, (user["id"], body.request_id, body.amount_cents), admit_many, collect_delay=0.020
+            "admission", aid, (user["id"], body.request_id, body.amount_cents), admit_many, collect_delay=0.100
         )
     except LookupError as e:
         raise HTTPException(404, str(e)) from None

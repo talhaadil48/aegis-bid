@@ -71,10 +71,11 @@ async def relay_once(js):
                 for r in batch
             )
         )
+    if rows:
         with connection() as c:
             c.execute(
                 "UPDATE bid_requests SET published_at=clock_timestamp() WHERE request_id=ANY(%s)",
-                ([r["request_id"] for r in batch],),
+                ([r["request_id"] for r in rows],),
             )
     with connection() as c:
         rows = c.execute("SELECT * FROM outbox WHERE published_at IS NULL ORDER BY id LIMIT 1000").fetchall()
