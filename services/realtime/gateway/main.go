@@ -311,6 +311,8 @@ func main() {
 	s := newServer()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v1/live/auctions/", s.live)
+	admission := newAdmissionProxy(s.upstream, s.origin)
+	mux.HandleFunc("/v1/auctions/", admission.serve)
 	mux.HandleFunc("/metrics", s.metrics)
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) { w.WriteHeader(200) })
 	httpServer := &http.Server{Addr: ":8081", Handler: mux, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}

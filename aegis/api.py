@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.responses import JSONResponse
 
 from aegis import config
-from aegis.auth import check_password, current_user, identity, roles, token
+from aegis.auth import check_password, current_user, identity, roles, subject, token, users_many
 from aegis.coalescing import grouped
 from aegis.db import connection
 from aegis.engine import Conflict, lock_intake
@@ -111,6 +111,56 @@ class Bid(BaseModel):
     model_config = ConfigDict(extra="forbid")
     request_id: UUID
     amount_cents: int = Field(strict=True, gt=0, le=10**12)
+
+
+class ServiceBid(Bid):
+    session_cookie: str = Field(min_length=1, max_length=4096)
+
+
+class AdmissionBatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    auction_id: UUID
+    requests: list[ServiceBid] = Field(min_length=1, max_length=512)
+
+
+@app.post("/internal/v1/admissions", include_in_schema=False)
+def internal_admission(body: AdmissionBatch):
+    results = [None] * len(body.requests)
+    verified = []
+    for index, item in enumerate(body.requests):
+        try:
+            verified.append((index, subject(item.session_cookie)))
+        except HTTPException as error:
+            results[index] = {"http_status": error.status_code, "detail": error.detail}
+    users = users_many(None, [uid for _, uid in verified]) if verified else []
+    accepted = []
+    for (index, _), user in zip(verified, users, strict=True):
+        try:
+            if isinstance(user, HTTPException):
+                raise user
+            if user["role"] != "bidder":
+                raise HTTPException(403, "Role does not permit this action")
+            limit(("bid", str(user["id"])), 120)
+            item = body.requests[index]
+            accepted.append((index, (user["id"], item.request_id, item.amount_cents)))
+        except HTTPException as error:
+            results[index] = {"http_status": error.status_code, "detail": error.detail}
+    outcomes = admit_many(body.auction_id, [entry for _, entry in accepted]) if accepted else []
+    for (index, _), outcome in zip(accepted, outcomes, strict=True):
+        if isinstance(outcome, LookupError):
+            results[index] = {"http_status": 404, "detail": str(outcome)}
+        elif isinstance(outcome, Conflict):
+            results[index] = {"http_status": 409, "detail": str(outcome)}
+        elif isinstance(outcome, OverflowError):
+            results[index] = {"http_status": 429, "detail": str(outcome)}
+        else:
+            results[index] = {
+                "http_status": 202 if outcome["state"] == "QUEUED" else 200,
+                "request_id": str(outcome["request_id"]),
+                "state": outcome["state"],
+                "message": "Durable result; query request for final reason",
+            }
+    return JSONResponse({"results": results})
 
 
 @app.post("/v1/auctions/{aid}/bids", status_code=202)

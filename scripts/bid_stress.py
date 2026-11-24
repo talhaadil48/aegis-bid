@@ -227,6 +227,7 @@ def run(args):
         "STRESS_DB_PASSWORD": password,
         "STRESS_SESSION_SECRET": session_key,
         "STRESS_API_WORKERS": str(args.workers),
+        "STRESS_ADMISSION_KEY": secrets.token_urlsafe(48),
     }
     compose = ["docker", "compose", "-p", project, "-f", "infra/compose.stress.yaml"]
     write_json(
@@ -294,7 +295,7 @@ def run(args):
                 {
                     "run_id": run_id,
                     "shard": shard,
-                    "api_url": "http://api:8000",
+                    "api_url": "http://gateway:8081" if args.ingress == "gateway" else "http://api:8000",
                     "ws_url": f"ws://gateway:8081/v1/live/auctions/{aid}",
                     "auction_id": aid,
                     "total": args.bidders,
@@ -478,6 +479,7 @@ def run(args):
             "timestamp": datetime.now(UTC).isoformat(),
             "scenario": args.fault,
             "profile": "http_only" if args.no_sockets else "live_and_http",
+            "bid_ingress": args.ingress,
             "auction_id": str(aid),
             "window_start": start.isoformat(),
             "window_close": end.isoformat(),
@@ -560,6 +562,7 @@ if __name__ == "__main__":
         "--no-sockets", action="store_true", help="Separate HTTP bidding calibration; does not claim held sockets"
     )
     parser.add_argument("--keep", action="store_true")
+    parser.add_argument("--ingress", choices=["direct", "gateway"], default="gateway")
     args = parser.parse_args()
     if (
         not 1 <= args.bidders <= 50000

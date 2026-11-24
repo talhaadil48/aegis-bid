@@ -26,6 +26,7 @@ services:
       NATS_URL: nats://nats:4222
       ENVIRONMENT: test
       MAX_PENDING_BIDS: '60000'
+      ADMISSION_SERVICE_KEY: ${STRESS_ADMISSION_KEY:?Set isolated admission key}
     command: [python, -m, aegis.db]
     depends_on:
       postgres: {condition: service_healthy}
@@ -67,6 +68,7 @@ services:
       MAX_AUCTION_CONNECTIONS: '60000'
       MAX_USER_CONNECTIONS: '10'
       PUBLIC_ORIGIN: http://localhost:18080
+      ADMISSION_SERVICE_KEY: ${STRESS_ADMISSION_KEY}
       GOMAXPROCS: '2'
       GOGC: '150'
       GOMEMLIMIT: 1500MiB

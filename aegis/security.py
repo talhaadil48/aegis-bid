@@ -1,5 +1,6 @@
 """Security headers and origin checks without per-request middleware task queues."""
 
+import hmac
 import os
 
 from starlette.requests import Request
@@ -26,6 +27,12 @@ class SecurityHeaders:
                 message = {**message, "headers": headers}
             await send(message)
 
+        if scope["path"].startswith("/internal/"):
+            key = os.getenv("ADMISSION_SERVICE_KEY", "")
+            provided = next((v.decode("latin1") for k, v in scope["headers"] if k.lower() == b"x-admission-key"), "")
+            if len(key) < 32 or not hmac.compare_digest(key, provided):
+                await Response("Service authentication required", status_code=403)(scope, receive, secure_send)
+                return
         if scope["method"] not in ("GET", "HEAD", "OPTIONS"):
             origin = next((v.decode("latin1") for k, v in scope["headers"] if k.lower() == b"origin"), None)
             if origin and origin != os.getenv("PUBLIC_ORIGIN", str(Request(scope).base_url).rstrip("/")):
