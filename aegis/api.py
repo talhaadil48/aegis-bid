@@ -8,6 +8,7 @@ from uuid import UUID, uuid4
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from starlette.responses import JSONResponse
 
 from aegis import config
 from aegis.auth import check_password, current_user, identity, roles, token
@@ -15,8 +16,10 @@ from aegis.coalescing import grouped
 from aegis.db import connection
 from aegis.engine import Conflict, lock_intake
 from aegis.engine_batch import admit_many
+from aegis.security import SecurityHeaders
 
 app = FastAPI(title="AegisBid Omega", version="1.0.0")
+app.add_middleware(SecurityHeaders)
 attempts = defaultdict(deque)
 connections = defaultdict(int)
 next_prune = 0.0
@@ -36,18 +39,6 @@ def limit(key, maximum, seconds=60):
         for old in list(attempts):
             if not attempts[old] or attempts[old][-1] < now - seconds:
                 del attempts[old]
-
-
-@app.middleware("http")
-async def security(request: Request, call_next):
-    if request.method not in ("GET", "HEAD", "OPTIONS"):
-        origin = request.headers.get("origin")
-        if origin and origin != os.getenv("PUBLIC_ORIGIN", str(request.base_url).rstrip("/")):
-            return Response("Cross-origin request denied", status_code=403)
-    response = await call_next(request)
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["Cache-Control"] = "no-store"
-    return response
 
 
 class Login(BaseModel):
@@ -123,7 +114,7 @@ class Bid(BaseModel):
 
 
 @app.post("/v1/auctions/{aid}/bids", status_code=202)
-async def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidder"))):
+async def bid(aid: UUID, body: Bid, user=Depends(roles("bidder"))):
     limit(("bid", str(user["id"])), 120)
     try:
         r = await grouped(
@@ -135,14 +126,16 @@ async def bid(aid: UUID, body: Bid, response: Response, user=Depends(roles("bidd
         raise HTTPException(409, str(e)) from None
     except OverflowError as e:
         raise HTTPException(429, str(e)) from None
-    response.status_code = 202 if r["state"] == "QUEUED" else 200
-    return {
-        "request_id": r["request_id"],
-        "state": r["state"],
-        "message": "Durably queued; query for final decision"
-        if r["state"] == "QUEUED"
-        else "Final result; query for recorded reason",
-    }
+    return JSONResponse(
+        status_code=202 if r["state"] == "QUEUED" else 200,
+        content={
+            "request_id": str(r["request_id"]),
+            "state": r["state"],
+            "message": "Durably queued; query for final decision"
+            if r["state"] == "QUEUED"
+            else "Final result; query for recorded reason",
+        },
+    )
 
 
 @app.get("/v1/bid-requests/{rid}")

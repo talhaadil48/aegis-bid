@@ -22,6 +22,16 @@ def test_password():
     assert not check_password("wrong", encoded)
 
 
+def test_security_headers_on_success_and_origin_refusal():
+    client = TestClient(app)
+    response = client.get("/livez")
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    refused = client.post("/v1/auth/logout", headers={"Origin": "https://evil.test"})
+    assert refused.status_code == 403
+    assert refused.headers["Cache-Control"] == "no-store"
+
+
 def test_bid_authorization_and_lifecycle(auction):
     aid, bidder = auction
     anon = TestClient(app)
