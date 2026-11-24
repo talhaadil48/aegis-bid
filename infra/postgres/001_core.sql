@@ -67,3 +67,58 @@ CREATE TABLE IF NOT EXISTS admission_outcomes (
  finalized_at timestamptz NOT NULL DEFAULT clock_timestamp()
 );
 INSERT INTO schema_migrations VALUES(2) ON CONFLICT DO NOTHING;
+
+-- One server-side admission operation avoids application round trips while the
+-- per-auction intake lock is held. Decision workers use their separate row lock.
+CREATE OR REPLACE FUNCTION aegis_admit_batch(p_aid uuid,p_ids uuid[],p_users uuid[],p_amounts bigint[],p_capacity integer)
+RETURNS TABLE(request_id uuid,auction_id uuid,bidder_id uuid,amount_cents bigint,admitted_at timestamptz,intake_seq bigint,state text,published_at timestamptz,error_code text)
+LANGUAGE plpgsql VOLATILE AS $$
+DECLARE
+ a auctions%ROWTYPE;
+ stamp timestamptz;
+ expired boolean;
+ last_seq bigint;
+ pending bigint := 0;
+BEGIN
+ IF cardinality(p_ids) NOT BETWEEN 1 AND 1024 OR cardinality(p_users)<>cardinality(p_ids) OR cardinality(p_amounts)<>cardinality(p_ids) THEN
+  RAISE EXCEPTION 'Invalid admission batch dimensions';
+ END IF;
+ PERFORM pg_advisory_xact_lock(hashtextextended(ordered.rid::text,0))
+ FROM (SELECT DISTINCT unnest(p_ids) rid ORDER BY rid) ordered;
+ PERFORM pg_advisory_xact_lock(hashtextextended('aegis-intake:'||p_aid::text,0));
+ SELECT x.* INTO a FROM auctions x WHERE x.id=p_aid;
+ IF NOT FOUND THEN
+  RETURN QUERY SELECT i.rid,p_aid,i.uid,i.amount,NULL::timestamptz,NULL::bigint,NULL::text,NULL::timestamptz,'NO_AUCTION'::text
+  FROM unnest(p_ids,p_users,p_amounts) i(rid,uid,amount);
+  RETURN;
+ END IF;
+ stamp := clock_timestamp();
+ expired := a.status='CLOSED' OR stamp>=a.closes_at;
+ SELECT greatest(a.intake_seq,coalesce(max(r.intake_seq),0)) INTO last_seq FROM bid_requests r WHERE r.auction_id=p_aid;
+ IF NOT expired AND last_seq+cardinality(p_ids)>p_capacity THEN
+  SELECT count(*) INTO pending FROM bid_requests r WHERE r.auction_id=p_aid AND r.state='QUEUED';
+ END IF;
+ WITH firsts AS (
+  SELECT DISTINCT ON(i.rid) i.rid,i.uid,i.amount,i.ord
+  FROM unnest(p_ids,p_users,p_amounts) WITH ORDINALITY i(rid,uid,amount,ord)
+  ORDER BY i.rid,i.ord
+ ), fresh AS (
+  SELECT f.*,row_number() OVER(ORDER BY f.ord) pos
+  FROM firsts f LEFT JOIN bid_requests r ON r.request_id=f.rid WHERE r.request_id IS NULL
+ ), introduced AS (
+  INSERT INTO bid_requests(request_id,auction_id,bidder_id,amount_cents,intake_seq,admitted_at,state)
+  SELECT f.rid,p_aid,f.uid,f.amount,last_seq+f.pos,stamp,CASE WHEN expired THEN 'CLOSED' ELSE 'QUEUED' END
+  FROM fresh f WHERE expired OR f.pos<=p_capacity-pending
+  RETURNING bid_requests.request_id
+ )
+ INSERT INTO admission_outcomes(request_id,status,reason)
+ SELECT n.request_id,'CLOSED','Auction deadline passed' FROM introduced n WHERE expired;
+ RETURN QUERY
+ SELECT i.rid,r.auction_id,r.bidder_id,r.amount_cents,r.admitted_at,r.intake_seq,r.state,r.published_at,
+  CASE WHEN r.request_id IS NULL THEN 'CAPACITY'
+   WHEN ROW(r.auction_id,r.bidder_id,r.amount_cents) IS DISTINCT FROM ROW(p_aid,i.uid,i.amount) THEN 'CONFLICT'
+   ELSE NULL END
+ FROM unnest(p_ids,p_users,p_amounts) WITH ORDINALITY i(rid,uid,amount,ord)
+ LEFT JOIN bid_requests r ON r.request_id=i.rid ORDER BY i.ord;
+END $$;
+INSERT INTO schema_migrations VALUES(3) ON CONFLICT DO NOTHING;

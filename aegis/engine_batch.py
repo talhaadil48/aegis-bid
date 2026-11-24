@@ -7,7 +7,7 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 
 from aegis.db import connection
-from aegis.engine import Conflict, Fenced, acquire, lock_intake
+from aegis.engine import Conflict, Fenced, acquire
 from aegis.evidence import pseudonym
 from aegis.rules import ZERO_HASH, evaluate, event_hash
 
@@ -24,80 +24,32 @@ def insert_rows(c, table, fields, rows, suffix=""):
 
 
 def admit_many(auction_id, entries):
-    """entries=(bidder UUID, request UUID, cents); return rows or per-item errors."""
+    """Every result follows one atomic SQL admission; authorization remains in the API."""
     if not entries:
         return []
     if len(entries) > 1024:
         raise ValueError("Admission batch exceeds 1024")
-    aid = UUID(str(auction_id))
-    entries = [(UUID(str(uid)), UUID(str(rid)), amount) for uid, rid, amount in entries]
+    errors = {
+        "NO_AUCTION": (LookupError, "Auction not found"),
+        "CAPACITY": (OverflowError, "Auction queue capacity reached"),
+        "CONFLICT": (Conflict, "Request ID already used for another payload"),
+    }
     with connection() as c:
-        # Global UUID conflicts are serialized even when different auctions race.
-        c.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended(rid::text,0)) "
-            "FROM (SELECT DISTINCT unnest(%s::uuid[]) rid ORDER BY rid) ordered",
-            ([r for _, r, _ in entries],),
-        )
-        lock_intake(c, aid)
-        a = c.execute("SELECT * FROM auctions WHERE id=%s", (aid,)).fetchone()
-        if not a:
-            return [LookupError("Auction not found") for _ in entries]
-        now = c.execute("SELECT clock_timestamp() t").fetchone()["t"]
-        expired = a["status"] == "CLOSED" or now >= a["closes_at"]
-        previous = c.execute(
-            "SELECT * FROM bid_requests WHERE request_id=ANY(%s)", ([r for _, r, _ in entries],)
+        rows = c.execute(
+            "SELECT * FROM aegis_admit_batch(%s,%s::uuid[],%s::uuid[],%s::bigint[],%s)",
+            (
+                UUID(str(auction_id)),
+                [UUID(str(rid)) for _, rid, _ in entries],
+                [UUID(str(uid)) for uid, _, _ in entries],
+                [amount for _, _, amount in entries],
+                int(os.getenv("MAX_PENDING_BIDS", "60000")),
+            ),
         ).fetchall()
-        known = {r["request_id"]: r for r in previous}
-        capacity = int(os.getenv("MAX_PENDING_BIDS", "60000"))
-        last = c.execute(
-            "SELECT intake_seq FROM bid_requests WHERE auction_id=%s ORDER BY intake_seq DESC LIMIT 1", (aid,)
-        ).fetchone()
-        last_seq = max(a["intake_seq"], last["intake_seq"] if last else 0)
-        pending = (
-            0
-            if expired or last_seq + len(entries) <= capacity
-            else c.execute(
-                "SELECT count(*) n FROM bid_requests WHERE auction_id=%s AND state='QUEUED'", (aid,)
-            ).fetchone()["n"]
-        )
-        fresh = {}
-        results = []
-        for uid, rid, amount in entries:
-            old = known.get(rid) or fresh.get(rid)
-            if old:
-                if (old["auction_id"], old["bidder_id"], old["amount_cents"]) != (aid, uid, amount):
-                    results.append(Conflict("Request ID already used for another payload"))
-                else:
-                    results.append(rid)
-            elif not expired and pending + len(fresh) >= capacity:
-                results.append(OverflowError("Auction queue capacity reached"))
-            else:
-                fresh[rid] = {"auction_id": aid, "bidder_id": uid, "amount_cents": amount}
-                results.append(rid)
-        if fresh:
-            first = last_seq + 1
-            rows = [
-                (rid, aid, r["bidder_id"], r["amount_cents"], first + i, now, "CLOSED" if expired else "QUEUED")
-                for i, (rid, r) in enumerate(fresh.items())
-            ]
-            fields = [
-                ("request_id", "uuid"),
-                ("auction_id", "uuid"),
-                ("bidder_id", "uuid"),
-                ("amount_cents", "bigint"),
-                ("intake_seq", "bigint"),
-                ("admitted_at", "timestamptz"),
-                ("state", "text"),
-            ]
-            known.update(
-                {r["request_id"]: r for r in insert_rows(c, "bid_requests", fields, rows, "RETURNING *").fetchall()}
-            )
-            if expired:
-                c.execute(
-                    "INSERT INTO admission_outcomes(request_id,status,reason) SELECT request_id,'CLOSED','Auction deadline passed' FROM bid_requests WHERE request_id=ANY(%s)",
-                    (list(fresh),),
-                )
-        return [r if isinstance(r, Exception) else known[r] for r in results]
+        result = []
+        for row in rows:
+            error = row.pop("error_code")
+            result.append(errors[error][0](errors[error][1]) if error else row)
+        return result
 
 
 def process_many(auction_id, holder, limit=512, expected_epoch=None):
