@@ -94,7 +94,7 @@ def main():
             "blocks": [
                 heading("1. Prepare locally before recording"),
                 paragraph(
-                    "Run from the repository root in PowerShell with local .env and seeded accounts; DEMO_PASSWORD must match. Running containers can predate the new code. Follow the coordinated image/migration upgrade in docs/runbook.md before relying on new fixes; this document update does not deploy the app. Keep secrets/cookie caches out of the recording. Helpers make no AWS calls."
+                    "Use PowerShell at the repository root with local .env and seeded accounts. Running containers can predate the fixes: follow docs/runbook.md to upgrade and rehearse first. --check verifies reachability, not code version. Keep credentials/cookies offscreen. Helpers make no AWS calls."
                 ),
                 code(
                     ".venv\\Scripts\\python.exe -m scripts.demo --check\n.venv\\Scripts\\python.exe -m scripts.demo --prepare"
@@ -114,7 +114,7 @@ def main():
                     "<b>Report:</b> AegisBid_Technical_Report_7_Pages.pdf, especially pages 2 and 7. <b>Bidding:</b> docs/bidding-proof.md and docs/evidence/bidding-index.json, with the selected run summaries. <b>Recovery:</b> recovery-bacula.json, bacula-console.txt, ha-local.json, pitr-local.json and s3-offsite.json. These are inside docs/evidence. The helper selects safe fields; avoid displaying private bucket/account details."
                 ),
                 paragraph(
-                    "The live auditor screen correctly shows INCOMPLETE without AUDIT_SIGNING_KEY. Do not label it trusted PASS. The saved stress export is signed; --verify-bidding checks the included public key. For independent provenance, distribute/pin that key separately: downloading an export and adjacent key alone does not establish institutional trust. An owner receipt hash is not an independently signed receipt."
+                    "The live auditor is INCOMPLETE without AUDIT_SIGNING_KEY. --verify-bidding checks the saved signed export; its public key must be distributed/pinned separately for trusted provenance. Owner receipts are hash references, not separate signatures."
                 ),
                 heading("4. If something is unavailable"),
                 paragraph(

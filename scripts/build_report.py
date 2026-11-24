@@ -13,7 +13,7 @@ from docx.shared import Inches, Pt
 from pypdf import PdfReader, PdfWriter
 from reportlab.graphics.shapes import Drawing, Line, Rect, String
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
@@ -60,21 +60,49 @@ def flow(labels, width):
 def styles(size):
     return {
         "body": ParagraphStyle(
-            "body", fontName="Times-Roman", fontSize=size, leading=size * 1.18, spaceAfter=5, alignment=TA_JUSTIFY
+            "body",
+            fontName="Helvetica",
+            fontSize=size,
+            leading=size * 1.30,
+            spaceAfter=8,
+            alignment=TA_LEFT,
+            textColor=colors.HexColor("#243548"),
         ),
         "heading": ParagraphStyle(
-            "heading", fontName="Helvetica-Bold", fontSize=11.1, leading=13, spaceBefore=5, spaceAfter=5, textColor=TEAL
+            "heading",
+            fontName="Helvetica-Bold",
+            fontSize=13,
+            leading=16,
+            spaceBefore=8,
+            spaceAfter=6,
+            textColor=TEAL,
         ),
         "title": ParagraphStyle(
-            "title", fontName="Helvetica-Bold", fontSize=17, leading=20, spaceAfter=10, textColor=NAVY
+            "title", fontName="Helvetica-Bold", fontSize=19, leading=23, spaceAfter=12, textColor=NAVY
         ),
-        "small": ParagraphStyle("small", fontName="Helvetica", fontSize=8.6, leading=10.2, spaceAfter=3),
+        "small": ParagraphStyle("small", fontName="Helvetica", fontSize=10, leading=13, spaceAfter=4),
         "table": ParagraphStyle(
-            "table", fontName="Helvetica", fontSize=max(8.3, size - 0.9), leading=max(9.9, size + 0.1), wordWrap="CJK"
+            "table",
+            fontName="Helvetica",
+            fontSize=max(9.1, size - 1),
+            leading=max(11.3, size + 2),
+            textColor=colors.HexColor("#243548"),
         ),
-        "th": ParagraphStyle("th", fontName="Helvetica-Bold", fontSize=8.7, leading=10.1, textColor=colors.white),
+        "th": ParagraphStyle(
+            "th",
+            fontName="Helvetica-Bold",
+            fontSize=max(9.1, size - 1),
+            leading=max(11.3, size + 2),
+            textColor=colors.white,
+        ),
         "code": ParagraphStyle(
-            "code", fontName="Courier", fontSize=8.7, leading=10.4, spaceAfter=5, leftIndent=6, alignment=TA_LEFT
+            "code",
+            fontName="Courier",
+            fontSize=min(10, size),
+            leading=min(13.5, size * 1.3),
+            spaceAfter=8,
+            leftIndent=6,
+            alignment=TA_LEFT,
         ),
     }
 
@@ -86,6 +114,21 @@ def blocks(page, size, width):
         kind = block["type"]
         if kind == "p":
             result.append(Paragraph(block["text"], s["body"]))
+        elif kind == "callout":
+            panel = Table([[Paragraph(block["text"], s["body"])]], colWidths=[width], hAlign="LEFT")
+            panel.setStyle(
+                TableStyle(
+                    [
+                        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#EEF4F8")),
+                        ("LINEBEFORE", (0, 0), (0, -1), 3, TEAL),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 11),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 11),
+                        ("TOPPADDING", (0, 0), (-1, -1), 9),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                    ]
+                )
+            )
+            result.extend([panel, Spacer(1, 10)])
         elif kind == "h":
             result.append(Paragraph(block["text"], s["heading"]))
         elif kind == "code":
@@ -109,10 +152,10 @@ def blocks(page, size, width):
                         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F1F5F7")]),
                         ("VALIGN", (0, 0), (-1, -1), "TOP"),
                         ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#CBD6DD")),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 5),
-                        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-                        ("TOPPADDING", (0, 0), (-1, -1), 4),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 7),
+                        ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+                        ("TOPPADDING", (0, 0), (-1, -1), 5),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
                     ]
                 )
             )
@@ -127,6 +170,22 @@ def blocks(page, size, width):
     return result
 
 
+def word_inline(paragraph, markup, size, font="Arial"):
+    bold = False
+    for part in re.split(r"(<b>|</b>|<br\s*/?>)", markup, flags=re.IGNORECASE):
+        if part.lower() == "<b>":
+            bold = True
+        elif part.lower() == "</b>":
+            bold = False
+        elif re.fullmatch(r"<br\s*/?>", part, flags=re.IGNORECASE):
+            paragraph.add_run().add_break()
+        elif part:
+            run = paragraph.add_run(plain(part))
+            run.font.name = font
+            run.font.size = Pt(size)
+            run.bold = bold
+
+
 def create_word(content, sizes, destination):
     document = Document()
     section = document.sections[0]
@@ -136,14 +195,20 @@ def create_word(content, sizes, destination):
     section.bottom_margin = Inches(0.55)
     section.left_margin = section.right_margin = Inches(0.58)
     normal = document.styles["Normal"]
-    normal.font.name = "Times New Roman"
-    normal.font.size = Pt(10)
-    normal.paragraph_format.space_after = Pt(4)
+    normal.font.name = "Arial"
+    normal.font.size = Pt(11.5)
+    normal.paragraph_format.space_after = Pt(7)
+    normal.paragraph_format.line_spacing = 1.15
+    for name, point_size in (("Title", 24), ("Heading 1", 19), ("Heading 2", 13)):
+        style = document.styles[name]
+        style.font.name, style.font.size = "Arial", Pt(point_size)
+        style.paragraph_format.space_before = Pt(0 if name != "Heading 2" else 8)
+        style.paragraph_format.space_after = Pt(7)
     header = section.header.paragraphs[0]
     header.text = "AEGISBID OMEGA  |  CEP 1 TECHNICAL REPORT"
     header.runs[0].font.size = Pt(8)
     footer = section.footer.paragraphs[0]
-    footer.text = content["date"] + "  |  Implementation + measured evidence  |  Page "
+    footer.text = f"{content['student_name']} | {content['roll_number']} | Page "
     field = OxmlElement("w:fldSimple")
     field.set(qn("w:instr"), "PAGE")
     footer._p.append(field)
@@ -155,28 +220,46 @@ def create_word(content, sizes, destination):
             document.add_paragraph(content["subtitle"])
             document.add_paragraph(f"Student: {content['student_name']}    Roll number: {content['roll_number']}")
         heading = document.add_heading(page["title"], 1)
-        heading.runs[0].font.size = Pt(15)
+        heading.runs[0].font.size = Pt(19)
         for block in page["blocks"]:
             kind = block["type"]
-            if kind in ("p", "h", "code"):
-                p = (
-                    document.add_heading(plain(block["text"]), 2)
-                    if kind == "h"
-                    else document.add_paragraph(plain(block["text"]))
-                )
-                for run in p.runs:
-                    run.font.name = "Courier New" if kind == "code" else ("Arial" if kind == "h" else "Times New Roman")
-                    run.font.size = Pt(10.5 if kind == "h" else (8.5 if kind == "code" else size))
-                p.paragraph_format.line_spacing = 1.0
-                p.paragraph_format.space_after = Pt(4)
+            if kind in ("p", "h", "code", "callout"):
+                p = document.add_heading(plain(block["text"]), 2) if kind == "h" else document.add_paragraph()
+                if kind == "h":
+                    for run in p.runs:
+                        run.font.name, run.font.size = "Arial", Pt(13)
+                else:
+                    word_inline(
+                        p, block["text"], 10 if kind == "code" else size, "Courier New" if kind == "code" else "Arial"
+                    )
+                if kind == "callout":
+                    shade = OxmlElement("w:shd")
+                    shade.set(qn("w:fill"), "EEF4F8")
+                    p._p.get_or_add_pPr().append(shade)
+                p.paragraph_format.line_spacing = 1.15
+                p.paragraph_format.space_after = Pt(7)
             elif kind == "table":
                 table = document.add_table(rows=1, cols=len(block["headers"]))
                 table.style = "Table Grid"
+                table.autofit = False
+                for column, fraction in zip(table.columns, block["widths"], strict=True):
+                    column.width = Inches(7.1 * fraction)
                 for cell, text in zip(table.rows[0].cells, block["headers"], strict=True):
-                    cell.text = text
+                    cell.text = ""
+                    word_inline(cell.paragraphs[0], text, 10.5)
+                    for run in cell.paragraphs[0].runs:
+                        run.bold = True
                 for row in block["rows"]:
                     for cell, text in zip(table.add_row().cells, row, strict=True):
-                        cell.text = plain(text)
+                        cell.text = ""
+                        word_inline(cell.paragraphs[0], text, 10.5)
+                header_row = table.rows[0]
+                repeat = OxmlElement("w:tblHeader")
+                header_row._tr.get_or_add_trPr().append(repeat)
+                for cell in header_row.cells:
+                    shade = OxmlElement("w:shd")
+                    shade.set(qn("w:fill"), "E5EEF4")
+                    cell._tc.get_or_add_tcPr().append(shade)
                 for row in table.rows:
                     for cell, fraction in zip(row.cells, block["widths"], strict=True):
                         cell.width = Inches(7.1 * fraction)
@@ -184,7 +267,7 @@ def create_word(content, sizes, destination):
                             paragraph.paragraph_format.space_after = Pt(0)
                             for run in paragraph.runs:
                                 run.font.name = "Arial"
-                                run.font.size = Pt(8.2)
+                                run.font.size = Pt(10.5)
             elif kind == "flow":
                 document.add_paragraph("  >  ".join(block["labels"]))
             elif kind == "system_design":
@@ -213,7 +296,11 @@ def main():
     diagram = system_design(1058)
     renderSVG.drawToFile(diagram, str(output / "AegisBid_Complete_System_Flow.svg"))
     with pypdfium2.PdfDocument(renderPDF.drawToString(diagram)) as diagram_pdf:
-        diagram_pdf[0].render().to_pil().save(output / "AegisBid_Complete_System_Flow.png")
+        diagram_page = diagram_pdf[0]
+        bitmap = diagram_page.render()
+        bitmap.to_pil().save(output / "AegisBid_Complete_System_Flow.png")
+        bitmap.close()
+        diagram_page.close()
     sizes = []
     writer = PdfWriter()
     with tempfile.TemporaryDirectory() as temporary:
@@ -226,11 +313,10 @@ def main():
                 canvas.setFillColor(NAVY)
                 canvas.drawString(42, A4[1] - 20, "AEGISBID OMEGA  |  CEP 1 TECHNICAL REPORT")
                 canvas.drawRightString(A4[0] - 42, 22, f"{page_index + 1} / {expected_pages}")
-                canvas.drawString(42, 22, content["date"] + "  |  Source baseline " + content["implementation_commit"])
+                canvas.drawString(42, 22, f"{content['student_name']} | {content['roll_number']} | {content['date']}")
 
             path = Path(temporary) / f"page-{index}.pdf"
-            for attempt in range(9):
-                size = 10.2 - attempt * 0.15
+            for size in [11.5]:
                 story = blocks(page, size, A4[0] - 84)
                 if index == 0:
                     top = [
@@ -269,7 +355,7 @@ def main():
                     writer.add_page(pages.pages[0])
                     break
             else:
-                raise RuntimeError(f"Page {index + 1} overflowed; edit content rather than shrinking below 9 pt")
+                raise RuntimeError(f"Page {index + 1} overflowed; edit content to retain the fixed 11.5 pt body font")
         pdf = output / f"AegisBid_Technical_Report_{expected_pages}_Pages.pdf"
         writer.add_metadata(
             {
@@ -287,9 +373,17 @@ def main():
         if page["title"] not in checked.pages[index].extract_text():
             raise RuntimeError("Report section is on the wrong page")
     create_word(content, sizes, output / "AegisBid_Technical_Report_Editable.docx")
+    student_slug = re.sub(r"[^A-Za-z0-9_-]+", "_", content["student_name"]).strip("_")
+    roll_slug = re.sub(r"[^A-Za-z0-9_-]+", "_", content["roll_number"]).strip("_")
+    stem = f"AegisBid_{student_slug}_{roll_slug}_Report"
+    (output / (stem + ".pdf")).write_bytes(pdf.read_bytes())
+    (output / (stem + ".docx")).write_bytes((output / "AegisBid_Technical_Report_Editable.docx").read_bytes())
     metadata = {
         "pdf_pages": expected_pages,
         "body_font_sizes_pt": sizes,
+        "font_family": "Helvetica (PDF), Arial (Word)",
+        "table_font_size_pt": 10.5,
+        "automatic_font_shrinking": False,
         "source_commit": content["implementation_commit"],
         "student_name": content["student_name"],
         "roll_number": content["roll_number"],

@@ -1,6 +1,6 @@
 {
   "title": "AegisBid Omega",
-  "subtitle": "Technical implementation, issue resolution and measured validation",
+  "subtitle": "System implementation, issue resolution and measured limits",
   "student_name": "Talha Adil",
   "roll_number": "CS-23114",
   "date": "24 November 2026",
@@ -8,529 +8,390 @@
   "expected_pages": 7,
   "pages": [
     {
-      "title": "Implementation stack and execution contracts",
+      "title": "Technology and verified scope",
       "blocks": [
+        {
+          "type": "callout",
+          "text": "<b>50,000-bidder capacity: not yet reliably demonstrated.</b><br/>Two historical HTTP-only runs passed. Later configurations failed the deadline target. A successful individual run does not certify the current system."
+        },
         {
           "type": "table",
           "headers": [
-            "Technology used",
-            "Implemented responsibility and design reason"
+            "What we used",
+            "Responsibility"
           ],
           "widths": [
-            0.29,
-            0.71
+            0.33,
+            0.67
           ],
           "rows": [
             [
-              "Python 3.13 / FastAPI / Pydantic",
-              "Authenticated HTTP contracts, strict UUID/integer-cent validation, authorization and independent request lookup. Pure ASGI security middleware and Linux uvloop reduce dispatch overhead."
+              "Next.js + Nginx",
+              "Four role views, same-origin routing, countdown, private bid history and final winners."
             ],
             [
-              "Go 1.24 / Gorilla WebSocket",
-              "Individual bid ingress grouped into bounded internal RPCs; shared prepared-frame fanout. Current scale layout separates admission and live services; its capacity regression remains open."
+              "Python 3.13 + FastAPI",
+              "JWT/role verification, strict request validation, status lookup and administrative APIs."
             ],
             [
-              "PostgreSQL 18 / psycopg 3",
-              "Sole decision authority: durable intake, ordered transactions, leases, offers, final allocation and hash ledger. Bounded per-process connection pools."
+              "Go 1.24 + Gorilla",
+              "Bounded HTTP admission batches and shared WebSocket frames for live auction updates."
             ],
             [
-              "NATS 2.11 JetStream / nats-py",
-              "File-backed command journal; stable message IDs, explicit consumer ACK and retryable relay. SQL reconciliation recovers missing/unpublished commands."
+              "PostgreSQL 18 + psycopg 3",
+              "Authoritative intake, ordered decisions, worker leases, integer money, allocation and audit events."
             ],
             [
-              "Next.js / Nginx",
-              "Bidder, seller, administrator and auditor views; same-origin routing, countdown, reconnect, pending UUID persistence, private history and winners."
+              "NATS 2.11 JetStream",
+              "File-backed command journal, stable message IDs, explicit acknowledgment and retryable publication."
             ],
             [
-              "SHA-256 / Ed25519 / AES-256-GCM",
-              "Chained canonical events, optionally signed export manifests, independent replay and authenticated encrypted offsite artifacts."
+              "scrypt / SHA-256 / Ed25519",
+              "Password hashing, tamper-evident event chains, signed manifests and independent verification."
             ],
             [
-              "Bacula 9.6.7 / PostgreSQL tools",
-              "Scheduled logical-artifact backup, alternate-path restore; pg_dump/exported snapshots, pg_basebackup, WAL archiving and PITR."
+              "Bacula / WAL / encrypted S3",
+              "Prepared backup media, isolated restore, point-in-time recovery and version-pinned remote copies."
             ],
             [
-              "Docker Compose / Kubernetes",
-              "Local services and isolated drills; CloudNativePG synchronous replicas, NATS TLS/quorum, zone placement, Barman resources and EKS templates."
+              "Compose / Kubernetes / CNPG",
+              "Local deployment and drills; configured synchronous replicas, TLS/quorum and zone placement."
             ],
             [
-              "Prometheus / Grafana / pytest / CI",
-              "SQL/gateway telemetry, dashboards, controlled chaos, 39 backend tests, Go race checks and GitHub Actions. ReportLab/python-docx generate this report."
+              "Prometheus / Grafana / CI",
+              "Operational metrics, dashboards, 39 backend checks, Go race checks and build workflows."
             ]
           ]
         },
         {
           "type": "h",
-          "text": "1.1 Authority and response semantics"
+          "text": "The decision contract"
         },
         {
           "type": "p",
-          "text": "A browser submits only request_id and amount_cents; the server derives bidder identity from its session. A globally unique UUID binds one immutable bidder/auction/amount tuple. <b>202 QUEUED</b> follows SQL commit; it proves durable intake, not acceptance, stock allocation or a JetStream quorum ACK. <b>200 ACCEPTED / REJECTED / CLOSED</b> is a terminal result. Reusing a UUID with changed payload returns 409; capacity/rate exhaustion returns 429. An uncertain transport acknowledgment requires retrying the same UUID."
-        },
-        {
-          "type": "p",
-          "text": "The admission transaction also creates a command publication receipt. Relay publishes with Nats-Msg-Id=request_id and records acknowledgment separately. Workers read the SQL queue in intake order, including requests whose broker publication is missing. Decision batches commit their business states and audit records together; notifications occur afterward. Go polls authenticated SQL-backed snapshots; it currently does not consume live outbox subjects. Redis is not required for this authority model."
+          "text": "POST /v1/auctions/{id}/bids carries request_id and amount_cents. <b>QUEUED</b> means committed intake awaiting a decision. <b>ACCEPTED</b> means the price rule passed; final winners are selected later. <b>REJECTED</b> and <b>CLOSED</b> are terminal. HTTP 202 denotes pending intake; HTTP 200 denotes a final result. Retrying the same UUID must retain one business effect."
         },
         {
           "type": "h",
-          "text": "1.2 Deployment and evidence baseline"
+          "text": "Authority and release boundary"
         },
         {
           "type": "p",
-          "text": "Measured HTTP proofs used six API processes, one decision worker, one relay, one Go ingress and five generators on a shared 12-CPU / 7.46-GiB Docker VM. The current branch adds separate Go admission/live services and a two-second scale fanout tick. Two historical HTTP runs passed 50k; later configurations regressed. <b>Current combined-live capacity and repeatability are unproven; phase 13 remains unmerged.</b> Page 7 identifies the actual runs. Payment collection and fulfillment are outside the implementation."
-        },
-        {
-          "type": "p",
-          "text": "<b>Source:</b> aegis/api.py, auth.py, db.py, pipeline.py; services/realtime/gateway/; apps/web/app/page.js; infra/compose*.yaml; scripts/render_ha.py."
+          "text": "PostgreSQL decides bids. NATS journals commands; workers also reconcile SQL pending rows. Go live updates are projections, not acceptance decisions. The latest scale layout separates Go admission and fanout services. Phase 13 remains unmerged because repeatable current-layout capacity is unresolved."
         }
       ]
     },
     {
-      "title": "Complete system flow and recovery paths",
+      "title": "Complete system flow",
       "blocks": [
         {
           "type": "system_design"
         },
         {
           "type": "p",
-          "text": "<b>Execution:</b> blue arrows trace authenticated admission, durable command delivery and the fenced worker into atomic SQL decisions. The dashed path reconciles SQL without broker delivery. New late requests end in a CLOSED receipt outside the sealed bid ledger. Gold paths protect committed data; green paths restore into isolation and verify it."
-        },
-        {
-          "type": "p",
-          "text": "<b>Scope:</b> the diagram shows implemented code and configured deployment roles. Go live fanout uses API snapshots. The real EKS deployment and physical whole-zone test remain pending; page 7 separates measured results from targets."
+          "text": "Solid arrows show processing; the dashed path reconciles SQL without broker delivery. Gold/green paths show isolated recovery. Late requests receive CLOSED receipts. Physical multi-zone deployment remains pending."
         }
       ]
     },
     {
-      "title": "Ordering, idempotency and terminal outcomes",
+      "title": "Correctness issues and verified fixes",
       "blocks": [
         {
           "type": "h",
-          "text": "3.1 Relations and database-enforced boundaries"
+          "text": "1. Concurrent price races and money accuracy"
         },
         {
-          "type": "table",
-          "headers": [
-            "Relation",
-            "Constraint / role"
-          ],
-          "widths": [
-            0.31,
-            0.69
-          ],
-          "rows": [
-            [
-              "auctions; worker_leases",
-              "Auction rules/version/processed watermark; one lease per auction with holder_id, epoch and five-second expiry."
-            ],
-            [
-              "bid_requests",
-              "Global request_id primary key; bidder/auction foreign keys; UNIQUE(auction_id,intake_seq); database admission timestamp and state."
-            ],
-            [
-              "bid_decisions",
-              "Unique request UUID and auction/decision sequence; outcome, reason, integer effective amount, epoch and recorded decision time."
-            ],
-            [
-              "bidder_offers; winners",
-              "One current offer per bidder/auction; unique bidder and rank in final allocation. Transaction enforces stock bounds and ranking."
-            ],
-            [
-              "auction_events; outbox",
-              "Separate canonical hash event per bid; one latest-version notification per atomic batch. Close is a final chained event."
-            ],
-            [
-              "command_queue; admission_outcomes",
-              "Separate broker publication metadata; terminal late-request receipts outside the sealed bidding ledger."
-            ]
-          ]
+          "type": "p",
+          "text": "<b>Issue:</b> concurrent read/modify/write logic can accept conflicting offers. <b>Change:</b> the auction row serializes decision batches; money uses BIGINT cents. The required amount is max(reserve, current high + increment). Two equal-price offers cannot both advance the high. <b>Check:</b> PostgreSQL race tests and independent ledger replay verify outcomes and amounts."
         },
         {
           "type": "h",
-          "text": "3.2 Parallel admission without overtaking"
+          "text": "2. Duplicate effects after retries or uncertain responses"
         },
         {
           "type": "p",
-          "text": "Admission takes globally sorted request-UUID transaction advisory locks, preventing conflicting reuse across auctions. A short per-auction reservation lock allocates sequence ranges and orders intake-lock acquisition. Ordinary inserts hold a shared transaction intake lock and can run in parallel. The processed watermark provides a fast capacity check; near the 60,000-pending bound, exclusive intake locking permits an exact queued count. SQL stamps eligibility; rollback/retry may leave sequence gaps, but committed decision order remains increasing."
-        },
-        {
-          "type": "code",
-          "text": "BEGIN\n  exclusive intake barrier: wait for earlier admission commits;\n  auction FOR NO KEY UPDATE; acquire lease and check epoch;\n  first QUEUED prefix ORDER BY intake_seq FOR UPDATE (<=512);\n  release intake barrier; evaluate the prefix in order;\n  write decisions + offers + states + separate hash events;\n  advance version/watermark; insert latest-version outbox row;\nCOMMIT; broker ACK follows resolution."
-        },
-        {
-          "type": "p",
-          "text": "The prefix barrier prevents an uncommitted lower sequence from being overtaken. Releasing it before evaluation lets later admission inserts continue; the auction row lock still serializes decision batches. A new worker boot gets a distinct holder. An expired lease advances the epoch; a live competing holder or stale expected epoch is fenced. Crash-before-commit rolls the batch back. Crash-after-commit/redelivery finds terminal states and unique decisions, preserving one business effect per UUID."
+          "text": "<b>Issue:</b> clients may retry after losing an HTTP response or broker ACK. <b>Change:</b> a global request UUID binds one immutable bidder/auction/amount tuple. Changed payloads return 409; terminal retries reuse the original decision. Unique decision keys prevent a second effect. <b>Check:</b> concurrent retries and owner-history checks verify one request and one final outcome."
         },
         {
           "type": "h",
-          "text": "3.3 Price, stock and deadline rules"
+          "text": "3. Late requests remained queued after final close"
+        },
+        {
+          "type": "p",
+          "text": "<b>Cause:</b> intake previously created QUEUED records while reconciliation scanned OPEN auctions only. <b>Fix:</b> a new late UUID now receives a CLOSED admission receipt with a reason/time, outside the sealed bidding ledger. Existing UUIDs retain their earlier result. Legacy stranded rows are repaired. <b>Check:</b> API/database tests verify final history and unchanged winners/anchor."
+        },
+        {
+          "type": "h",
+          "text": "4. Parallel admission without losing sequence order"
+        },
+        {
+          "type": "p",
+          "text": "<b>Change:</b> sorted UUID locks prevent payload conflicts. A short reservation lock allocates sequence ranges; shared intake locks permit parallel inserts. Before selecting work, the worker takes an exclusive intake barrier so an uncommitted lower sequence cannot be overtaken. Sequence gaps are allowed; decision order stays increasing."
         },
         {
           "type": "code",
-          "text": "required = max(reserve, high + increment) if high else reserve\neligible interval = [opens_at, closes_at) using SQL admitted_at\nwinners = top stock distinct offers by amount DESC, sequence ASC"
+          "text": "BEGIN\n  wait at intake barrier; lock auction, then fenced lease;\n  capture first QUEUED prefix in intake order (max 512);\n  release intake barrier; evaluate ordered requests;\n  write decisions, offers, states, hash events and outbox;\nCOMMIT; acknowledge resolved commands afterward."
         },
         {
           "type": "p",
-          "text": "BIGINT cents avoid floating-point money errors. Same-price competitors cannot both advance the global high. An accepted bidder can later be displaced from stock; ACCEPTED is not a winning allocation. Close waits until eligible queued requests drain, then ranks distinct current offers and seals the close event atomically. Administrative close updates the deadline under the intake/auction locks."
-        },
-        {
-          "type": "p",
-          "text": "<b>Closed-auction bug and fix:</b> earlier intake could create QUEUED rows after final close while workers scanned OPEN auctions. Admission now writes terminal CLOSED plus reason/time for a new late UUID. It leaves sealed events, winners and anchor unchanged; earlier UUID retries retain their original result. Reconciliation repairs legacy stranded rows. Source: infra/postgres/001_core.sql, 002_parallel_intake.sql; aegis/engine.py, engine_batch.py, rules.py."
+          "text": "A new worker boot uses a new holder and a five-second lease with increasing epoch. Stale workers are fenced. Crash-before-commit rolls back the batch; redelivery after commit reuses terminal states. Close drains eligible pending work, then selects at most stock distinct offers by amount descending and decision sequence ascending."
         }
       ]
     },
     {
-      "title": "Bottlenecks, implemented changes and API behavior",
+      "title": "Performance issues: changes and open work",
       "blocks": [
         {
-          "type": "table",
-          "headers": [
-            "Issue observed",
-            "How it was tackled / verification boundary"
-          ],
-          "widths": [
-            0.29,
-            0.71
-          ],
-          "rows": [
-            [
-              "Distinct-user authentication serialized",
-              "A global Go cache mutex previously covered upstream network calls. Network verification now runs outside it; per-token flights coalesce identical sessions and a 256-slot bound permits distinct sessions concurrently. Go race/concurrency checks cover this behavior."
-            ],
-            [
-              "Per-request Python / SQL overhead",
-              "Pure ASGI middleware, Linux uvloop, grouped identity lookup (2 ms), direct admission grouping (100 ms), and Go groups up to 512 requests / 100 ms with eight in-flight RPCs per auction. Every item still verifies a real JWT and bidder role."
-            ],
-            [
-              "Intake held the hot auction row",
-              "SQL sequence reservation plus shared intake locks allow parallel inserts. The worker exclusive prefix barrier preserves earlier committed ordering; sorted UUID locks preserve conflict semantics. PostgreSQL rollback, capacity and ordering tests cover these invariants."
-            ],
-            [
-              "Relay contended with queued business rows",
-              "command_queue holds publication ACK metadata. Relay no longer updates the same queued request rows locked by the decision worker; the compatibility timestamp is synchronized only for terminal rows."
-            ],
-            [
-              "Per-bid commit / notification overhead",
-              "Up to 512 individual decisions/events commit together, with one latest-version outbox row. All per-bid histories and hashes remain independently stored; signed replay checks the full sequence."
-            ],
-            [
-              "Fault restart also reran schema DDL",
-              "Logs showed migration DDL deadlocking with admissions after Compose restarted dependencies. The harness now starts only the recorded worker container and requires an unchanged migration start timestamp. This fixes test isolation, not the remaining throughput regression."
-            ],
-            [
-              "Live fanout + admission contention",
-              "Separate Go services, larger live heap allowance and a two-second scale snapshot tick were attempted. Later HTTP and combined runs still failed their cutoff gate; a complete root cause or reliable capacity improvement is not established."
-            ]
-          ]
+          "type": "callout",
+          "text": "<b>Implemented optimizations are not a capacity guarantee.</b> Functional checks passed, but later full-load runs regressed. The remaining performance cause has not been isolated."
         },
         {
           "type": "h",
-          "text": "4.1 HTTP and live-update contracts"
+          "text": "1. Distinct-user authentication was serialized"
         },
         {
           "type": "p",
-          "text": "POST /v1/auctions/{id}/bids accepts a UUID and strict integer cents (1..10^12). Go bounds the body to 1,024 bytes, forbids extra fields, validates origin/session presence and forwards only server-read cookies. The hidden /internal/v1/admissions endpoint requires a separate service key before parsing; FastAPI verifies each JWT, current role and quota. GET /v1/bid-requests/{id} and /v1/me/bids resolve private outcomes. GET auction/winners reads authoritative projections; a WebSocket snapshot never decides acceptance."
+          "text": "<b>Cause:</b> a global Go cache mutex covered upstream HTTP verification. <b>Change:</b> network calls run outside that mutex; identical sessions share a per-token flight, while up to 256 distinct verifications can proceed concurrently. A 30-second socket-auth cache reduces repeat work. <b>Check:</b> Go concurrency and race tests."
+        },
+        {
+          "type": "h",
+          "text": "2. Per-request dispatch and database overhead"
         },
         {
           "type": "p",
-          "text": "Go shares prepared frames; each client has one replaceable pending snapshot slot. The default tick is one second; current scale profiles use two seconds. Reads are limited to 1,024 bytes with 60-second pong renewal; writers use five-second deadlines and 20-second pings. Three source failures force reconciliation. Defaults cap sockets at 60,000 total/per auction and ten per user; production uses 25,000 per gateway. DB pools use 1..16 connections per process/DSN with five-second acquisition/connect timeouts. These are configured bounds, not capacity guarantees."
+          "text": "<b>Changes:</b> pure ASGI middleware, Linux uvloop, grouped identity lookup and bounded Go ingress. Groups hold at most 512 bids, collect for at most 100 ms and allow eight in-flight RPCs per auction. FastAPI still verifies every real JWT and role. Connection pools are bounded to 1..16 per process/DSN."
         },
+        {
+          "type": "h",
+          "text": "3. Publication and notification contention"
+        },
+        {
+          "type": "p",
+          "text": "<b>Change:</b> command_queue stores broker publication metadata separately from queued business rows. Up to 512 decisions commit together; each keeps its own result and hash event, while one outbox row names the latest batch version. This reduces repeated updates without discarding bid history."
+        },
+        {
+          "type": "h",
+          "text": "4. The failure test also restarted migrations"
+        },
+        {
+          "type": "p",
+          "text": "<b>Evidence:</b> PostgreSQL logs showed migration DDL deadlocking with admissions after a Compose worker restart reran dependencies. <b>Correction:</b> restart only the recorded worker container and require the migration start timestamp to remain unchanged. This repaired test isolation; it did not resolve the remaining throughput gap."
+        },
+        {
+          "type": "h",
+          "text": "5. Live updates plus bidding remain unresolved"
+        },
+        {
+          "type": "p",
+          "text": "Separate Go admission/live services, more live heap headroom and a two-second scale snapshot tick were attempted. Latest eligible counts were 42,794 for HTTP-only and 30,782 with 50,000 live sockets. Both missed the final-window gate. These changes remain experimental; the report does not label this issue solved."
+        }
+      ]
+    },
+    {
+      "title": "API roles, security and independent audit",
+      "blocks": [
         {
           "type": "table",
           "headers": [
             "Role",
-            "Visible workflow / server authorization"
+            "Server-authorized workflow"
           ],
           "widths": [
-            0.19,
-            0.81
+            0.2,
+            0.8
           ],
           "rows": [
             [
               "Bidder",
-              "Authenticated discovery, countdown, integer-cent bid, stable pending UUID, owner-only history, final reason and winner indication."
+              "Submit integer-cent bids; resolve /v1/bid-requests/{id}; view own history, reasons and winners."
             ],
             [
               "Seller",
-              "Create/schedule auctions with stock/reserve/increment; close only owned auctions. Pending intake drains before allocation."
+              "Create/schedule auctions with stock and price rules; close only owned auctions."
             ],
             [
               "Administrator",
-              "Create/close auctions, inspect rates/queues/leases/backups/incidents; test-only allowlisted chaos controls."
+              "Inspect rates, queues, leases, backups and incidents; use explicitly enabled local chaos controls."
             ],
             [
               "Auditor",
-              "Retrieve sanitized auction evidence and independently verify rules, hash links, signatures and final winners."
+              "Retrieve sanitized evidence; independently verify event order, rules, hashes and allocation."
             ]
           ]
         },
         {
-          "type": "p",
-          "text": "<b>Comparison feature:</b> scripts.compare_baseline is only a barrier-controlled in-memory unsafe-versus-locked race. Actual PostgreSQL/API tests verify the implemented engine. A seeded database/network comparison against the real legacy V1 system was not performed."
-        }
-      ]
-    },
-    {
-      "title": "Authentication, signed audit and operations",
-      "blocks": [
-        {
           "type": "h",
-          "text": "5.1 Identity and service boundaries"
+          "text": "Identity and request protection"
         },
         {
           "type": "p",
-          "text": "Passwords use salted scrypt (N=16,384, r=8, p=1). Four-hour HS256 sessions require subject, issuer aegisbid and expiry. Cookies are HttpOnly, SameSite=Strict and Secure in production. The server loads the authenticated identity and role; public bid bodies cannot choose bidder_id. Owner/admin checks protect private histories and receipts. PUBLIC_ORIGIN validates browser writes behind TLS proxies. Admission service keys use constant-time comparison and are independent of session-signing secrets."
-        },
-        {
-          "type": "p",
-          "text": "Gateway session-to-subject caching lasts up to 30 seconds for socket admission; each bid still undergoes FastAPI token and role verification. Rate/connection limits are process-local; fleet-wide enforcement, IAM/MFA and full account lifecycle remain production work. Application pods receive no S3 backup credentials. Production manifests configure PostgreSQL CA verification, TLS NATS clients/routes, read-only filesystems, dropped capabilities, disabled automatic service-account token mounts and default-deny network policies."
+          "text": "Passwords use salted scrypt (N=16,384, r=8, p=1). Four-hour HS256 sessions require subject, issuer and expiry. Cookies are HttpOnly, SameSite=Strict and Secure in production. Public bid bodies cannot supply bidder identity. Origin checks and owner/role checks protect writes and history. The hidden batch endpoint requires an independent service key before parsing, then verifies every session and role."
         },
         {
           "type": "h",
-          "text": "5.2 Auction Black Box / BidDNA: chain and independent replay"
+          "text": "Auction Black Box / BidDNA verification"
         },
         {
           "type": "code",
-          "text": "H_0 = 64 zero characters\nH_i = SHA256(ASCII(H_(i-1)) || canonical_JSON(event_i))\ncanonical_JSON = sorted keys + compact separators + ASCII escaping\nbidder pseudonym = SHA256(string UUID)\nsignature = Ed25519(canonical unsigned export manifest)"
+          "text": "H_i = SHA256(ASCII(previous hex hash) || canonical_JSON(event))\ncanonical JSON: sorted keys, compact separators, ASCII escaping\nsignature = Ed25519(canonical unsigned export manifest)"
         },
         {
           "type": "p",
-          "text": "Each bid event records request UUID, pseudonymous bidder, integer amount, SQL admission time, intake order, decision sequence, status and reason. A repeatable-read export fixes rules, ordered events, winners, version and terminal anchor. AUDIT_SIGNING_KEY enables manifest signing. A private bid receipt references its event/hash; it is not a separate signature or payment credential. UUID pseudonyms do not prevent the operator retaining an identity mapping."
-        },
-        {
-          "type": "p",
-          "text": "The independent verifier does not call the engine price evaluator. It checks contiguous event sequence, hash predecessors/digests, duplicate requests, eligibility, price progression, distinct current offers, stock bounds, allocation order, close placement, exported version and stored winners. Changed winners, missing/reordered events or payload tampering fail. Unsigned evidence is INCOMPLETE. A signed export requires an independently trusted public key: an adjacent downloaded key alone does not establish provenance, and an original malicious signer is outside this guarantee. SQL administration can alter tables; the ledger is tamper-evident relative to trusted evidence, not WORM storage."
+          "text": "A repeatable-read export fixes auction rules, ordered events, winners, version and terminal anchor. The independent verifier recomputes price progression, hashes, unique requests, stock bounds, close placement and winners. Altered evidence fails; unsigned evidence is INCOMPLETE. A trusted public key must be pinned separately. Receipts reference event hashes; they are not independent per-bid signatures. SQL storage is tamper-evident relative to trusted evidence, not WORM."
         },
         {
           "type": "h",
-          "text": "5.3 Telemetry and controlled failures"
-        },
-        {
-          "type": "table",
-          "headers": [
-            "Signal / control",
-            "Implemented source and interpretation"
-          ],
-          "widths": [
-            0.31,
-            0.69
-          ],
-          "rows": [
-            [
-              "Admin metrics / Prometheus",
-              "SQL decision totals, recent decisions/s, queue/outbox depth, lease epochs and admission-to-recorded-decision p50/p95/p99. Row timestamps are not exact transaction visibility measurements."
-            ],
-            [
-              "Go telemetry / Grafana",
-              "Per-process connected clients/hubs, snapshots, auth failures and slow-writer disconnects; production needs full replica discovery and aggregation. Provisioned Grafana panels visualize those signals."
-            ],
-            [
-              "Chaos / incidents",
-              "Requires development/test and ENABLE_CHAOS=true; admin-only pause/resume and fixed faults. API has no Docker socket/arbitrary command field. The local controller restart-gateway/disconnect-client actions currently restart the API service; a dedicated Go fault is not implied."
-            ],
-            [
-              "Backup / recovery records",
-              "backup_jobs and recovery_runs retain checksums, statuses, checkpoint metadata, verification results and measured recovery scope. Process/job success alone does not prove business correctness."
-            ]
-          ]
+          "text": "Operations and bounded live delivery"
         },
         {
           "type": "p",
-          "text": "<b>Source:</b> aegis/auth.py, security.py, evidence.py, verifier.py, operations.py; infra/prometheus/, infra/grafana/; scripts/chaos_controller.py. No Redis-loss claim is made because this implementation uses no Redis projection."
+          "text": "Go shares prepared frames with one replaceable pending snapshot per client; defaults cap sockets at 60,000 total/per auction and ten per user. Prometheus/Grafana expose SQL queues, latency and gateway signals. Test-only chaos requires an explicit flag; legacy restart/disconnect actions target the API service. Quotas are process-local; fleet-wide controls and pre-warming remain pending. The baseline comparison is an in-memory race model, not a legacy-system benchmark."
         }
       ]
     },
     {
-      "title": "HA, backup transport and verified restoration",
+      "title": "Availability, Bacula and disaster recovery",
       "blocks": [
         {
           "type": "h",
-          "text": "6.1 Primary loss, broker quorum and zone placement"
+          "text": "1. Database and broker failure"
         },
         {
           "type": "p",
-          "text": "CloudNativePG 1.30.1 configures three PostgreSQL instances with ANY 1 synchronous standby acknowledgment, required durability, failover quorum and isolation checks. The operator controls promotion/read-write routing; application lease epochs cannot fence independently writable database primaries. NATS uses three file-backed replicas with authenticated TLS and verified routes. One broker replica can fail while publishing remains available; loss of a safe majority must not produce a false durable ACK. SQL reconciliation retains unfinished business work."
-        },
-        {
-          "type": "p",
-          "text": "PostgreSQL/NATS require zone anti-affinity; stateless workloads spread across zones, with gateway autoscaling from three to twelve replicas and a 600-second scale-down window. EKS templates define three subnet pairs, per-zone NAT, private workers, encrypted disks, KMS-protected secrets, audit logs and EBS CSI identity. Templates/operator resources were validated; <b>EKS was not launched</b>. The actual kind primary-node stop/promotion drill used simulated zone labels and a small dataset; it is not a physical whole-zone or 50k-load database-failover proof."
+          "text": "CloudNativePG configures three PostgreSQL instances with ANY 1 synchronous standby acknowledgment, failover quorum and isolation checks. NATS uses three file-backed replicas with authenticated TLS. SQL reconciliation recovers unpublished commands. An actual kind primary-node loss preserved three decisions and promoted a standby in 67.21 s. Its zone labels were simulated; this is not a physical zone or 50k-load database-failure proof."
         },
         {
           "type": "h",
-          "text": "6.2 Why the recovery layers are separate"
+          "text": "2. Bacula backup and isolated restore"
+        },
+        {
+          "type": "code",
+          "text": "Director schedules -> File Daemon reads prepared artifacts\nStorage Daemon writes media -> PostgreSQL Catalog indexes jobs"
+        },
+        {
+          "type": "p",
+          "text": "A shared exported SQL snapshot feeds pg_dump and a checksum/count manifest. Bacula backup/restore jobs completed with T status. Alternate-path restoration imported a fresh database and verified 20 decisions, 21 events and three winners in 1.25 s. A JSON/HTML restore certificate records verification. Live authority is never overwritten by the sandbox restore."
+        },
+        {
+          "type": "h",
+          "text": "3. Physical point-in-time recovery"
+        },
+        {
+          "type": "p",
+          "text": "pg_basebackup and pg_verifybackup establish the base; archived WAL recovers a named/time target using recovery.signal. WAL publication uses temporary copy, fsync and atomic publication. A local drill recovered two decisions where the base contained one, matching the anchor in 3.12 s. Barman remote WAL resources are configured; continuous production offsite PITR/RPO is not yet demonstrated."
+        },
+        {
+          "type": "h",
+          "text": "4. Protected remote copies"
+        },
+        {
+          "type": "p",
+          "text": "S3 artifacts use AES-256-GCM with object-key associated data, exact VersionIds and an encrypted index published last. A real Singapore restore verified a 20-decision dataset in 1.97 s, plus encryption, 30-day COMPLIANCE retention and protected-version deletion denial. The bucket uses the configured account; independent backup-account administration remains unproven."
+        },
+        {
+          "type": "callout",
+          "text": "<b>Deployment boundary:</b> three-zone EKS, zone placement, TLS and backup templates were validated, but EKS was not launched. Small controlled restore timers exclude full-site reconstruction. Catalog/configuration and decryption/signing keys also require independent recovery."
+        }
+      ]
+    },
+    {
+      "title": "Results: why PASS and FAIL coexist",
+      "blocks": [
+        {
+          "type": "callout",
+          "text": "<b>PASS describes one recorded run, not every version.</b> The successful historical HTTP runs used an earlier configuration. Later tested layouts regressed. Reliable current-layout 50k capacity remains unproven."
         },
         {
           "type": "table",
           "headers": [
-            "Failure / layer",
-            "Implemented mechanism and recovery check"
+            "Configuration / run ID prefix",
+            "Eligible before cutoff",
+            "Run verdict"
           ],
           "widths": [
-            0.29,
-            0.71
+            0.49,
+            0.3,
+            0.21
           ],
           "rows": [
             [
-              "Logical checkpoint",
-              "pg_export_snapshot and pg_dump -Fc share a repeatable-read checkpoint. Manifest captures counts, sequence positions and SHA-256 file hashes; artifact corruption is checked before import."
+              "Historical HTTP / normal<br/>6a341563",
+              "50,000 / 50,000",
+              "PASS"
             ],
             [
-              "Bacula media workflow",
-              "Director schedules jobs; File Daemon reads prepared staging; Storage Daemon writes media; PostgreSQL Catalog indexes jobs/files. Restore selects an alternate directory, then imports into a fresh database. Catalog/configuration and encryption keys also need independent protection."
+              "Historical HTTP / worker kill<br/>93aedc3e",
+              "50,000 / 50,000",
+              "PASS"
             ],
             [
-              "Historical corruption / PITR",
-              "pg_basebackup with SHA-256 manifest and pg_verifybackup; continuous WAL archive; named/time recovery target with recovery.signal. WAL publication uses temporary copy, fsync and atomic hard-link; an existing segment must compare identically."
+              "Latest tested HTTP / worker kill<br/>016565f9",
+              "42,794 / 50,000",
+              "FAIL"
             ],
             [
-              "Local-site loss / S3 vault",
-              "Client AES-256-GCM binds the object key as associated data; encrypted index is published last. Restore downloads exact VersionIds, authenticates/decrypts artifacts and verifies the database. Newer corrupt indexes cannot replace a pinned valid version."
-            ],
-            [
-              "Restore correctness",
-              "Reject a populated destination; import only into an isolated database/project/volume. Check manifest/counts/sequence positions, independently replay ledger/winners and issue a JSON/HTML recovery certificate. Promotion to authority remains an operator decision."
+              "Latest live + HTTP / worker kill<br/>5bcdf2d8",
+              "30,782 / 50,000",
+              "FAIL"
             ]
           ]
         },
         {
           "type": "h",
-          "text": "6.3 What was actually verified"
+          "text": "What failed in the latest trials?"
         },
         {
           "type": "p",
-          "text": "Bacula backup and restore jobs completed with T status; an isolated restored dataset contained 20 decisions, 21 events and three winners. Physical PITR recovered a decision absent from the base backup and matched the ledger anchor. A real private Singapore S3 round trip verified server-side encryption, client encryption, version-pinned restore, 30-day COMPLIANCE retention and protected-version deletion denial. The remote bucket uses the configured account; independent backup-account administration was not demonstrated."
+          "text": "The latest HTTP trial stored all 50,000 requests, but 7,206 received SQL admission timestamps after cutoff and were CLOSED; only 42,794 were eligible. With live feeds, 19,218 were late and only 30,782 were eligible. Request errors were zero, and both recorded correctness gates passed. The failed requirement was timely bidding. These are real performance failures, so they remain FAIL."
         },
         {
-          "type": "p",
-          "text": "Production remote continuous WAL is configured through Barman Cloud plugin 0.16.0, an ObjectStore, WAL-archiver patch and scheduled physical backups. These resources are not an end-to-end production offsite PITR/RPO proof. archive_timeout=60s is not a site-loss RPO guarantee. Recovery timers on page 7 cover controlled small-dataset import/retrieval/verification intervals; they exclude full-site reconstruction. Source: scripts/backup_export.py, scripts/rehearse_pitr.py, infra/bacula/, infra/pitr/, infra/offsite/, infra/ha/; docs/recovery.md, ha-deployment.md."
-        }
-      ]
-    },
-    {
-      "title": "Measured results, regressions and reproducibility",
-      "blocks": [
-        {
-          "type": "p",
-          "text": "<b>Current status:</b> historical normal and worker-failure HTTP runs passed the 50,000-user gate. Later layouts regressed; the branch is not certified for repeatable 50k or combined-live operation and phase 13 remains unmerged. All original failed trials remain FAIL. The 30-request / 7.96-bids/s smoke test is retained as historical data, not the assignment-scale proof."
+          "type": "h",
+          "text": "What did the historical passes prove?"
         },
         {
           "type": "table",
           "headers": [
-            "Run / ID prefix",
-            "Eligible / 50k",
-            "Late / errors",
-            "Final accepted / rejected / closed",
-            "Gate / tail after cutoff"
+            "Historical run",
+            "Final accepted / rejected",
+            "Queued at cutoff",
+            "Last decision after cutoff"
           ],
           "widths": [
+            0.18,
+            0.32,
             0.24,
-            0.13,
-            0.14,
-            0.29,
-            0.2
+            0.26
           ],
           "rows": [
             [
-              "Historical normal HTTP<br/>6a341563",
-              "50,000",
-              "0 / 0",
-              "14,730 / 35,270 / 0",
-              "PASS<br/>+13.335 s"
+              "Normal",
+              "14,730 / 35,270",
+              "30,032",
+              "+13.335 s"
             ],
             [
-              "Historical worker HTTP<br/>93aedc3e",
-              "50,000",
-              "0 / 0",
-              "18,290 / 31,710 / 0",
-              "PASS<br/>+8.913 s"
-            ],
-            [
-              "Latest worker HTTP<br/>016565f9",
-              "42,794",
-              "7,206 / 0",
-              "900 / 41,894 / 7,206",
-              "FAIL<br/>+22.976 s"
-            ],
-            [
-              "Latest live + worker<br/>5bcdf2d8",
-              "30,782",
-              "19,218 / 0",
-              "614 / 30,168 / 19,218",
-              "FAIL<br/>+23.584 s"
+              "Worker kill",
+              "18,290 / 31,710",
+              "40,272",
+              "+8.913 s"
             ]
           ]
         },
         {
           "type": "p",
-          "text": "No successful-run request remained queued at final close. Recorded cutoff ACCEPTED/REJECTED/QUEUED counts: normal 2,260/17,708/30,032; historical worker 3,198/6,530/40,272. HTTP ingress p50/p95/p99: normal 0.369/1.108/1.515 s; historical worker 0.326/0.734/0.853 s. Winning integer-cent totals were 10,196,980 and 10,196,880 respectively. All four rows passed their recorded audit/correctness gate; the latest missed the bidding-window gate."
+          "text": "All 50,000 original requests were matched to signed events; 20 winners replayed correctly. The worker trial confirmed SIGKILL/exit 137, checkpoint preservation and epoch 1 to 2 with stale-holder fencing. Queued work drained after cutoff. This proves those recorded runs; it does not show all decisions finished inside ten seconds."
         },
         {
           "type": "h",
-          "text": "7.1 Workload, failure and correctness evidence"
+          "text": "Measurement scope and reproducibility"
         },
         {
           "type": "p",
-          "text": "One hot auction used stock 20, reserve 10,000 cents and increment 10 cents; amount_i=10000+10i for i=0..49999. Five generators seeded 50,000 distinct users and pre-issued real HS256 sessions. Each offered one original bid over nine seconds inside the final ten-second window (about 5,556 offers/s). HTTP transport pooled at most 5,120 connections, not 50,000 simultaneous transactions. All services/generators shared one 12-CPU / 7.46-GiB Docker host; login and multi-host capacity were not measured. PostgreSQL fsync, synchronous_commit and full_page_writes stayed on."
+          "text": "One auction used stock 20, reserve 10,000 cents and increment 10. Five generators offered one bid per distinct user over nine seconds, with at most 5,120 pooled HTTP connections on one 12-CPU / 7.46-GiB host. Sessions were pre-issued; login throughput and 50,000 simultaneous transactions were not measured. SQL timestamps occur inside transactions; exact commit visibility was not measured."
         },
         {
           "type": "p",
-          "text": "Both historical passes checked all 50,000 SQL histories and matched all original client CSV requests to 50,000 signed bid events plus one close event and 20 replayed winners. Owner HTTP histories and same-UUID retries were sampled for 64 users. Tampered winners failed; a new late UUID returned CLOSED without changing the sealed anchor. The worker trial confirmed SIGKILL/exit 137, checkpoint preservation and epoch 1 to 2 with stale-holder fencing. Earlier Compose restart could also rerun migrations; the corrected harness restarts only the worker and checks migration start time. Current combined trials held 50,000 distinct sockets but failed bidding cutoff."
-        },
-        {
-          "type": "p",
-          "text": "SQL admitted_at is stamped inside the admission transaction; HTTP ACK follows commit. Decision committed_at is also an in-transaction row timestamp, not the exact WAL-flush/MVCC-visibility instant. Cutoff counts are reconstructed from those times; saved roughly one-second SQL samples record committed observations separately. Eligible queued work drains after cutoff. Successful admission does not imply every decision completed inside ten seconds."
-        },
-        {
-          "type": "table",
-          "headers": [
-            "Other proof",
-            "Recorded dataset / actual scope",
-            "Measured interval"
-          ],
-          "widths": [
-            0.22,
-            0.53,
-            0.25
-          ],
-          "rows": [
-            [
-              "Bacula restore",
-              "20 decisions / 21 events / 3 winners; checksums and replay PASS",
-              "1.25 s import + verify"
-            ],
-            [
-              "Physical PITR",
-              "Base 1 decision; WAL recovered 2 decisions / 3 events; anchor matches",
-              "3.12 s recovery + verify"
-            ],
-            [
-              "Primary-node loss",
-              "Actual kind worker stop; 3 decisions retained; standby promotion and fencing",
-              "67.21 s controlled drill"
-            ],
-            [
-              "Real S3 restore",
-              "Encrypted, locked, version-pinned 20-decision dataset; same account",
-              "1.97 s retrieval + verify"
-            ],
-            [
-              "Socket / broker",
-              "Historical 50k shared-identity sockets: 58.01 s; NATS replica-loss and TLS checks PASS",
-              "Separate workload scopes"
-            ]
-          ]
-        },
-        {
-          "type": "h",
-          "text": "7.2 Reproduction and unresolved production requirements"
-        },
-        {
-          "type": "p",
-          "text": "Exact runs, image IDs and full commands are in docs/bidding-proof.md and docs/evidence/bidding-index.json. Offline check: python -m scripts.verify_bid_stress docs/evidence/bids-&lt;full-run-id&gt;. Rebuild PDFs with python -m scripts.build_report and python -m scripts.build_demo_guide. Checks: 39 backend tests, Go race tests, frontend build and phase CI; later report edits require only document validation. Source baseline f607529 produced the historical passes; 9474f91 is the current benchmark-code checkpoint."
-        },
-        {
-          "type": "p",
-          "text": "Remaining: repeatable current-layout 50k bidding, combined-live throughput, physical multi-zone deployment/outage, independent-account backups, continuous production offsite PITR/RPO, predictive fleet pre-warming, fleet-wide quotas, payment settlement and a real legacy benchmark. The demo uses small live requests plus labelled recorded capacity/recovery evidence; full-load runs, cloud provisioning and live-database restores stay outside the three-minute presentation."
+          "text": "<b>Evidence:</b> docs/bidding-proof.md and docs/evidence/bidding-index.json list full IDs, configurations and replay commands. Historical baseline: f607529; latest tested: 9474f91. Repeatable 50k, physical multi-zone operation and full-site guarantees remain unproven."
         }
       ]
     }

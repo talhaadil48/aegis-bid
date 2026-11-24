@@ -7,7 +7,7 @@ from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 INK = colors.HexColor("#172B45")
-MUTED = colors.HexColor("#56677C")
+MUTED = colors.HexColor("#3D4D62")
 EDGE = colors.HexColor("#DCE3EB")
 BLUE = colors.HexColor("#3666AA")
 TEAL = colors.HexColor("#15746B")
@@ -21,7 +21,7 @@ def system_design(width=511):
     height = 650
     drawing = Drawing(width, height * width / 520)
 
-    def text(x, top, value, size=8.3, bold=False, color=MUTED, anchor="start"):
+    def text(x, top, value, size=10, bold=False, color=MUTED, anchor="start"):
         drawing.add(
             String(
                 x,
@@ -70,27 +70,27 @@ def system_design(width=511):
             drawing.add(Polygon(vertices, fillColor=color, strokeColor=color, strokeWidth=0.4))
 
     def section(top, number, title, color=BLUE):
-        text(20, top, number, 8, True, color)
-        text(43, top, title, 8, True, INK)
+        text(20, top, number, 10, True, color)
+        text(43, top, title, 10, True, INK)
 
     def card(x, top, w, h, title, lines, accent=BLUE, fill=WHITE):
         rect(x, top, w, h, fill)
         drawing.add(Line(x + 12, height - top - 14, x + 12, height - top - 27, strokeColor=accent, strokeWidth=2.5))
-        text(x + 22, top + 23, title, 10, True, INK)
-        if stringWidth(title, "Helvetica-Bold", 10) > w - 34:
+        text(x + 22, top + 23, title, 11, True, INK)
+        if stringWidth(title, "Helvetica-Bold", 11) > w - 34:
             raise ValueError(f"Diagram card title overflows: {title}")
         for index, value in enumerate(lines):
-            if stringWidth(value, "Helvetica", 8.2) > w - 24:
+            if stringWidth(value, "Helvetica", 10) > w - 24:
                 raise ValueError(f"Diagram card text overflows: {value}")
-            text(x + 12, top + 39 + index * 11.5, value, 8.2)
+            text(x + 12, top + 39 + index * 12, value, 10)
 
     section(10, "01", "ACCESS & IDENTITY")
     for x, label in zip([20, 143, 266, 389], ["Bidder", "Seller", "Administrator", "Auditor"], strict=True):
         rect(x, 22, 111, 22, fill=colors.HexColor("#F3F6FA"), border=colors.HexColor("#F3F6FA"))
-        text(x + 55.5, 36.5, label, 8.6, True, INK, "middle")
+        text(x + 55.5, 36.5, label, 10, True, INK, "middle")
         line([(x + 55.5, 44), (x + 55.5, 51)], head=False)
-    card(20, 58, 218, 62, "Web application", ["Next.js role views + Nginx proxy", "Session cookie / HTTP / WebSocket"])
-    card(282, 58, 218, 62, "Go intake + FastAPI", ["Separate bid ingress / real session checks", "Bounded batches / UUID / integer cents"])
+    card(20, 58, 218, 62, "Web application", ["Next.js roles + Nginx", "Cookies / HTTP / WebSocket"])
+    card(282, 58, 218, 62, "Go intake + FastAPI", ["Batch ingress / JWT + roles", "UUID / origin / integer cents"])
     line([(75.5, 51), (444.5, 51)], head=False)
     line([(129, 51), (129, 58)])
     line([(238, 89), (282, 89)])
@@ -98,27 +98,27 @@ def system_design(width=511):
     section(140, "02", "DURABLE BID PROCESSING")
     line([(429, 175), (429, 159), (91, 159), (91, 175)], dashed=True)
     rect(178, 150, 164, 15, border=WHITE, radius=0)
-    text(260, 160, "Worker also reconciles SQL intake", 7.8, color=BLUE, anchor="middle")
-    card(358, 175, 142, 63, "SQL intake", ["Parallel sequence reservation", "Commit -> 202 QUEUED"])
-    card(189, 175, 142, 63, "JetStream", ["Relay -> durable command", "Same UUID / retry + ACK"])
-    card(20, 175, 142, 63, "Auction worker", ["Prefix barrier + lease epoch", "Price / cutoff / intake order"])
+    text(260, 160, "Worker reconciles SQL intake", 9.5, color=BLUE, anchor="middle")
+    card(358, 175, 142, 63, "SQL intake", ["UUID + sequence", "Commit -> QUEUED"])
+    card(189, 175, 142, 63, "JetStream", ["Durable command", "UUID / retry / ACK"])
+    card(20, 175, 142, 63, "Auction worker", ["Barrier + lease epoch", "Ordered price checks"])
     line([(475, 120), (475, 175)])
     line([(358, 206), (331, 206)])
     line([(189, 206), (162, 206)])
     rect(189, 242, 311, 15, fill=colors.HexColor("#F3F6FA"), border=colors.HexColor("#F3F6FA"), radius=3)
-    text(344.5, 252, "Late UUID -> CLOSED receipt; sealed result unchanged", 7.7, color=INK, anchor="middle")
+    text(344.5, 252, "Late UUID -> CLOSED; sealed result unchanged", 9.5, color=INK, anchor="middle")
     line([(500, 206), (510, 206), (510, 249.5), (500, 249.5)])
     line([(91, 238), (91, 260)])
-    text(100, 252, "commit", 7.5)
+    text(100, 252, "commit", 9.5)
 
     rect(20, 260, 480, 65, fill=INK, border=INK)
-    text(35, 281, "PostgreSQL  /  one atomic ordered batch", 11, True, WHITE)
-    text(35, 298, "Separate bid results + hash events; offers + states + latest-version outbox", 9, color=WHITE)
+    text(35, 281, "PostgreSQL  /  one atomic ordered batch", 12, True, WHITE)
+    text(35, 298, "Bid results + hash events + offers + states + batch outbox", 10, color=WHITE)
     text(
         35,
         313,
         "At close: drain intake -> rank distinct bidders -> allocate stock",
-        8.5,
+        10,
         color=colors.HexColor("#CBDAEC"),
     )
 
@@ -133,7 +133,7 @@ def system_design(width=511):
         142,
         76,
         "Live updates",
-        ["Separate Go fanout service", "API snapshots: 2 s scale tick", "One-slot queue -> role views"],
+        ["Separate Go service", "2 s tick; default 1 s", "One-slot snapshot queue"],
         accent=TEAL,
     )
     card(
@@ -142,7 +142,7 @@ def system_design(width=511):
         142,
         76,
         "Audit & replay",
-        ["SHA-256 event chain", "Optional Ed25519 signature", "Rules + winners verified"],
+        ["SHA-256 event chain", "Ed25519 manifest", "Replay rules + winners"],
         accent=PURPLE,
     )
     card(
@@ -151,18 +151,16 @@ def system_design(width=511):
         142,
         76,
         "Notifications",
-        ["SQL outbox -> relay", "NATS live subjects + retries", "Go uses the API read path"],
+        ["SQL outbox -> relay", "NATS live subjects", "Go polls API snapshots"],
     )
 
     section(469, "04", "BACKUP & VERIFIED RECOVERY", TEAL)
     line([(500, 292), (510, 292), (510, 477), (91, 477)], color=AMBER, head=False)
     for x in [91, 260, 429]:
         line([(x, 477), (x, 489)], color=AMBER)
-    card(20, 489, 142, 63, "Bacula", ["pg_dump + file checksums", "Director / FD / SD / Catalog"], accent=TEAL)
-    card(
-        189, 489, 142, 63, "Physical PITR", ["Base backup + archived WAL", "Named / time recovery target"], accent=TEAL
-    )
-    card(358, 489, 142, 63, "S3 vault", ["AES-GCM + exact versions", "COMPLIANCE retention"], accent=TEAL)
+    card(20, 489, 142, 63, "Bacula / Catalog", ["Prepared SQL backup", "Director / FD / SD"], accent=TEAL)
+    card(189, 489, 142, 63, "Physical PITR", ["Base backup + WAL", "Named / time target"], accent=TEAL)
+    card(358, 489, 142, 63, "S3 vault", ["AES-GCM + versions", "COMPLIANCE lock"], accent=TEAL)
     for x in [91, 260, 429]:
         line([(x, 552), (x, 561)], color=TEAL, head=False)
     line([(91, 561), (429, 561)], color=TEAL, head=False)
@@ -171,20 +169,20 @@ def system_design(width=511):
     text(
         260,
         588.5,
-        "Isolated restore   ->   verify ledger + winners   ->   recovery certificate",
-        8.7,
+        "Isolated restore   ->   verify ledger + winners   ->   certificate",
+        10,
         True,
         TEAL,
         "middle",
     )
 
     section(618, "05", "PLATFORM & OPERATIONS")
-    text(20, 634, "Observe: Prometheus / Grafana    |    Control: admin metrics + allowlisted local chaos", 8)
+    text(20, 634, "Metrics: Prometheus / Grafana    |    Admin controls: fixed local faults", 9.5)
     text(
         20,
         648,
-        "HA: local failover tested    |    Target: 3-zone EKS, CNPG + NATS    |    Real zone proof pending",
-        7.9,
+        "Local failover tested    |    EKS 3-zone target    |    Real zone proof pending",
+        9.5,
     )
     drawing.scale(width / 520, width / 520)
     return drawing

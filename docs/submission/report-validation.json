@@ -1,25 +1,28 @@
 {
   "pdf_pages": 7,
   "body_font_sizes_pt": [
-    10.2,
-    10.2,
-    10.2,
-    10.2,
-    10.2,
-    10.2,
-    9.75
+    11.5,
+    11.5,
+    11.5,
+    11.5,
+    11.5,
+    11.5,
+    11.5
   ],
+  "font_family": "Helvetica (PDF), Arial (Word)",
+  "table_font_size_pt": 10.5,
+  "automatic_font_shrinking": false,
   "source_commit": "f607529 proofs / 9474f91 checkpoint",
   "student_name": "Talha Adil",
   "roll_number": "CS-23114",
-  "words": 1957,
+  "words": 1475,
   "section_titles": [
-    "Implementation stack and execution contracts",
-    "Complete system flow and recovery paths",
-    "Ordering, idempotency and terminal outcomes",
-    "Bottlenecks, implemented changes and API behavior",
-    "Authentication, signed audit and operations",
-    "HA, backup transport and verified restoration",
-    "Measured results, regressions and reproducibility"
+    "Technology and verified scope",
+    "Complete system flow",
+    "Correctness issues and verified fixes",
+    "Performance issues: changes and open work",
+    "API roles, security and independent audit",
+    "Availability, Bacula and disaster recovery",
+    "Results: why PASS and FAIL coexist"
   ]
 }
