@@ -225,7 +225,8 @@ p {
   padding: 5px 9px;
   border-radius: 5px;
 }
-input {
+input,
+select {
   display: block;
   background: #0b111b;
   color: white;
@@ -235,7 +236,8 @@ input {
   width: 100%;
   margin-top: 9px;
 }
-input:focus {
+input:focus,
+select:focus {
   outline: 2px solid var(--accent);
 }
 label {
@@ -321,6 +323,9 @@ th {
 }
 .auth-switch {
   margin-top: 12px;
+}
+.account-form {
+  max-width: 420px;
 }
 .page-footer {
   border-top: 1px solid var(--border);

@@ -60,6 +60,40 @@ def test_registration_creates_a_bidder_and_starts_a_session(auction):
     assert client.post("/v1/auth/login", json=credentials).json() == account
 
 
+def test_public_seller_registration(auction):
+    client = TestClient(app)
+    credentials = {"username": "seller-" + uuid4().hex[:16], "password": "registration-test-password"}
+    assert client.post("/v1/auth/register", json={**credentials, "role": "auditor"}).status_code == 422
+    registered = client.post("/v1/auth/register", json={**credentials, "role": "seller"})
+    assert registered.status_code == 201
+    assert client.get("/v1/auth/me").json()["role"] == "seller"
+    assert client.post("/v1/admin/users", json={**credentials, "role": "admin"}).status_code == 403
+
+
+def test_first_admin_setup_and_account_provisioning(auction, monkeypatch):
+    client = TestClient(app)
+    setup_key = "first-admin-test-key-with-at-least-32-characters"
+    credentials = {"username": "admin-" + uuid4().hex[:16], "password": "registration-test-password"}
+    assert client.post("/v1/admin/users", json={**credentials, "role": "admin"}).status_code == 401
+    monkeypatch.delenv("ADMIN_SETUP_KEY", raising=False)
+    assert client.get("/v1/auth/setup").json() == {"available": False}
+    monkeypatch.setenv("ADMIN_SETUP_KEY", setup_key)
+    assert client.get("/v1/auth/setup").json() == {"available": True}
+    assert client.post("/v1/auth/setup", json={**credentials, "setup_key": "wrong"}).status_code == 403
+    created = client.post("/v1/auth/setup", json={**credentials, "setup_key": setup_key})
+    assert created.status_code == 201
+    assert created.json()["role"] == "admin"
+    assert client.get("/v1/auth/setup").json() == {"available": False}
+    duplicate = client.post("/v1/auth/setup", json={**credentials, "setup_key": setup_key})
+    assert duplicate.status_code == 409
+    auditor = {"username": "auditor-" + uuid4().hex[:16], "password": "registration-test-password"}
+    managed = client.post("/v1/admin/users", json={**auditor, "role": "auditor"})
+    assert managed.status_code == 201
+    assert "set-cookie" not in managed.headers
+    assert client.get("/v1/auth/me").json() == created.json()
+    assert TestClient(app).post("/v1/auth/login", json=auditor).json() == managed.json()
+
+
 def test_bid_authorization_and_lifecycle(auction):
     aid, bidder = auction
     anon = TestClient(app)

@@ -7,12 +7,14 @@ async function api(path, body) {
     headers: body ? { "Content-Type": "application/json" } : {},
     body: body ? JSON.stringify(body) : undefined,
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => null);
   if (!res.ok)
     throw Error(
-      typeof data.detail === "string"
+      typeof data?.detail === "string"
         ? data.detail
-        : JSON.stringify(data.detail),
+        : data?.detail
+          ? JSON.stringify(data.detail)
+          : "The request failed. Please try again.",
     );
   return data;
 }
@@ -20,10 +22,92 @@ const money = (c) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
     c / 100,
   );
+const accountTypes = {
+  bidder: "Bidder",
+  seller: "Seller",
+  auditor: "Auditor",
+  admin: "Administrator",
+};
+
+function AccountType({ managed = false }) {
+  const types = managed ? Object.keys(accountTypes) : ["bidder", "seller"];
+  return (
+    <label>
+      Account type
+      <select name="role" defaultValue="bidder">
+        {types.map((role) => (
+          <option key={role} value={role}>{accountTypes[role]}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function AccountFields({ creating = false }) {
+  return (
+    <>
+      <label>
+        Username
+        <input
+          name="username"
+          required
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          minLength={creating ? 3 : undefined}
+          maxLength={creating ? 32 : 80}
+          pattern={creating ? "[A-Za-z0-9_\\-]+" : undefined}
+          aria-describedby={creating ? "username-hint" : undefined}
+        />
+      </label>
+      {creating && (
+        <p className="muted" id="username-hint">
+          Use 3–32 letters, numbers, underscores or hyphens.
+        </p>
+      )}
+      <label>
+        Password
+        <input
+          name="password"
+          type="password"
+          required
+          autoComplete={creating ? "new-password" : "current-password"}
+          minLength={creating ? 12 : undefined}
+          maxLength={128}
+          aria-describedby={creating ? "password-hint" : undefined}
+        />
+      </label>
+      {creating && (
+        <>
+          <p className="muted" id="password-hint">Use at least 12 characters.</p>
+          <label>
+            Confirm password
+            <input
+              name="confirmPassword"
+              type="password"
+              required
+              autoComplete="new-password"
+              maxLength={128}
+            />
+          </label>
+        </>
+      )}
+    </>
+  );
+}
+
+function accountDetails(form) {
+  const { confirmPassword, ...details } = Object.fromEntries(new FormData(form));
+  if (confirmPassword !== undefined && details.password !== confirmPassword)
+    throw Error("Passwords do not match.");
+  return details;
+}
+
 export default function Home() {
   const [user, setUser] = useState(null),
     [sessionLoading, setSessionLoading] = useState(true),
-    [registering, setRegistering] = useState(false),
+    [authMode, setAuthMode] = useState("login"),
+    [setupAvailable, setSetupAvailable] = useState(false),
     [list, setList] = useState([]),
     [selected, setSelected] = useState(""),
     [auction, setAuction] = useState(null),
@@ -47,7 +131,9 @@ export default function Home() {
   useEffect(() => {
     api("/auth/me")
       .then(setUser)
-      .catch(() => {})
+      .catch(() =>
+        api("/auth/setup").then((data) => setSetupAvailable(data.available)).catch(() => {}),
+      )
       .finally(() => setSessionLoading(false));
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
@@ -119,14 +205,23 @@ export default function Home() {
   }
   async function authenticate(e) {
     e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const username = form.get("username");
-    const password = form.get("password");
+    const form = e.currentTarget;
     await act(async () => {
-      if (registering && password !== form.get("confirmPassword"))
-        throw Error("Passwords do not match.");
-      const path = registering ? "/auth/register" : "/auth/login";
-      setUser(await api(path, { username, password }));
+      setUser(await api("/auth/" + authMode, accountDetails(form)));
+    });
+  }
+  function switchAuth(mode) {
+    setError("");
+    setAuthMode(mode);
+  }
+  async function provision(e) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    setNotice("");
+    await act(async () => {
+      const account = await api("/admin/users", accountDetails(form));
+      form.reset();
+      setNotice(`Created ${accountTypes[account.role].toLowerCase()} account for ${account.username}.`);
     });
   }
   async function submit(e) {
@@ -273,72 +368,62 @@ export default function Home() {
                 Reconnect at any time and retrieve the same result.
               </p>
             </div>
-            <form key={registering ? "register" : "login"} onSubmit={authenticate}>
-              <h3>{registering ? "Create a bidder account" : "Sign in"}</h3>
-              <label>
-                Username
-                <input
-                  name="username"
-                  required
-                  autoComplete="username"
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  minLength={registering ? 3 : undefined}
-                  maxLength={registering ? 32 : 80}
-                  pattern={registering ? "[A-Za-z0-9_\\-]+" : undefined}
-                  aria-describedby={registering ? "username-hint" : undefined}
-                />
-              </label>
-              {registering && (
-                <p className="muted" id="username-hint">
-                  Use 3–32 letters, numbers, underscores or hyphens.
-                </p>
+            <form key={authMode} onSubmit={authenticate}>
+              <h3>
+                {{
+                  login: "Sign in",
+                  register: "Create an account",
+                  setup: "Set up the first administrator",
+                }[authMode]}
+              </h3>
+              {authMode === "register" && (
+                <AccountType />
               )}
-              <label>
-                Password
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  autoComplete={registering ? "new-password" : "current-password"}
-                  minLength={registering ? 12 : undefined}
-                  maxLength={128}
-                  aria-describedby={registering ? "password-hint" : undefined}
-                />
-              </label>
-              {registering && (
-                <>
-                  <p className="muted" id="password-hint">Use at least 12 characters.</p>
-                  <label>
-                    Confirm password
-                    <input
-                      name="confirmPassword"
-                      type="password"
-                      required
-                      autoComplete="new-password"
-                      maxLength={128}
-                    />
-                  </label>
-                </>
+              {authMode === "register" && (
+                <p className="muted">Bidders place offers. Sellers publish auctions.</p>
               )}
+              {authMode === "setup" && (
+                <label>
+                  Setup key
+                  <input name="setup_key" type="password" required maxLength={256} autoComplete="off" />
+                </label>
+              )}
+              <AccountFields creating={authMode !== "login"} />
               <button disabled={busy}>
-                {registering ? "Create account" : "Sign in"}
+                {{ login: "Sign in", register: "Create account", setup: "Create administrator" }[authMode]}
               </button>
               <button
                 type="button"
                 className="quiet auth-switch"
                 disabled={busy}
-                onClick={() => {
-                  setError("");
-                  setRegistering(!registering);
-                }}
+                onClick={() => switchAuth(authMode === "login" ? "register" : "login")}
               >
-                {registering ? "Back to sign in" : "Create an account"}
+                {authMode === "login" ? "Create an account" : "Back to sign in"}
               </button>
+              {authMode === "login" && setupAvailable && (
+                <button
+                  type="button"
+                  className="quiet auth-switch"
+                  disabled={busy}
+                  onClick={() => switchAuth("setup")}
+                >
+                  Set up administrator
+                </button>
+              )}
             </form>
           </section>
         ) : (
           <>
+            {user.role === "admin" && (
+              <section className="panel">
+                <h2>Accounts</h2>
+                <form className="account-form" onSubmit={provision}>
+                  <AccountType managed />
+                  <AccountFields creating />
+                  <button disabled={busy}>Create account</button>
+                </form>
+              </section>
+            )}
             {metrics && user.role === "admin" && (
               <>
                 <div className="stats">

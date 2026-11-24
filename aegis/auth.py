@@ -20,9 +20,14 @@ class NewAccount(BaseModel):
     password: str = Field(min_length=12, max_length=128)
 
 
-def create_account(account: NewAccount, role: str):
+def create_account(account: NewAccount, role: str, *, first_admin=False):
     password_hash = hash_password(account.password)
     with connection() as c:
+        if first_admin:
+            # Prevent concurrent setup and account provisioning from racing the check.
+            c.execute("LOCK TABLE users IN SHARE ROW EXCLUSIVE MODE")
+            if c.execute("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1").fetchone():
+                raise HTTPException(409, "An administrator already exists")
         return c.execute(
             """
             INSERT INTO users (id, username, password_hash, role)
