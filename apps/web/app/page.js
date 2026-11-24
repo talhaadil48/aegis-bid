@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
+import { AuctionForm, auctionDetails } from "./auction-form";
+import SellerStudio from "./seller-studio";
 
 async function api(path, body) {
   const res = await fetch("/v1" + path, {
@@ -139,7 +141,7 @@ export default function Home() {
     return () => clearInterval(t);
   }, []);
   useEffect(() => {
-    if (!user) return;
+    if (!user || user.role === "seller") return;
     load().catch((e) => setError(e.message));
     const t = setInterval(() => {
       api("/me/bids")
@@ -271,13 +273,9 @@ export default function Home() {
   }, [user]);
   async function create(e) {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget));
-    for (const key of ["stock", "min_price_cents", "increment_cents"])
-      data[key] = Number(data[key]);
-    data.opens_at = new Date(data.opens_at).toISOString();
-    data.closes_at = new Date(data.closes_at).toISOString();
+    const form = e.currentTarget;
     await act(async () => {
-      const a = await api("/seller/auctions", data);
+      const a = await api("/seller/auctions", auctionDetails(form));
       await load();
       setSelected(a.id);
       setNotice("Auction created");
@@ -322,7 +320,7 @@ export default function Home() {
                 ? {
                     bidder: "The auction floor",
                     admin: "Your operations, in view.",
-                    seller: "Build your next auction.",
+                    seller: "Seller studio",
                     auditor: "Verify the outcome.",
                   }[user.role]
                 : "Bidding built on trust."}
@@ -412,6 +410,8 @@ export default function Home() {
               )}
             </form>
           </section>
+        ) : user.role === "seller" ? (
+          <SellerStudio api={api} user={user} now={now} money={money} />
         ) : (
           <>
             {user.role === "admin" && (
@@ -565,7 +565,7 @@ export default function Home() {
                       </p>
                     </form>
                   )}
-                  {["admin", "seller"].includes(user.role) &&
+                  {user.role === "admin" &&
                     auction.status === "OPEN" && (
                       <button
                         className="quiet"
@@ -681,54 +681,10 @@ export default function Home() {
                 </div>
               </section>
             )}
-            {["seller", "admin"].includes(user.role) && (
+            {user.role === "admin" && (
               <section className="panel">
                 <h2>Create an auction</h2>
-                <form className="create" onSubmit={create}>
-                  <label>
-                    Title
-                    <input name="title" required maxLength="160" />
-                  </label>
-                  <label>
-                    Stock
-                    <input
-                      name="stock"
-                      type="number"
-                      min="1"
-                      defaultValue="3"
-                      required
-                    />
-                  </label>
-                  <label>
-                    Reserve (cents)
-                    <input
-                      name="min_price_cents"
-                      type="number"
-                      min="1"
-                      defaultValue="10000"
-                      required
-                    />
-                  </label>
-                  <label>
-                    Increment (cents)
-                    <input
-                      name="increment_cents"
-                      type="number"
-                      min="1"
-                      defaultValue="500"
-                      required
-                    />
-                  </label>
-                  <label>
-                    Opens (local time)
-                    <input name="opens_at" type="datetime-local" required />
-                  </label>
-                  <label>
-                    Closes (local time)
-                    <input name="closes_at" type="datetime-local" required />
-                  </label>
-                  <button disabled={busy}>Create auction</button>
-                </form>
+                <AuctionForm onSubmit={create} busy={busy} />
               </section>
             )}
             {user.role === "admin" && (

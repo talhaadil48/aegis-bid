@@ -14,12 +14,15 @@ def pseudonym(uid):
     return hashlib.sha256(str(uid).encode()).hexdigest()
 
 
-def export_auction(aid):
+def export_auction(aid, *, seller_id=None):
     with connection() as c:
         c.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
         a = c.execute(
-            "SELECT id,stock,min_price_cents,increment_cents,opens_at,closes_at,status,version FROM auctions WHERE id=%s",
-            (aid,),
+            """
+            SELECT id,stock,min_price_cents,increment_cents,opens_at,closes_at,status,version
+            FROM auctions WHERE id=%s AND (%s::uuid IS NULL OR seller_id=%s)
+            """,
+            (aid, seller_id, seller_id),
         ).fetchone()
         if not a:
             raise LookupError("Auction not found")
