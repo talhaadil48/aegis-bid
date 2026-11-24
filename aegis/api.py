@@ -7,10 +7,13 @@ from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
+from fastapi.exception_handlers import request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from starlette.responses import JSONResponse
 
 from aegis import config
-from aegis.auth import check_password, current_user, identity, roles, token
+from aegis.auth import NewAccount, check_password, create_account, current_user, identity, roles, token
 from aegis.coalescing import grouped
 from aegis.db import connection
 from aegis.engine import Conflict
@@ -55,13 +58,14 @@ class Login(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
-@app.post("/v1/auth/login")
-def login(body: Login, response: Response, request: Request):
-    limit(("login", request.client.host), 10)
-    with connection() as c:
-        user = c.execute("SELECT * FROM users WHERE username=%s", (body.username,)).fetchone()
-    if not user or not check_password(body.password, user["password_hash"]):
-        raise HTTPException(401, "Invalid credentials")
+@app.exception_handler(RequestValidationError)
+async def validate_request(request: Request, exc: RequestValidationError):
+    if request.url.path in ("/v1/auth/register", "/v1/auth/login"):
+        return JSONResponse({"detail": "Check the username and password fields."}, status_code=422)
+    return await request_validation_exception_handler(request, exc)
+
+
+def start_session(response: Response, user):
     response.set_cookie(
         "aegis_session",
         token(user),
@@ -71,6 +75,28 @@ def login(body: Login, response: Response, request: Request):
         max_age=14400,
     )
     return {k: user[k] for k in ("id", "username", "role")}
+
+
+@app.post("/v1/auth/login")
+def login(body: Login, response: Response, request: Request):
+    limit(("login", request.client.host), 10)
+    with connection() as c:
+        user = c.execute("SELECT * FROM users WHERE username=%s", (body.username,)).fetchone()
+    if not user or not check_password(body.password, user["password_hash"]):
+        raise HTTPException(401, "Invalid credentials")
+    return start_session(response, user)
+
+
+@app.post("/v1/auth/register", status_code=201)
+def register(body: NewAccount, response: Response, request: Request):
+    limit(("register", request.client.host), 5)
+    config.require_secret()
+    if body.username.lower() in {"admin", "seller", "auditor"}:
+        raise HTTPException(409, "Username is unavailable")
+    user = create_account(body, role="bidder")
+    if user is None:
+        raise HTTPException(409, "Username is unavailable")
+    return start_session(response, user)
 
 
 @app.post("/v1/auth/logout")

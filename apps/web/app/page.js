@@ -22,6 +22,8 @@ const money = (c) =>
   );
 export default function Home() {
   const [user, setUser] = useState(null),
+    [sessionLoading, setSessionLoading] = useState(true),
+    [registering, setRegistering] = useState(false),
     [list, setList] = useState([]),
     [selected, setSelected] = useState(""),
     [auction, setAuction] = useState(null),
@@ -45,7 +47,8 @@ export default function Home() {
   useEffect(() => {
     api("/auth/me")
       .then(setUser)
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSessionLoading(false));
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -114,12 +117,17 @@ export default function Home() {
       setBusy(false);
     }
   }
-  async function login(e) {
+  async function authenticate(e) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    await act(async () =>
-      setUser(await api("/auth/login", Object.fromEntries(form))),
-    );
+    const username = form.get("username");
+    const password = form.get("password");
+    await act(async () => {
+      if (registering && password !== form.get("confirmPassword"))
+        throw Error("Passwords do not match.");
+      const path = registering ? "/auth/register" : "/auth/login";
+      setUser(await api(path, { username, password }));
+    });
   }
   async function submit(e) {
     e.preventDefault();
@@ -231,7 +239,7 @@ export default function Home() {
               onClick={() =>
                 act(async () => {
                   await api("/auth/logout", {});
-                  setUser(null);
+                  window.location.reload();
                 })
               }
             >
@@ -249,7 +257,9 @@ export default function Home() {
             {notice}
           </div>
         )}
-        {!user ? (
+        {sessionLoading ? (
+          <p role="status">Checking your session…</p>
+        ) : !user ? (
           <section className="login">
             <div>
               <span className="eyebrow">VERIFIABLE BY DESIGN</span>
@@ -263,25 +273,68 @@ export default function Home() {
                 Reconnect at any time and retrieve the same result.
               </p>
             </div>
-            <form onSubmit={login}>
-              <h3>Enter your workspace</h3>
+            <form key={registering ? "register" : "login"} onSubmit={authenticate}>
+              <h3>{registering ? "Create a bidder account" : "Sign in"}</h3>
               <label>
                 Username
-                <input name="username" required autoComplete="username" />
+                <input
+                  name="username"
+                  required
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  minLength={registering ? 3 : undefined}
+                  maxLength={registering ? 32 : 80}
+                  pattern={registering ? "[A-Za-z0-9_\\-]+" : undefined}
+                  aria-describedby={registering ? "username-hint" : undefined}
+                />
               </label>
+              {registering && (
+                <p className="muted" id="username-hint">
+                  Use 3–32 letters, numbers, underscores or hyphens.
+                </p>
+              )}
               <label>
                 Password
                 <input
                   name="password"
                   type="password"
                   required
-                  autoComplete="current-password"
+                  autoComplete={registering ? "new-password" : "current-password"}
+                  minLength={registering ? 12 : undefined}
+                  maxLength={128}
+                  aria-describedby={registering ? "password-hint" : undefined}
                 />
               </label>
-              <button disabled={busy}>Sign in</button>
-              <p className="muted">
-                Use an account created by your administrator.
-              </p>
+              {registering && (
+                <>
+                  <p className="muted" id="password-hint">Use at least 12 characters.</p>
+                  <label>
+                    Confirm password
+                    <input
+                      name="confirmPassword"
+                      type="password"
+                      required
+                      autoComplete="new-password"
+                      maxLength={128}
+                    />
+                  </label>
+                </>
+              )}
+              <button disabled={busy}>
+                {registering ? "Create account" : "Sign in"}
+              </button>
+              <button
+                type="button"
+                className="quiet auth-switch"
+                disabled={busy}
+                onClick={() => {
+                  setError("");
+                  setRegistering(!registering);
+                }}
+              >
+                {registering ? "Back to sign in" : "Create an account"}
+              </button>
             </form>
           </section>
         ) : (
