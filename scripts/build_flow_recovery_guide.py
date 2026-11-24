@@ -1,240 +1,157 @@
-"""Build the plain English AegisBid system and recovery walkthrough."""
+"""Build the one-page AegisBid presentation script."""
 
+import itertools
+import re
 from pathlib import Path
 
 from pypdf import PdfReader
-from reportlab.graphics.shapes import Drawing, Line, Polygon, Rect, String
-from reportlab.lib.colors import HexColor, white
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.colors import HexColor
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs/submission/AegisBid_Flow_and_Recovery_Guide.pdf"
-NAVY = HexColor("#122840")
-TEAL = HexColor("#08665F")
-TEXT = HexColor("#243C50")
-LINE = HexColor("#C8D7DE")
-PALE = HexColor("#F1F6F8")
-MINT = HexColor("#E7F4EF")
-MARGIN = 45
+MARGIN = 41
 WIDTH = A4[0] - 2 * MARGIN - 12
+INK = HexColor("#142B3D")
+TEAL = HexColor("#076355")
+MUTED = HexColor("#3F5868")
+PALE = HexColor("#EAF4F1")
+LINE = HexColor("#CBDAD9")
+
+SCRIPT = [
+    (
+        0,
+        16,
+        "Seller studio",
+        (
+            "AegisBid is a flash auction app. Here, a seller lists one keyboard starting at $100. "
+            "A bidder places an offer, and the seller can watch the latest bids."
+        ),
+    ),
+    (
+        16,
+        42,
+        "Bidder screen and bid history",
+        (
+            "Nginx routes the bid to Go, which groups requests when many arrive together. "
+            "FastAPI checks the account, then PostgreSQL saves the bid and gives it a place in line. "
+            "Queued means saved. The worker checks offers in order."
+        ),
+    ),
+    (
+        42,
+        68,
+        "Latest bids and Worker leadership",
+        (
+            "If two people offer $100, the first is accepted and the next minimum becomes $105. "
+            "If the worker crashes, another can take over and check the saved bids. NATS passes messages between services. "
+            "Retrying with the same request ID counts once. The worker finishes bids saved before the deadline, then picks the winner."
+        ),
+    ),
+    (
+        68,
+        92,
+        "PostgreSQL failover design",
+        (
+            "In production, one PostgreSQL primary sends its change log to two standbys. "
+            "At least one standby must save the change before the primary confirms the write. "
+            "If the primary fails, a safe standby takes over. We demonstrated this in the local lab."
+        ),
+    ),
+    (
+        92,
+        120,
+        "Bacula job list and restore certificate",
+        (
+            "Bacula saves a consistent database export. We restored it into a separate database, checked the files, "
+            "and recalculated the winners. The drill verified 20 decisions and three winners. "
+            "Archived changes let PostgreSQL recover to a chosen time, and encrypted S3 keeps a remote copy."
+        ),
+    ),
+]
 
 STYLES = {
-    "title": ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=28, leading=32, textColor=NAVY, spaceAfter=9),
-    "lead": ParagraphStyle("lead", fontName="Helvetica", fontSize=14, leading=20, textColor=TEXT, spaceAfter=17),
-    "heading": ParagraphStyle("heading", fontName="Helvetica-Bold", fontSize=15, leading=19, textColor=TEAL, spaceBefore=11, spaceAfter=6),
-    "body": ParagraphStyle("body", fontName="Helvetica", fontSize=12, leading=17, textColor=TEXT, spaceAfter=8, alignment=TA_LEFT),
-    "cell": ParagraphStyle("cell", fontName="Helvetica", fontSize=11.5, leading=15, textColor=TEXT),
-    "label": ParagraphStyle("label", fontName="Helvetica-Bold", fontSize=11.5, leading=15, textColor=white),
-    "note": ParagraphStyle("note", fontName="Helvetica", fontSize=10, leading=14, textColor=TEXT, spaceBefore=9),
+    "title": ParagraphStyle("title", fontName="Helvetica-Bold", fontSize=29, leading=34, textColor=INK, spaceAfter=7),
+    "meta": ParagraphStyle("meta", fontName="Helvetica-Bold", fontSize=11.5, leading=16, textColor=TEAL, spaceAfter=15),
+    "prep": ParagraphStyle("prep", fontName="Helvetica", fontSize=11.5, leading=16, textColor=MUTED, spaceAfter=12),
+    "time": ParagraphStyle("time", fontName="Helvetica-Bold", fontSize=12, leading=17, textColor=TEAL),
+    "cue": ParagraphStyle("cue", fontName="Helvetica-Bold", fontSize=10.5, leading=15, textColor=TEAL, spaceAfter=4),
+    "say": ParagraphStyle("say", fontName="Helvetica", fontSize=13, leading=18.5, textColor=INK),
 }
 
 
-def p(text, style="body"):
-    return Paragraph(text, STYLES[style])
-
-
-def start(title, lead):
-    return [p(title, "title"), p(lead, "lead")]
-
-
-def hint(text):
-    box = Table([[p("<b>Show in your demo.</b> " + text, "cell")]], colWidths=[WIDTH])
-    box.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), MINT),
-        ("LINEBEFORE", (0, 0), (0, -1), 3, TEAL),
-        ("LEFTPADDING", (0, 0), (-1, -1), 14),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-        ("TOPPADDING", (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ]))
-    return [Spacer(1, 11), box]
-
-
-def table(headers, rows, fractions):
-    cells = [[p(header, "label") for header in headers]]
-    cells.extend([p(text, "cell") for text in row] for row in rows)
-    grid = Table(cells, colWidths=[WIDTH * fraction for fraction in fractions])
-    grid.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), NAVY),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [PALE, white]),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LINEBELOW", (0, 1), (-1, -1), 0.45, LINE),
-        ("LEFTPADDING", (0, 0), (-1, -1), 10),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 10),
-        ("TOPPADDING", (0, 0), (-1, -1), 8),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-    ]))
-    return grid
-
-
-def node(drawing, x, y, width, title, subtitle, highlighted=False):
-    drawing.add(Rect(x, y, width, 51, rx=7, ry=7, fillColor=MINT if highlighted else PALE, strokeColor=LINE))
-    drawing.add(String(x + width / 2, y + 30, title, fontName="Helvetica-Bold", fontSize=11, textAnchor="middle", fillColor=NAVY))
-    drawing.add(String(x + width / 2, y + 14, subtitle, fontName="Helvetica", fontSize=9, textAnchor="middle", fillColor=TEXT))
-
-
-def arrow(drawing, start_x, end_x, y):
-    drawing.add(Line(start_x, y, end_x - 6, y, strokeColor=TEAL, strokeWidth=1.5))
-    drawing.add(Polygon([end_x, y, end_x - 6, y - 3.5, end_x - 6, y + 3.5], fillColor=TEAL, strokeColor=None))
-
-
-def bid_diagram():
-    drawing = Drawing(WIDTH, 70)
-    labels = [
-        ("Browser", "Sends a bid"),
-        ("Nginx", "Routes traffic"),
-        ("Go + FastAPI", "Group and check"),
-        ("PostgreSQL", "Saves and orders"),
-        ("Worker", "Decides the bid"),
-    ]
-    gap = 18
-    size = (WIDTH - 4 * gap) / 5
-    for i, (title, detail) in enumerate(labels):
-        x = i * (size + gap)
-        node(drawing, x, 11, size, title, detail, highlighted=i == 3)
-        if i < len(labels) - 1:
-            arrow(drawing, x + size + 2, x + size + gap - 2, 36)
-    return drawing
-
-
-def replication_diagram():
-    drawing = Drawing(WIDTH, 128)
-    x = WIDTH - 145
-    node(drawing, 1, 42, 155, "Primary · Zone A", "Only writer", highlighted=True)
-    node(drawing, x, 72, 144, "Standby · Zone B", "Receives and replays WAL")
-    node(drawing, x, 9, 144, "Standby · Zone C", "Receives and replays WAL")
-    mid = (156 + x) / 2
-    drawing.add(Line(158, 67, mid, 67, strokeColor=TEAL, strokeWidth=1.5))
-    drawing.add(Line(mid, 34, mid, 97, strokeColor=TEAL, strokeWidth=1.5))
-    arrow(drawing, mid, x - 2, 97)
-    arrow(drawing, mid, x - 2, 34)
-    drawing.add(String(mid + 8, 64, "WAL stream", fontName="Helvetica-Bold", fontSize=10, fillColor=TEAL))
-    return drawing
-
-
-def page_content():
-    return [
-        [
-            *start("From bid to winner", "Follow one auction for one keyboard. It starts at <b>$100</b> and each new high bid must beat the last by at least <b>$5</b>."),
-            bid_diagram(),
-            p("1. The seller publishes the auction", "heading"),
-            p("In <b>Seller studio</b>, the seller adds the title, number of units, opening time, and deadline. The listing appears in the shared marketplace. The seller also sees it in <b>My auctions</b>."),
-            p("2. The bidder sends a price", "heading"),
-            p("Nginx sends the request to Go. Go can group up to 512 bids per auction in one trip. FastAPI checks the login, bidder role, amount, and request ID. PostgreSQL gives each request a position and saves it. <b>Queued</b> means the bid has been saved and is waiting for a decision."),
-            p("3. The worker checks the offers in order", "heading"),
-            p("The first $100 bid can be accepted. Another $100 bid then falls below the new $105 minimum. Different auctions can be checked in parallel. For one auction, a single worker decides the saved requests in order."),
-            p("4. The deadline arrives and the app picks the winner", "heading"),
-            p("The worker finishes bids admitted before the deadline. The highest eligible bidder wins. If $105 was highest, that bidder pays $105. After the decision, the buyer sees <b>Final allocation</b>. The audit records how the result was reached."),
-            *hint("Create an auction as a seller. In a second window, bid as a bidder. Return to <b>Latest bids</b> to show the amount, decision, and reason."),
-        ],
-        [
-            *start("When something fails", "The saved database record lets the app resume when a browser, worker, or service goes down."),
-            table(
-                ["Failure", "What AegisBid does"],
-                [
-                    ["<b>The reply is lost</b>", "Retry using the same request ID. If the bid was already saved, the app finds the original request and returns its result. The bid has one effect."],
-                    ["<b>The worker crashes</b>", "An unfinished database transaction rolls back. Saved bids stay queued. After the worker's time limit expires, another worker can take over. The database blocks writes using an older worker's permission."],
-                    ["<b>NATS is interrupted</b>", "NATS carries messages to tell services about work. A running worker can find pending bids directly in PostgreSQL. The relay can send saved messages when NATS returns. Worker startup still needs NATS."],
-                    ["<b>The live feed drops</b>", "The browser reconnects and gets the latest price. The Go gateway shares one price snapshot across viewers. The bidder can check the saved result in <b>Your bid history</b>."],
-                    ["<b>Too many requests arrive</b>", "Go limits how much work waits in memory. A full buffer can return <b>429</b>. If the reply is uncertain, retry with the original request ID while the auction still accepts new bids."],
-                    ["<b>The deadline passes</b>", "New late bids get <b>Closed</b>. The worker finishes eligible queued bids before choosing the winners. Late requests leave the finished auction result intact."],
-                ],
-                [0.29, 0.71],
-            ),
-            p("Why separate the traffic? Why no Redis?", "heading"),
-            p("Nginx sends bids to Go intake and live viewers to a separate Go gateway. In production, a load balancer and Kubernetes would distribute requests across healthy app instances. PostgreSQL holds the official bid record, NATS delivers messages, and Go shares live prices. A Redis cache could speed up reads later. Bid decisions would still use PostgreSQL."),
-            *hint("Show <b>Queued</b> and <b>Worker leadership</b> in Admin. Explain that another worker can continue from saved bids."),
-        ],
-        [
-            *start("How PostgreSQL stays in sync", "The production design places one primary and two standby copies in three separate cloud zones. Each auction has one place where writes are accepted."),
-            replication_diagram(),
-            p("1. The primary records each change", "heading"),
-            p("When a bid is saved, the primary writes the change to its <b>write-ahead log</b>, or <b>WAL</b>. Think of WAL as PostgreSQL's record of the changes it needs to recover. A new standby starts with a copy of the database, then receives and replays these records to catch up."),
-            p("2. A standby confirms the write", "heading"),
-            p("Both standbys receive the stream. The configuration uses <b>ANY 1</b>. A write can be confirmed after the primary and at least one standby have written the relevant WAL safely to disk. The other standby can be behind and catch up. With no eligible standby to acknowledge, the required synchronous configuration can make writes wait."),
-            p("3. If the primary fails, one standby takes over", "heading"),
-            p("CloudNativePG checks which standby can take over safely and whether it has enough information to confirm that choice. It isolates the old primary and promotes the eligible standby. The app reconnects through the same database service, <b>aegis-pg-rw</b>, which now points to the new primary. Uncertain bid requests can be retried with their original IDs."),
-            p("What we proved locally", "heading"),
-            p("A lab drill stopped the node hosting the primary. Promotion and checks took <b>67.21 seconds</b> and preserved <b>three committed decisions</b>. The lab ran on one host. The design for physical AWS zones has yet to be launched."),
-            *hint("Point to the two WAL arrows. Say, “One database writes. The standbys copy its changes. If the writer fails, one safe copy becomes the writer.”"),
-        ],
-        [
-            *start("How recovery actually works", "Choose the recovery method that matches what was lost."),
-            table(
-                ["Mechanism", "When you use it", "What it does"],
-                [
-                    ["<b>PostgreSQL standby failover</b>", "The primary database server stops.", "An eligible standby becomes the new primary after safety checks. The local drill took about 67 seconds, including verification, and kept all three committed decisions in that drill."],
-                    ["<b>Bacula backup and restore</b>", "You need a saved copy of the database.", "Bacula retrieves the files from a backup job. The project imports them into a separate database and verifies the restored auction record."],
-                    ["<b>Point-in-time recovery (PITR)</b>", "You need the database from just before a deletion or corruption.", "PostgreSQL loads a physical base backup and replays archived WAL up to the chosen time. The local drill recovered a decision created after the base backup."],
-                    ["<b>Encrypted S3 backup</b>", "The local machine or backup disk is lost.", "Retrieve an exact saved version from remote storage. The project tested a real encrypted S3 restore and verified retention protection. Continuous production WAL recovery from an independently managed account remains unproven."],
-                ],
-                [0.23, 0.26, 0.51],
-            ),
-            p("Two terms you may be asked about", "heading"),
-            p("<b>RPO</b> tells you how much recent data you could lose. For Bacula, it depends on the age of the snapshot you can restore. For PITR, it depends on how far the archived changes go."),
-            p("<b>RTO</b> tells you how long it takes to restore service. A full timer includes retrieving the backup, checking the data, and getting the app back online."),
-            *hint("Use this page to answer which tool you would use for a dead database server, a mistaken deletion, or a lost backup disk."),
-        ],
-        [
-            *start("Bacula, step by step", "Bacula protects a prepared database copy. The restore check shows whether that copy can really recover the auction."),
-            p("1. Prepare the files", "heading"),
-            p("The backup script exports PostgreSQL from one consistent snapshot. It writes a manifest with the checkpoint time, record counts, and a checksum that can detect a changed dump."),
-            p("2. Save the files", "heading"),
-            p("The <b>Director</b> runs the job. The <b>File Daemon</b> reads the prepared files. The <b>Storage Daemon</b> writes the backup media. The <b>Catalog</b> tracks which job saved each file and where to retrieve it."),
-            p("3. Restore to a safe place", "heading"),
-            p("Bacula retrieves the chosen files into a separate folder. The recovery script checks their checksums, creates a new database, and imports the saved data there. The live database stays available for its own work."),
-            p("4. Prove the result", "heading"),
-            p("The script checks record counts and independently replays the audit history to recalculate the winners. The drill verified <b>20 decisions, 21 audit events, and 3 winners</b>. It recorded <b>PASS</b>."),
-            p("What 1.25 seconds means", "heading"),
-            p("The recorded <b>1.25 s</b> covers database import and verification in the rehearsal. Media retrieval, operator response, and rebuilding the site are outside that timer. The drill did not measure full-site RTO or RPO."),
-            *hint("Show Bacula backup job <b>1</b> and restore job <b>2</b> with <b>T</b> status. Then show the restore certificate and point to the checks and winner count."),
-            p("Project references: docs/recovery.md, docs/ha-deployment.md, docs/measurements.md, docs/evidence/recovery-bacula.json", "note"),
-        ],
-    ]
+def timestamp(seconds):
+    return f"{seconds // 60}:{seconds % 60:02}"
 
 
 def decorate(canvas, doc):
     canvas.setStrokeColor(TEAL)
-    canvas.setLineWidth(1)
-    canvas.line(MARGIN, A4[1] - 36, A4[0] - MARGIN, A4[1] - 36)
+    canvas.line(MARGIN, A4[1] - 35, A4[0] - MARGIN, A4[1] - 35)
+    canvas.setFillColor(TEAL)
     canvas.setFont("Helvetica-Bold", 9)
-    canvas.setFillColor(NAVY)
-    canvas.drawString(MARGIN, A4[1] - 27, "AEGISBID OMEGA")
-    canvas.setFont("Helvetica", 9)
-    canvas.drawRightString(A4[0] - MARGIN, A4[1] - 27, "SYSTEM FLOW AND RECOVERY")
-    canvas.setStrokeColor(LINE)
-    canvas.line(MARGIN, 35, A4[0] - MARGIN, 35)
-    canvas.drawString(MARGIN, 22, "Talha Adil  ·  CS-23114")
-    canvas.drawRightString(A4[0] - MARGIN, 22, f"{doc.page} / 5")
+    canvas.drawString(MARGIN, A4[1] - 26, "AEGISBID OMEGA")
+    canvas.drawRightString(A4[0] - MARGIN, A4[1] - 26, "DEMO SCRIPT")
 
 
 def main():
-    pages = page_content()
-    story = []
-    for index, page in enumerate(pages):
-        if index:
-            story.append(PageBreak())
-        story.extend(page)
+    if (
+        SCRIPT[0][0] != 0
+        or SCRIPT[-1][1] != 120
+        or any(left[1] != right[0] for left, right in itertools.pairwise(SCRIPT))
+    ):
+        raise RuntimeError("The five segments must cover exactly two minutes.")
+    words = sum(len(re.findall(r"[\w$]+", spoken)) for _, _, _, spoken in SCRIPT)
+    if not 190 <= words <= 235:
+        raise RuntimeError(f"The narration should be easy to read in two minutes. Got {words} words.")
+
+    rows = [
+        [
+            Paragraph(f"{timestamp(start)}<br/>– {timestamp(end)}", STYLES["time"]),
+            [Paragraph(show, STYLES["cue"]), Paragraph(spoken, STYLES["say"])],
+        ]
+        for start, end, show, spoken in SCRIPT
+    ]
+    sequence = Table(rows, colWidths=[64, WIDTH - 64])
+    sequence.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (0, -1), PALE),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LINEBELOW", (0, 0), (-1, -1), 0.6, LINE),
+                ("TOPPADDING", (0, 0), (-1, -1), 10),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 11),
+                ("LEFTPADDING", (0, 0), (-1, -1), 11),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 9),
+            ]
+        )
+    )
+
+    story = [
+        Paragraph("AegisBid in two minutes", STYLES["title"]),
+        Paragraph("Talha Adil · CS-23114", STYLES["meta"]),
+        Paragraph(
+            "<b>Before you start</b> &nbsp; Open an auction, the Admin dashboard, and the Bacula restore certificate. "
+            "Read the larger text aloud. The green text tells you what to show.",
+            STYLES["prep"],
+        ),
+        sequence,
+    ]
     SimpleDocTemplate(
         str(OUTPUT),
         pagesize=A4,
         leftMargin=MARGIN,
         rightMargin=MARGIN,
-        topMargin=52,
-        bottomMargin=50,
-        title="AegisBid Omega | System flow and recovery",
+        topMargin=51,
+        bottomMargin=31,
+        title="AegisBid in two minutes",
         author="Talha Adil",
-    ).build(story, onFirstPage=decorate, onLaterPages=decorate)
+    ).build(story, onFirstPage=decorate)
     pdf = PdfReader(OUTPUT)
-    titles = [page[0].getPlainText() for page in pages]
-    if len(pdf.pages) != len(titles) or any(
-        title not in page.extract_text() for title, page in zip(titles, pdf.pages, strict=True)
-    ):
-        raise RuntimeError("Guide pages do not match the planned layout.")
-    print(OUTPUT)
+    if len(pdf.pages) != 1 or "2:00" not in pdf.pages[0].extract_text():
+        raise RuntimeError("The complete script must fit on one page.")
+    print(f"{OUTPUT} ({words} spoken words)")
 
 
 if __name__ == "__main__":
