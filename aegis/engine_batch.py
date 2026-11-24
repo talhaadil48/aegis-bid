@@ -7,7 +7,7 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 
 from aegis.db import connection
-from aegis.engine import Conflict, Fenced, acquire
+from aegis.engine import Conflict, Fenced, acquire, lock_intake
 from aegis.evidence import pseudonym
 from aegis.rules import ZERO_HASH, evaluate, event_hash
 
@@ -38,7 +38,8 @@ def admit_many(auction_id, entries):
             "FROM (SELECT DISTINCT unnest(%s::uuid[]) rid ORDER BY rid) ordered",
             ([r for _, r, _ in entries],),
         )
-        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (aid,)).fetchone()
+        lock_intake(c, aid)
+        a = c.execute("SELECT * FROM auctions WHERE id=%s", (aid,)).fetchone()
         if not a:
             return [LookupError("Auction not found") for _ in entries]
         now = c.execute("SELECT clock_timestamp() t").fetchone()["t"]
@@ -70,8 +71,10 @@ def admit_many(auction_id, entries):
                 fresh[rid] = {"auction_id": aid, "bidder_id": uid, "amount_cents": amount}
                 results.append(rid)
         if fresh:
-            first = a["intake_seq"] + 1
-            c.execute("UPDATE auctions SET intake_seq=intake_seq+%s WHERE id=%s", (len(fresh), aid))
+            last = c.execute(
+                "SELECT intake_seq FROM bid_requests WHERE auction_id=%s ORDER BY intake_seq DESC LIMIT 1", (aid,)
+            ).fetchone()
+            first = max(a["intake_seq"], last["intake_seq"] if last else 0) + 1
             rows = [
                 (rid, aid, r["bidder_id"], r["amount_cents"], first + i, now, "CLOSED" if expired else "QUEUED")
                 for i, (rid, r) in enumerate(fresh.items())
@@ -100,7 +103,8 @@ def process_many(auction_id, holder, limit=512, expected_epoch=None):
     if not 1 <= limit <= 1024:
         raise ValueError("Decision batch must be between 1 and 1024")
     with connection() as c:
-        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (auction_id,)).fetchone()
+        # Retain one decision authority while allowing FK-safe journal inserts.
+        a = c.execute("SELECT * FROM auctions WHERE id=%s FOR NO KEY UPDATE", (auction_id,)).fetchone()
         if not a:
             return []
         epoch = acquire(c, auction_id, holder)

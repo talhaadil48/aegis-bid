@@ -110,3 +110,16 @@ def test_cancelled_http_waiter_does_not_cancel_group():
         assert seen == [1, 2]
 
     asyncio.run(scenario())
+
+
+def test_admission_does_not_wait_for_an_inflight_decision_transaction(auction):
+    aid, bidder = auction
+    pool = ThreadPoolExecutor(max_workers=1)
+    try:
+        with connection() as c:
+            c.execute("SELECT id FROM auctions WHERE id=%s FOR NO KEY UPDATE", (aid,))
+            future = pool.submit(admit_many, aid, [(bidder, uuid4(), 100)])
+            assert future.result(timeout=3)[0]["state"] == "QUEUED"
+    finally:
+        pool.shutdown(wait=True)
+    assert process_many(aid, "worker")[0]["status"] == "ACCEPTED"

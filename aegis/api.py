@@ -13,7 +13,7 @@ from aegis import config
 from aegis.auth import check_password, current_user, identity, roles, token
 from aegis.coalescing import grouped
 from aegis.db import connection
-from aegis.engine import Conflict
+from aegis.engine import Conflict, lock_intake
 from aegis.engine_batch import admit_many
 
 app = FastAPI(title="AegisBid Omega", version="1.0.0")
@@ -90,8 +90,11 @@ def snapshot(aid):
         if not a:
             raise HTTPException(404, "Auction not found")
         high = c.execute(
-            "SELECT coalesce(max(current_amount_cents),0) high FROM bidder_offers WHERE auction_id=%s", (aid,)
-        ).fetchone()["high"]
+            "SELECT coalesce(max(current_amount_cents),0) high, (SELECT coalesce(max(intake_seq),0) FROM bid_requests WHERE auction_id=%s) intake_seq FROM bidder_offers WHERE auction_id=%s",
+            (aid, aid),
+        ).fetchone()
+        a["intake_seq"] = max(a["intake_seq"], high["intake_seq"])
+        high = high["high"]
         a.update(
             high_cents=high,
             minimum_next_cents=max(a["min_price_cents"], high + a["increment_cents"] if high else 0),
@@ -103,7 +106,9 @@ def snapshot(aid):
 @app.get("/v1/auctions")
 def auctions(user=Depends(current_user)):
     with connection() as c:
-        return c.execute("SELECT * FROM auctions ORDER BY closes_at DESC LIMIT 100").fetchall()
+        return c.execute(
+            "SELECT a.*,greatest(a.intake_seq,coalesce(r.intake_seq,0)) AS intake_seq FROM auctions a LEFT JOIN LATERAL(SELECT max(intake_seq) intake_seq FROM bid_requests WHERE auction_id=a.id) r ON true ORDER BY closes_at DESC LIMIT 100"
+        ).fetchall()
 
 
 @app.get("/v1/auctions/{aid}")
@@ -221,6 +226,7 @@ def create_auction(body: AuctionCreate, user=Depends(roles("seller", "admin"))):
 @app.post("/v1/admin/auctions/{aid}/close")
 def end_auction(aid: UUID, user=Depends(roles("seller", "admin"))):
     with connection() as c:
+        lock_intake(c, aid)
         a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (aid,)).fetchone()
         if not a:
             raise HTTPException(404, "Auction not found")

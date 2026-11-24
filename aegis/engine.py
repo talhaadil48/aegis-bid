@@ -15,6 +15,11 @@ class Fenced(RuntimeError):
     pass
 
 
+def lock_intake(c, auction_id):
+    """Admission and final-close share this lock; decision batches do not."""
+    c.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,0))", ("aegis-intake:" + str(auction_id).lower(),))
+
+
 def admit(auction_id, bidder_id, request_id, amount):
     from aegis.engine_batch import admit_many
 
@@ -86,6 +91,7 @@ def process(auction_id, holder, expected_epoch=None):
 
 def close(auction_id, holder):
     with connection() as c:
+        lock_intake(c, auction_id)
         a = c.execute("SELECT * FROM auctions WHERE id=%s FOR UPDATE", (auction_id,)).fetchone()
         if not a or a["status"] == "CLOSED":
             return False
@@ -106,7 +112,10 @@ def close(auction_id, holder):
                 (auction_id, offer["bidder_id"], rank, offer["current_amount_cents"]),
             )
         a["version"] += 1
-        c.execute("UPDATE auctions SET status='CLOSED',version=%s WHERE id=%s", (a["version"], auction_id))
+        c.execute(
+            "UPDATE auctions SET status='CLOSED',version=%s,intake_seq=greatest(intake_seq,coalesce((SELECT max(intake_seq) FROM bid_requests WHERE auction_id=%s),0)) WHERE id=%s",
+            (a["version"], auction_id, auction_id),
+        )
         append_event(
             c,
             a,
