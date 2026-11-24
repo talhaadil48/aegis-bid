@@ -173,6 +173,7 @@ def render(api_image, gateway_image, web_image, origin):
             *common,
             *database,
             {"name": "SESSION_SECRET", "valueFrom": secret("aegis-runtime", "session-secret")},
+            {"name": "ADMISSION_SERVICE_KEY", "valueFrom": secret("aegis-runtime", "admission-key")},
             env("AUDIT_SIGNING_KEY", "/audit/audit-private.pem"),
         ],
     )
@@ -194,6 +195,7 @@ def render(api_image, gateway_image, web_image, origin):
         environment=[
             env("API_URL", "http://api:8000"),
             env("PUBLIC_ORIGIN", origin),
+            {"name": "ADMISSION_SERVICE_KEY", "valueFrom": secret("aegis-runtime", "admission-key")},
             env("MAX_CONNECTIONS", "25000"),
             env("MAX_AUCTION_CONNECTIONS", "25000"),
             env("MAX_USER_CONNECTIONS", "10"),
@@ -251,6 +253,7 @@ def render(api_image, gateway_image, web_image, origin):
                             }
                             for path, name, port in [
                                 ("/v1/live/", "gateway", 8081),
+                                ("/v1/auctions", "gateway", 8081),
                                 ("/v1/", "api", 8000),
                                 ("/", "web", 8080),
                             ]

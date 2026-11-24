@@ -20,7 +20,14 @@ def main(destination):
     ).decode()
     routes = {f"ROUTE_{i}": f"nats-route://routes:{route_password}@nats-{i}.nats.aegis.svc:6222" for i in range(3)}
     data = [
-        ("aegis-runtime", {"session-secret": session, "nats-url": f"tls://aegis:{password}@nats.aegis.svc:4222"}),
+        (
+            "aegis-runtime",
+            {
+                "session-secret": session,
+                "nats-url": f"tls://aegis:{password}@nats.aegis.svc:4222",
+                "admission-key": os.getenv("ADMISSION_SERVICE_KEY") or secrets.token_urlsafe(48),
+            },
+        ),
         (
             "aegis-nats-auth",
             {
