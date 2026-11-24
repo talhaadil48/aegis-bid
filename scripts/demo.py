@@ -146,6 +146,7 @@ def recover():
             raise RuntimeError("Prepare an open auction first")
         rid = str(uuid4())
         payload = {"request_id": rid, "amount_cents": snapshot["minimum_next_cents"]}
+        worker = subprocess.run([*compose, "ps", "-q", "worker"], check=True, capture_output=True, text=True).stdout.strip()
         subprocess.run([*compose, "kill", "-s", "SIGKILL", "worker"], check=True)
         start = time.monotonic()
         try:
@@ -154,7 +155,7 @@ def recover():
                 response.raise_for_status()
             print("Intake state with worker stopped:", response.json()["state"], flush=True)
         finally:
-            subprocess.run([*compose, "start", "worker"], check=True)
+            subprocess.run(["docker", "start", worker], check=True)
         rows = outcomes(client, [rid], timeout=30)
         response = client.get("/v1/me/bids")
         response.raise_for_status()
@@ -210,6 +211,97 @@ def evidence():
         print(json.dumps({key: record[key] for key in keys}, indent=2))
 
 
+def bidding():
+    root = Path("docs/evidence")
+    index = json.loads((root / "bidding-index.json").read_text())
+    for label, selected in index["selected"].items():
+        record = json.loads((root / selected["summary"]).read_text())
+        sql = record["sql"]
+        print("Recorded distinct-bidder proof:", label)
+        print(
+            json.dumps(
+                {
+                    "status": record["status"],
+                    "run_id": record["run_id"],
+                    "profile": record["profile"],
+                    "distinct_bidders": sql["distinct_bidder_ids"],
+                    "client_writes_in_final_ten_seconds": record["client_write_count_in_window"],
+                    "outside_server_admission_window": sql["outside_server_admission_window"],
+                    "request_errors": record["request_errors"],
+                    "recorded_states_at_cutoff": sql["states_at_deadline"],
+                    "final_states": sql["final_states"],
+                    "last_recorded_decision_after_cutoff_s": sql["last_decision_after_deadline_s"],
+                    "distinct_live_sockets_start_end": [
+                        record["distinct_authenticated_sockets_at_start"],
+                        record["distinct_authenticated_sockets_at_end"],
+                    ],
+                    "signed_replay": record["audit"]["status"],
+                    "winners": record["winner_count"],
+                    "scope": "Recorded local evidence; pooled HTTP connections; final decisions may drain after cutoff",
+                },
+                indent=2,
+            )
+        )
+
+
+def verify_bidding():
+    from scripts.verify_bid_stress import verify_run
+
+    root = Path("docs/evidence")
+    selected = json.loads((root / "bidding-index.json").read_text())["selected"]
+    proof = selected.get("live_worker_failure") or selected["http_worker_failure"]
+    result = verify_run(root / proof["directory"])
+    print(json.dumps(result, indent=2))
+    if result["status"] != "PASS":
+        raise RuntimeError("Saved client requests did not match the signed evidence")
+
+
+def late():
+    aid = state()["auction_id"]
+    with client_for("admin") as admin, client_for("bidder1") as bidder:
+        response = admin.post(f"/v1/admin/auctions/{aid}/close")
+        response.raise_for_status()
+        until = time.monotonic() + 30
+        while time.monotonic() < until:
+            response = admin.get(f"/v1/auctions/{aid}")
+            response.raise_for_status()
+            if response.json()["status"] == "CLOSED":
+                break
+            time.sleep(0.15)
+        else:
+            raise TimeoutError("Auction still draining; do not claim final close")
+        response = admin.get(f"/v1/audit/auctions/{aid}")
+        response.raise_for_status()
+        before = response.json()
+        rid = str(uuid4())
+        payload = {"request_id": rid, "amount_cents": 10000}
+        response = bidder.post(f"/v1/auctions/{aid}/bids", json=payload)
+        response.raise_for_status()
+        outcome = response.json()["state"]
+        response = bidder.get(f"/v1/bid-requests/{rid}")
+        response.raise_for_status()
+        owner_state = response.json()["state"]
+        response = admin.get(f"/v1/audit/auctions/{aid}")
+        response.raise_for_status()
+        after = response.json()
+    preserved = before["anchor"] == after["anchor"] and before["winners"] == after["winners"]
+    passed = outcome == owner_state == "CLOSED" and preserved
+    print(
+        json.dumps(
+            {
+                "scenario": "New authenticated request after final close",
+                "status": "PASS" if passed else "FAIL",
+                "final_state": outcome,
+                "owner_state": owner_state,
+                "sealed_anchor_and_winners_unchanged": preserved,
+            },
+            indent=2,
+        )
+    )
+    if not passed:
+        raise RuntimeError("Late request did not preserve the sealed result")
+
+
 def check():
     for url in (BASE + "/health", "http://127.0.0.1:18080"):
         httpx.get(url, timeout=10).raise_for_status()
@@ -246,12 +338,20 @@ if __name__ == "__main__":
     load_dotenv()
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_mutually_exclusive_group(required=True)
-    for action in ("check", "prepare", "race", "recover", "evidence", "bacula"):
+    for action in ("check", "prepare", "race", "recover", "evidence", "bacula", "bidding", "verify-bidding", "late"):
         actions.add_argument("--" + action, action="store_true")
     args = parser.parse_args()
     if os.getenv("ENVIRONMENT", "development") not in ("development", "test"):
         parser.error("Demo actions are restricted to local development/test")
     action = next(name for name, selected in vars(args).items() if selected)
-    {"check": check, "prepare": prepare, "race": race, "recover": recover, "evidence": evidence, "bacula": bacula}[
-        action
-    ]()
+    {
+        "check": check,
+        "prepare": prepare,
+        "race": race,
+        "recover": recover,
+        "evidence": evidence,
+        "bacula": bacula,
+        "bidding": bidding,
+        "verify_bidding": verify_bidding,
+        "late": late,
+    }[action]()

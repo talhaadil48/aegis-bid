@@ -90,7 +90,7 @@ def system_design(width=511):
         text(x + 55.5, 36.5, label, 8.6, True, INK, "middle")
         line([(x + 55.5, 44), (x + 55.5, 51)], head=False)
     card(20, 58, 218, 62, "Web application", ["Next.js role views + Nginx proxy", "Session cookie / HTTP / WebSocket"])
-    card(282, 58, 218, 62, "FastAPI", ["Identity, role and ownership checks", "Origin / limits / UUID / integer cents"])
+    card(282, 58, 218, 62, "Go intake + FastAPI", ["Separate bid ingress / real session checks", "Bounded batches / UUID / integer cents"])
     line([(75.5, 51), (444.5, 51)], head=False)
     line([(129, 51), (129, 58)])
     line([(238, 89), (282, 89)])
@@ -99,9 +99,9 @@ def system_design(width=511):
     line([(429, 175), (429, 159), (91, 159), (91, 175)], dashed=True)
     rect(178, 150, 164, 15, border=WHITE, radius=0)
     text(260, 160, "Worker also reconciles SQL intake", 7.8, color=BLUE, anchor="middle")
-    card(358, 175, 142, 63, "SQL intake", ["UUID + admission sequence", "Commit -> 202 QUEUED"])
+    card(358, 175, 142, 63, "SQL intake", ["Parallel sequence reservation", "Commit -> QUEUED / CLOSED"])
     card(189, 175, 142, 63, "JetStream", ["Relay -> durable command", "Same UUID / retry + ACK"])
-    card(20, 175, 142, 63, "Auction worker", ["Lock auction + lease epoch", "Price / cutoff / intake order"])
+    card(20, 175, 142, 63, "Auction worker", ["Prefix barrier + lease epoch", "Price / cutoff / intake order"])
     line([(475, 120), (475, 175)])
     line([(358, 206), (331, 206)])
     line([(189, 206), (162, 206)])
@@ -109,8 +109,8 @@ def system_design(width=511):
     text(100, 252, "commit", 7.5)
 
     rect(20, 260, 480, 65, fill=INK, border=INK)
-    text(35, 281, "PostgreSQL  /  one atomic decision", 11, True, WHITE)
-    text(35, 298, "Decision + offer + request state + hash event + outbox", 9, color=WHITE)
+    text(35, 281, "PostgreSQL  /  one atomic ordered batch", 11, True, WHITE)
+    text(35, 298, "Separate bid results + hash events; offers + states + latest-version outbox", 9, color=WHITE)
     text(
         35,
         313,
@@ -130,7 +130,7 @@ def system_design(width=511):
         142,
         76,
         "Live updates",
-        ["Go polls API: 1 s / auction", "Prepared WebSocket frames", "One-slot queue -> role views"],
+        ["Separate Go fanout service", "API snapshots: 2 s scale tick", "One-slot queue -> role views"],
         accent=TEAL,
     )
     card(

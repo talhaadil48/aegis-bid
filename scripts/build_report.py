@@ -143,7 +143,7 @@ def create_word(content, sizes, destination):
     header.text = "AEGISBID OMEGA  |  CEP 1 TECHNICAL REPORT"
     header.runs[0].font.size = Pt(8)
     footer = section.footer.paragraphs[0]
-    footer.text = "23 November 2026  |  Implementation + measured evidence  |  Page "
+    footer.text = content["date"] + "  |  Implementation + measured evidence  |  Page "
     field = OxmlElement("w:fldSimple")
     field.set(qn("w:instr"), "PAGE")
     footer._p.append(field)
@@ -225,7 +225,7 @@ def main():
                 canvas.setFillColor(NAVY)
                 canvas.drawString(42, A4[1] - 20, "AEGISBID OMEGA  |  CEP 1 TECHNICAL REPORT")
                 canvas.drawRightString(A4[0] - 42, 22, f"{page_index + 1} / {expected_pages}")
-                canvas.drawString(42, 22, "23 November 2026  |  Source baseline " + content["implementation_commit"])
+                canvas.drawString(42, 22, content["date"] + "  |  Source baseline " + content["implementation_commit"])
 
             path = Path(temporary) / f"page-{index}.pdf"
             for attempt in range(9):

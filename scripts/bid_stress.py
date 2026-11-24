@@ -95,17 +95,25 @@ def crash(compose, env, aid):
             "SELECT count(*) n FROM pg_stat_activity WHERE application_name='aegis-stress-worker' AND state='active'"
         ).fetchone()["n"]
     cid = command([*compose, "ps", "-q", "worker"], env).strip()
+    migration = command([*compose, "ps", "--all", "-q", "migrate"], env).strip()
+    migration_started = command(["docker", "inspect", "--format", "{{.State.StartedAt}}", migration]).strip()
     record = {
         "requested_at": datetime.now(UTC).isoformat(),
         "checkpoint": before,
         "lease_before": lease,
         "active_db_sessions_before": busy,
         "before": sample(aid),
+        "migration_started_before": migration_started,
     }
     command(["docker", "kill", "--signal", "KILL", cid])
     record["stopped"] = json.loads(command(["docker", "inspect", "--format", "{{json .State}}", cid]))
     time.sleep(0.5)
-    command([*compose, "start", "worker"], env)
+    # Compose start may restart completed dependencies, including schema DDL.
+    # The fault scenario must restart only the recorded worker container.
+    command(["docker", "start", cid])
+    record["migration_started_after"] = command(
+        ["docker", "inspect", "--format", "{{.State.StartedAt}}", migration]
+    ).strip()
     record["restart_requested_at"] = datetime.now(UTC).isoformat()
     record["running_after_start"] = (
         command(["docker", "inspect", "--format", "{{.State.Running}}", cid]).strip() == "true"
@@ -264,6 +272,11 @@ def run(args):
     resource_thread = None
     fault = None
     report = {"run_id": run_id, "status": "FAIL", "requested_bidders": args.bidders}
+    source_commit = command(["git", "rev-parse", "HEAD"]).strip()
+    source_changed = bool(
+        command(["git", "status", "--porcelain", "--", "aegis", "scripts", "infra", "services"]).strip()
+    )
+    harness_digest = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     try:
         if not args.skip_build:
             command(["docker", "build", "-t", "aegis-stress-app:local", "-f", "infra/Dockerfile", "."])
@@ -461,6 +474,7 @@ def run(args):
             not fault["stopped"]["Running"]
             and fault["stopped"]["ExitCode"] == 137
             and fault["running_after_start"]
+            and fault["migration_started_before"] == fault["migration_started_after"]
             and truth["pre_crash_checkpoint_preserved"]
             and truth["stale_worker_fenced"]
             and fault["lease_before"]
@@ -471,11 +485,9 @@ def run(args):
         report = {
             "run_id": run_id,
             "status": "PASS" if population_ok and workload_ok and correctness_ok and fault_ok else "FAIL",
-            "commit": command(["git", "rev-parse", "HEAD"]).strip(),
-            "source_files_changed": bool(
-                command(["git", "status", "--porcelain", "--", "aegis", "scripts", "infra", "services"]).strip()
-            ),
-            "harness_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "commit": source_commit,
+            "source_files_changed": source_changed,
+            "harness_sha256": harness_digest,
             "timestamp": datetime.now(UTC).isoformat(),
             "scenario": args.fault,
             "profile": "http_only" if args.no_sockets else "live_and_http",

@@ -40,48 +40,48 @@ def main():
                             "AegisBid Omega: durable flash auctions with independent verification and disaster recovery. Name, roll number, project objective.",
                         ],
                         [
-                            "0:12-0:42",
-                            "Bidder screen; place one bid; seller view already open",
-                            "Reserve $100, increment $5, stock 3. Submit and point to QUEUED then ACCEPTED in bid history. Seller sees auction activity; highest offer alone is not final allocation.",
+                            "0:12-0:32",
+                            "Report page 2: complete system flow",
+                            "Trace HTTP bid to Go intake, FastAPI authentication, durable SQL queue, fenced worker, atomic decisions and final allocation. Separate live fanout and verified recovery branches.",
                         ],
                         [
-                            "0:42-1:05",
-                            "Terminal: --race; admin view",
-                            "Two authenticated bidders send the same eligible price concurrently. One commits first; the other is rejected under the global increment rule. Show the two decision sequences.",
+                            "0:32-0:55",
+                            "Live bidder screen; submit one bid",
+                            "Reserve $100, increment $5, stock 3. Show pending then final state in private history. QUEUED means durable admission, not winning stock. Seller/admin views are already open.",
                         ],
                         [
-                            "1:05-1:30",
-                            "Terminal: --recover; refresh bid history",
-                            "This kills the worker with SIGKILL, retries the same UUID 20 times, restarts the worker and checks one accepted request. QUEUED means SQL admission, not final acceptance.",
+                            "0:55-1:15",
+                            "Terminal: --race; refresh private history",
+                            "Two authenticated bidders offer the same eligible price. Show one ACCEPTED and one REJECTED, with different ordered sequences. Stable request UUIDs make retries idempotent.",
                         ],
                         [
-                            "1:30-1:55",
-                            "Terminal: --bacula; recovery-bacula.json",
-                            "Bacula jobs 1 and 2 completed with T status. The recorded isolated restore verifies 20 decisions, 21 events and three winners. This is real backup and restore evidence.",
+                            "1:15-1:55",
+                            "Terminal: --bidding; report page 7",
+                            "Label these recorded tests. 50,000 distinct authenticated users offered bids in the final ten seconds; normal and actual worker-SIGKILL HTTP runs passed. Show zero errors/missing/late, accepted/rejected/queued counts, drain time and 20 verified winners. State the live-profile result exactly as recorded.",
                         ],
                         [
                             "1:55-2:15",
-                            "Terminal: --evidence, first block",
-                            "50,000 sockets were concurrently retained for 58.01 seconds: five generators, shared host and identity. This proves socket capacity; distinct bidders and bid throughput need separate measurements.",
+                            "Terminal: --verify-bidding",
+                            "Replay the saved original client requests against signed events: 50,000 bidder/UUID/amount matches, rule replay and 20 winners. Tampered winners fail. This verification runs now; the stress workload itself was recorded earlier.",
                         ],
                         [
                             "2:15-2:40",
-                            "Same terminal: HA, PITR and S3 blocks",
-                            "Recorded kind node-loss recovery: 67.21 seconds; physical PITR: 3.12 seconds. An encrypted real S3 restore passed. Multi-zone AWS deployment remains unexecuted; the remote bucket uses the same account.",
+                            "Recorded recovery evidence; --evidence",
+                            "Bacula restored 20 decisions and three winners. Kind node-loss recovery took 67.21 seconds; PITR 3.12 seconds; encrypted S3 restore passed. These are controlled recorded drills. Physical multi-zone AWS deployment and independent-account backup remain pending.",
                         ],
                         [
                             "2:40-3:00",
-                            "Auditor view + report page 5",
-                            "Auditors replay rules and check hash links. Ed25519 verification needs a trusted signing key; unsigned evidence is INCOMPLETE. Close: durability, one business effect per UUID, verifiable recovery; remaining production work is listed on page 7.",
+                            "Terminal: --late; final winners",
+                            "Close the demo auction, submit a new UUID and show terminal CLOSED. The owner sees the same state; the sealed anchor and winners remain unchanged. Finish on correct allocation and transparent production limits.",
                         ],
                     ],
                 },
                 heading("Delivery cues"),
                 paragraph(
-                    "Keep the browser, terminal and PDF viewer arranged before starting. Explain each result while the command runs. Point to one useful field at a time. Spend the most attention on the visible bid and crash recovery: they demonstrate behavior rather than configuration. Do not read every row of the report."
+                    "Keep browser, terminal and PDF viewer arranged before starting. Point to one useful field at a time. Spend the most attention on the distinct-bidder and crash results. Admission within ten seconds does not mean all decisions finish by cutoff: show the recorded backlog and tail. Do not read every row."
                 ),
                 paragraph(
-                    "If the terminal evidence needs scrolling, expand it before recording. Use a short, clearly labelled recorded clip for any step that exceeds its slot. Do not silently skip time or call stored JSON a live experiment. The --recover restart is explicit; do not claim automatic restart from this demonstration."
+                    "Pre-expand the evidence output or use a clearly labelled recorded clip when a step exceeds its slot. Do not call stored JSON a live stress experiment. The failure test sends real SIGKILL and explicitly restarts the worker. HTTP pools are bounded; 50,000 virtual bidders does not mean 50,000 simultaneous HTTP transactions."
                 ),
             ],
         },
@@ -100,21 +100,21 @@ def main():
                 ),
                 heading("2. Pretype these in separate terminal tabs"),
                 code(
-                    ".venv\\Scripts\\python.exe -m scripts.demo --race\n.venv\\Scripts\\python.exe -m scripts.demo --recover\n.venv\\Scripts\\python.exe -m scripts.demo --bacula\n.venv\\Scripts\\python.exe -m scripts.demo --evidence"
+                    ".venv\\Scripts\\python.exe -m scripts.demo --race\n.venv\\Scripts\\python.exe -m scripts.demo --bidding\n.venv\\Scripts\\python.exe -m scripts.demo --verify-bidding\n.venv\\Scripts\\python.exe -m scripts.demo --evidence\n.venv\\Scripts\\python.exe -m scripts.demo --late"
                 ),
                 paragraph(
-                    "--race uses bidder1 and bidder2 at the current eligible amount. Avoid manual bids during the race. --recover really stops the local Compose worker, retries one UUID 20 times and restarts it in a finally block. Successful output is ACCEPTED, matching_requests=1 and PASS. It writes only .cache/demo-recovery.json; historical measurements stay unchanged. --bacula lists existing Catalog jobs; --evidence only reads recorded reports."
+                    "--race uses bidder1 and bidder2 at the current eligible amount; avoid concurrent manual bids. --bidding reads selected immutable runs from docs/evidence/bidding-index.json. --verify-bidding independently replays the saved full client CSV and signed ledger. --late closes this demo auction, checks a new terminal request and unchanged anchor/winners: run it last. Optional --recover kills/restarts the local worker and tests 20 same-UUID retries; rehearse that separately. --bacula lists existing Catalog jobs."
                 ),
                 heading("3. Open the evidence files in advance"),
                 paragraph(
-                    "<b>Report:</b> AegisBid_Technical_Report_7_Pages.pdf, especially pages 1, 2, 5 and 7. <b>Backup:</b> docs/evidence/recovery-bacula.json and bacula-console.txt. <b>Recorded capacity/recovery:</b> sockets-8be4e979f1bb4723bfcb86fe7a90f37a/summary.json, ha-local.json, pitr-local.json and s3-offsite.json. The helper selects safe fields; avoid displaying raw bucket/account details."
+                    "<b>Report:</b> AegisBid_Technical_Report_7_Pages.pdf, especially pages 2 and 7. <b>Bidding:</b> docs/bidding-proof.md and docs/evidence/bidding-index.json, with the selected run summaries. <b>Recovery:</b> recovery-bacula.json, bacula-console.txt, ha-local.json, pitr-local.json and s3-offsite.json. These are inside docs/evidence. The helper selects safe fields; avoid displaying private bucket/account details."
                 ),
                 paragraph(
-                    "The auditor screen may correctly show INCOMPLETE without AUDIT_SIGNING_KEY. Do not present it as a trusted signed PASS. To demonstrate signed verification, use an honestly labelled prior recording of the signed/tampered fixture check: RUN_INTEGRATION=1, then pytest tests/test_evidence.py -v in the configured local test environment. An owner receipt hash is not an independently signed receipt."
+                    "The live auditor screen correctly shows INCOMPLETE without AUDIT_SIGNING_KEY. Do not label it trusted PASS. The saved stress export is signed; --verify-bidding checks the included public key. For independent provenance, distribute/pin that key separately: downloading an export and adjacent key alone does not establish institutional trust. An owner receipt hash is not an independently signed receipt."
                 ),
                 heading("4. If something is unavailable"),
                 paragraph(
-                    "If the auction has expired, rerun --prepare and select its new title. If --recover is interrupted, ensure the worker is started with the command below. If the app is not running, use the normal Compose startup from README before recording. Never reset volumes for this demo."
+                    "After --late or an expired auction, rerun --prepare and select its new title. If optional --recover is interrupted, start the worker using the command below. Use README startup if the app is stopped. The ordered-intake upgrade requires coordinated migration; see docs/runbook.md. Never reset data volumes for this demo."
                 ),
                 code("docker compose --env-file .env -f infra/compose.yaml start worker"),
                 paragraph(
@@ -122,7 +122,7 @@ def main():
                 ),
                 heading("Likely viva questions: concise answers"),
                 paragraph(
-                    "<b>Exactly once?</b> Stable UUID admission and one committed SQL effect; transport can redeliver. <b>Why NATS?</b> Durable command journal and retries; SQL intake and reconciliation close the publication gap. <b>Why a Go gateway?</b> Shared prepared frames and bounded coalescing reduce per-subscriber work. <b>HA vs backup?</b> HA handles a primary/node failure; WAL recovery restores a selected historical point, and remote copies address local loss. <b>Production complete?</b> No: real multi-zone exercise, independent-account backups, continuous production PITR/RPO proof, distinct-client capacity and the closed-auction admission guard remain."
+                    "<b>Exactly once?</b> One committed SQL effect per stable UUID; transport can redeliver. <b>50k proof?</b> Real distinct users and original HTTP requests, final-ten-second admission timestamps, reported queue/drain, full signed replay; state live-profile scope separately. <b>Why separate Go services?</b> Isolate HTTP intake from socket fanout. <b>HA vs backup?</b> Promotion handles a primary failure; WAL/PITR and remote copies address historical corruption/site loss. <b>Production complete?</b> Physical multi-zone, multi-host load, independent-account backups and continuous production offsite PITR/RPO remain. The closed-auction admission bug is fixed."
                 ),
             ],
         },
