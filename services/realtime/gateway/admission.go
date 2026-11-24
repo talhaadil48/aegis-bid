@@ -142,7 +142,7 @@ func (p *admissionProxy) drain(auction string, group chan *admissionJob) {
 			}
 		}
 		batch := []*admissionJob{first}
-		timer := time.NewTimer(10 * time.Millisecond)
+		timer := time.NewTimer(50 * time.Millisecond)
 	collect:
 		for len(batch) < 512 {
 			select {

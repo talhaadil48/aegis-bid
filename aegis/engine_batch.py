@@ -49,9 +49,13 @@ def admit_many(auction_id, entries):
         ).fetchall()
         known = {r["request_id"]: r for r in previous}
         capacity = int(os.getenv("MAX_PENDING_BIDS", "60000"))
+        last = c.execute(
+            "SELECT intake_seq FROM bid_requests WHERE auction_id=%s ORDER BY intake_seq DESC LIMIT 1", (aid,)
+        ).fetchone()
+        last_seq = max(a["intake_seq"], last["intake_seq"] if last else 0)
         pending = (
             0
-            if expired
+            if expired or last_seq + len(entries) <= capacity
             else c.execute(
                 "SELECT count(*) n FROM bid_requests WHERE auction_id=%s AND state='QUEUED'", (aid,)
             ).fetchone()["n"]
@@ -71,10 +75,7 @@ def admit_many(auction_id, entries):
                 fresh[rid] = {"auction_id": aid, "bidder_id": uid, "amount_cents": amount}
                 results.append(rid)
         if fresh:
-            last = c.execute(
-                "SELECT intake_seq FROM bid_requests WHERE auction_id=%s ORDER BY intake_seq DESC LIMIT 1", (aid,)
-            ).fetchone()
-            first = max(a["intake_seq"], last["intake_seq"] if last else 0) + 1
+            first = last_seq + 1
             rows = [
                 (rid, aid, r["bidder_id"], r["amount_cents"], first + i, now, "CLOSED" if expired else "QUEUED")
                 for i, (rid, r) in enumerate(fresh.items())

@@ -95,7 +95,7 @@ func main() {
 	gate := make(chan struct{})
 	handshakes := make(chan struct{}, *ramp)
 	var plan Plan
-	transport := &http.Transport{MaxIdleConns: 256, MaxIdleConnsPerHost: 256, MaxConnsPerHost: 256, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
+	transport := &http.Transport{MaxIdleConns: 512, MaxIdleConnsPerHost: 512, MaxConnsPerHost: 512, IdleConnTimeout: 60 * time.Second, DialContext: (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext}
 	client := &http.Client{Transport: transport, Timeout: 90 * time.Second}
 	beginRamp := time.Now().UTC()
 	for i, profile := range c.Users {
