@@ -1,8 +1,10 @@
 import asyncio
+import hmac
 import os
 import time
 from collections import defaultdict, deque
 from datetime import UTC, datetime
+from typing import Literal
 from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
@@ -58,10 +60,22 @@ class Login(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class PublicAccount(NewAccount):
+    role: Literal["bidder", "seller"] = "bidder"
+
+
+class ManagedAccount(NewAccount):
+    role: Literal["bidder", "seller", "auditor", "admin"]
+
+
+class SetupAccount(NewAccount):
+    setup_key: str = Field(min_length=1, max_length=256)
+
+
 @app.exception_handler(RequestValidationError)
 async def validate_request(request: Request, exc: RequestValidationError):
-    if request.url.path in ("/v1/auth/register", "/v1/auth/login"):
-        return JSONResponse({"detail": "Check the username and password fields."}, status_code=422)
+    if request.url.path in ("/v1/auth/register", "/v1/auth/login", "/v1/auth/setup", "/v1/admin/users"):
+        return JSONResponse({"detail": "Check the account details and try again."}, status_code=422)
     return await request_validation_exception_handler(request, exc)
 
 
@@ -88,15 +102,45 @@ def login(body: Login, response: Response, request: Request):
 
 
 @app.post("/v1/auth/register", status_code=201)
-def register(body: NewAccount, response: Response, request: Request):
+def register(body: PublicAccount, response: Response, request: Request):
     limit(("register", request.client.host), 5)
     config.require_secret()
     if body.username.lower() in {"admin", "seller", "auditor"}:
         raise HTTPException(409, "Username is unavailable")
-    user = create_account(body, role="bidder")
+    user = create_account(body, role=body.role)
     if user is None:
         raise HTTPException(409, "Username is unavailable")
     return start_session(response, user)
+
+
+@app.get("/v1/auth/setup")
+def setup_status():
+    if len(os.getenv("ADMIN_SETUP_KEY", "")) < 32:
+        return {"available": False}
+    with connection() as c:
+        return {"available": c.execute("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1").fetchone() is None}
+
+
+@app.post("/v1/auth/setup", status_code=201)
+def setup_admin(body: SetupAccount, response: Response, request: Request):
+    limit(("admin-setup", request.client.host), 5)
+    key = os.getenv("ADMIN_SETUP_KEY", "")
+    if len(key) < 32 or not hmac.compare_digest(key.encode(), body.setup_key.encode()):
+        raise HTTPException(403, "Invalid setup key")
+    config.require_secret()
+    user = create_account(body, role="admin", first_admin=True)
+    if user is None:
+        raise HTTPException(409, "Username is unavailable")
+    return start_session(response, user)
+
+
+@app.post("/v1/admin/users", status_code=201)
+def provision_account(body: ManagedAccount, _admin=Depends(roles("admin"))):
+    limit(("provision-account", str(_admin["id"])), 20)
+    user = create_account(body, role=body.role)
+    if user is None:
+        raise HTTPException(409, "Username is unavailable")
+    return user
 
 
 @app.post("/v1/auth/logout")
