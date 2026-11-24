@@ -153,7 +153,7 @@ def create_word(content, sizes, destination):
         if index == 0:
             document.add_heading(content["title"], 0)
             document.add_paragraph(content["subtitle"])
-            document.add_paragraph("Student: __________________________    Roll number: __________________")
+            document.add_paragraph(f"Student: {content['student_name']}    Roll number: {content['roll_number']}")
         heading = document.add_heading(page["title"], 1)
         heading.runs[0].font.size = Pt(15)
         for block in page["blocks"]:
@@ -196,6 +196,7 @@ def create_word(content, sizes, destination):
                         run.font.size = Pt(8)
     document.core_properties.title = content["title"] + " Technical Report"
     document.core_properties.subject = content["subtitle"]
+    document.core_properties.author = content["student_name"]
     document.save(destination)
 
 
@@ -246,7 +247,7 @@ def main():
                         ),
                         Paragraph(content["subtitle"], styles(size)["small"]),
                         Paragraph(
-                            "Student: __________________________  |  Roll number: __________________",
+                            f"Student: {content['student_name']}  |  Roll number: {content['roll_number']}",
                             styles(size)["small"],
                         ),
                         Spacer(1, 6),
@@ -271,7 +272,11 @@ def main():
                 raise RuntimeError(f"Page {index + 1} overflowed; edit content rather than shrinking below 9 pt")
         pdf = output / f"AegisBid_Technical_Report_{expected_pages}_Pages.pdf"
         writer.add_metadata(
-            {"/Title": "AegisBid Omega | Technical report with full system flow", "/Subject": content["subtitle"]}
+            {
+                "/Title": "AegisBid Omega | Technical report with full system flow",
+                "/Subject": content["subtitle"],
+                "/Author": content["student_name"],
+            }
         )
         with pdf.open("wb") as stream:
             writer.write(stream)
@@ -286,6 +291,8 @@ def main():
         "pdf_pages": expected_pages,
         "body_font_sizes_pt": sizes,
         "source_commit": content["implementation_commit"],
+        "student_name": content["student_name"],
+        "roll_number": content["roll_number"],
         "words": sum(len(plain(b.get("text", "")).split()) for p in content["pages"] for b in p["blocks"]),
         "section_titles": [p["title"] for p in content["pages"]],
     }

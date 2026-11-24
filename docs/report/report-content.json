@@ -1,6 +1,8 @@
 {
   "title": "AegisBid Omega",
   "subtitle": "Technical implementation, issue resolution and measured validation",
+  "student_name": "Talha Adil",
+  "roll_number": "CS-23114",
   "date": "24 November 2026",
   "implementation_commit": "f607529 proofs / 9474f91 checkpoint",
   "expected_pages": 7,

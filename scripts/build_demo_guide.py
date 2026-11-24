@@ -1,5 +1,6 @@
 """Build the separate two-page, exactly 180-second presentation guide."""
 
+import json
 from html import escape
 
 from pypdf import PdfReader
@@ -22,12 +23,15 @@ def code(text):
 
 
 def main():
+    identity = json.loads((ROOT / "docs/report/report-content.json").read_text(encoding="utf-8"))
+    name, roll = identity["student_name"], identity["roll_number"]
     pages = [
         {
             "title": "Your three-minute demonstration",
             "blocks": [
                 paragraph(
-                    "<b>Recording:</b> show your project title, name and roll number first; use your own voice. The eight slots below total exactly 180 seconds. Pre-open the tabs and rehearse once. Historical evidence must be described as recorded evidence."
+                    f"<b>Presenter:</b> {escape(name)} | {escape(roll)}.<br/>"
+                    "<b>Recording:</b> use your own voice. The eight slots below total exactly 180 seconds. Pre-open the tabs and rehearse once. Historical evidence must be described as recorded evidence."
                 ),
                 {
                     "type": "table",
@@ -37,7 +41,7 @@ def main():
                         [
                             "0:00-0:12",
                             "Title/name + implementation stack on report page 1",
-                            "AegisBid Omega. PostgreSQL decides bids, Go handles ingress/fanout, NATS journals commands and Bacula/WAL/S3 protect recovery. State your name and roll number.",
+                            f"I am {name}, {roll}. AegisBid uses PostgreSQL for decisions, Go for ingress/fanout, NATS for commands and Bacula/WAL/S3 for recovery.",
                         ],
                         [
                             "0:12-0:32",
@@ -153,9 +157,16 @@ def main():
         canvas.line(42, A4[1] - 28, A4[0] - 42, A4[1] - 28)
         canvas.drawRightString(A4[0] - 42, 22, str(doc.page))
 
-    SimpleDocTemplate(str(output), pagesize=A4, leftMargin=42, rightMargin=42, topMargin=42, bottomMargin=38).build(
-        story, onFirstPage=decorate, onLaterPages=decorate
-    )
+    SimpleDocTemplate(
+        str(output),
+        pagesize=A4,
+        leftMargin=42,
+        rightMargin=42,
+        topMargin=42,
+        bottomMargin=38,
+        title="AegisBid Omega | Three-minute demo guide",
+        author=name,
+    ).build(story, onFirstPage=decorate, onLaterPages=decorate)
     reader = PdfReader(output)
     if len(reader.pages) != 2 or pages[1]["title"] not in reader.pages[1].extract_text():
         raise RuntimeError("Demo guide must contain two correctly arranged pages")
