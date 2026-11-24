@@ -27,6 +27,7 @@ spec:
       synchronous_commit: 'on'
       archive_timeout: '60s'
       max_connections: '200'
+      jit: 'off'
   probes:
     liveness:
       isolationCheck:

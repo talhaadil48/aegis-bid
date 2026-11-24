@@ -71,9 +71,9 @@ services:
       ADMISSION_SERVICE_KEY: ${STRESS_ADMISSION_KEY}
       GOMAXPROCS: '4'
       GOGC: '150'
-      GOMEMLIMIT: 2GiB
+      GOMEMLIMIT: 3GiB
     ports: ["127.0.0.1:18082:8081"]
-    mem_limit: 2400m
+    mem_limit: 3600m
     ulimits:
       nofile: {soft: 200000, hard: 200000}
     sysctls:

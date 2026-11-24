@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:18
+    command: [postgres, -c, jit=off]
     environment:
       POSTGRES_DB: aegisbid
       POSTGRES_USER: aegis
