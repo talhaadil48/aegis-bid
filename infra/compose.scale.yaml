@@ -23,6 +23,7 @@ services:
       MAX_USER_CONNECTIONS: ${MAX_USER_CONNECTIONS:-10}
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://localhost:18080}
       ADMISSION_SERVICE_KEY: ${ADMISSION_SERVICE_KEY:?Set a shared 32-character admission service key}
+      SNAPSHOT_INTERVAL_MS: '2000'
     ports: ["127.0.0.1:18081:8081"]
     ulimits:
       nofile: {soft: 200000, hard: 200000}

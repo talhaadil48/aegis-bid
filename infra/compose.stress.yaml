@@ -86,6 +86,7 @@ services:
       GOMAXPROCS: '4'
       GOGC: '150'
       GOMEMLIMIT: 3GiB
+      SNAPSHOT_INTERVAL_MS: '2000'
     ports: ["127.0.0.1:18082:8081"]
     mem_limit: 3600m
     ulimits:

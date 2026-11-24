@@ -237,7 +237,11 @@ func (s *server) live(w http.ResponseWriter, r *http.Request) {
 	_ = socket.Close()
 }
 func (s *server) poll(h *hub) {
-	ticker := time.NewTicker(time.Second)
+	interval := integer("SNAPSHOT_INTERVAL_MS", 1000)
+	if interval < 250 || interval > 10000 {
+		interval = 1000
+	}
+	ticker := time.NewTicker(time.Duration(interval) * time.Millisecond)
 	defer ticker.Stop()
 	for range ticker.C {
 		s.mu.Lock()

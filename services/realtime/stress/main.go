@@ -166,7 +166,7 @@ func main() {
 				row.Written = time.Unix(0, ns).UTC()
 			}
 			if requestErr != nil {
-				row.Error = "transport failure"
+				row.Error = "transport failure: " + requestErr.Error()
 			} else {
 				row.Status = response.StatusCode
 				var outcome struct {

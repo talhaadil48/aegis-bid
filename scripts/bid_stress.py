@@ -481,6 +481,7 @@ def run(args):
             "profile": "http_only" if args.no_sockets else "live_and_http",
             "bid_ingress": args.ingress,
             "separate_admission_and_realtime_services": True,
+            "live_snapshot_interval_ms": 2000,
             "auction_id": str(aid),
             "window_start": start.isoformat(),
             "window_close": end.isoformat(),

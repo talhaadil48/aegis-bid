@@ -199,6 +199,7 @@ def render(api_image, gateway_image, web_image, origin):
             env("MAX_CONNECTIONS", "25000"),
             env("MAX_AUCTION_CONNECTIONS", "25000"),
             env("MAX_USER_CONNECTIONS", "10"),
+            env("SNAPSHOT_INTERVAL_MS", "2000"),
         ],
     )
     gateway["spec"]["template"]["spec"]["containers"][0]["securityContext"]["runAsUser"] = 65532
